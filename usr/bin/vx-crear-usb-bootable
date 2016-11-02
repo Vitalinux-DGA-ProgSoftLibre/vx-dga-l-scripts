@@ -79,7 +79,7 @@ then
 		--text " A continuación se iniciará el software para crear el USB Bootable ... \n Antes deberás <b>seleccionar la imagen ISO a grabar</b>. \n Después <b>seleccionarás el dispositio USB $USBSELECCIONADO</b> y <b>deberás borrar los datos del disco</b>,  \n si no lo has hecho previamente con GParted" \
 		--button="Pasar a Crear USB Bootable":0 --button="Abortar":1 ; then
 
-			USUARIOGUI=$(who | grep " :0 " | cut -d" " -f1)
+			USUARIOGUI=$(who | grep " :0 " | cut -d" " -f1 | uniq)
 			if test -d /home/${USUARIOGUI}/Descargas ; then
 				cd /home/${USUARIOGUI}/Descargas
 			fi

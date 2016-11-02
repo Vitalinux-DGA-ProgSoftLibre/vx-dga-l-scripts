@@ -207,6 +207,7 @@ function instalar-software-pdi {
 
 	descargar-software-pdi
 
+	cd /opt/pkgs/pdis
 	case $PDI in
 
 	"eBeam")
@@ -229,7 +230,13 @@ else
 fi
 /usr/local/StarBoardSoftware/install.sh
 apt-get -f --assume-yes --force-yes install
+# Instalamos los drivers necesarios
+# 1. El primero es para que el servicio que el demonio que se encarga de hablar con la pizarra (driver) DGBoard se pueda ejecutar en 64 bits
+apt-get --assume-yes --force-yes install libusb-0.1-4:i386
+# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
+# pero tampoco molesta que se cargue en memoria
 apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
+# Modificamos el lanzador de calibrado que no se ejecuta correctamente desde entorno grafico
 if [ -f /usr/share/applications/hitachi-starboard-calibrate.desktop ] ; then
 	sed -i 's/^Terminal=[Tt]rue/Terminal=false/g' /usr/share/applications/hitachi-starboard-calibrate.desktop
 fi
@@ -250,7 +257,7 @@ EOF
 
 	"IQBoard")
 	# Cosultar en /var/lib/dpkg/info/iqboard.deb.postinst que hay acciones que no se pueden realizar
-	if test -f ./IQBoard_Software.deb ; then
+	if test -f ./iqboard.deb -a -f ./rsboardep.deb ; then
 		cat > /tmp/programa-ejecutar<<EOF
 # Borramos cualquier instalacion previa de drivers o software
 if dpkg -l | grep iqboard.deb >/dev/null 2>/dev/null ; then
