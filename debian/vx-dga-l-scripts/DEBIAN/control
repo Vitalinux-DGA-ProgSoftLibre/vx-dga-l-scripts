@@ -1,0 +1,11 @@
+Package: vx-dga-l-scripts
+Version: 3.0-13
+Architecture: all
+Maintainer: Arturo Martín Romero <amartinromero@gmail.com>
+Installed-Size: 732
+Depends: imagemagick, php5-cli, zenity, yad, lame, ghostscript, pdftk, evince, mplayer, vx-dga-l-variables-conf, gparted, dosfstools
+Section: utils
+Priority: extra
+Homepage: http://wiki.vitalinux.educa.aragon.es
+Description: Scripts utiles para LVitalinux
+ Scripts utiles para LVitalinux que añaden funcionalidades dentro del menú lxpanel

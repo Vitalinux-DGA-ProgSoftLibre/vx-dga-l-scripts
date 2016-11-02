@@ -1,0 +1,2 @@
+# Permiso para reinicar el equipo
+ALL ALL=(ALL) NOPASSWD: /sbin/init 6

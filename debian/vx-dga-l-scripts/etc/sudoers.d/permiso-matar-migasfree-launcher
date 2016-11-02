@@ -1,0 +1,3 @@
+# Permiso para reinicar el equipo
+ALL ALL=(ALL) NOPASSWD: /usr/bin/killall migasfree-tray
+ALL ALL=(ALL) NOPASSWD: /usr/bin/killall migasfree-launcher

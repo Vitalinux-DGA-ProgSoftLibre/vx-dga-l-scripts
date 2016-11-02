@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Exportamos las variables para saber cual es la IPCache Actual
+. /etc/default/vx-dga-variables/vx-dga-variables-general.conf
+
+echo "" > /tmp/info-tarjetas-red
+
+for TARJETA in $(ifconfig | grep ^[a-z] | cut -d" " -f1) ; do
+	MAC=$(ifconfig $TARJETA | grep HW | tr -s " " " " | cut -d" " -f5)
+	IP=$(ifconfig $TARJETA | grep inet: | tr -s " " " " | cut -d" " -f3 | cut -d":" -f2)
+	if test "$IP" != "" -a "$MAC" != "" ; then
+		echo "  -->  Interfaz <b><tt><span foreground='blue'>$TARJETA</span></tt></b>: " >> /tmp/info-tarjetas-red
+		echo "\t\tIP -> <b><tt><span foreground='blue'>$IP</span></tt></b> " >> /tmp/info-tarjetas-red
+		echo "\t\tMAC -> <b><tt><span foreground='blue'>$MAC</span></tt></b>" >> /tmp/info-tarjetas-red
+		echo "" >> /tmp/info-tarjetas-red
+	fi
+done
+
+GATEWAY=$(route -n | grep UG | tr -s " " " " | cut -d" " -f2)
+echo "  -->  Puerta de Enlace: <b><tt><span foreground='blue'>$GATEWAY</span></tt></b>" >> /tmp/info-tarjetas-red
+echo "\n  -->  Dirección IP del Servidor Caché: <b><tt><span foreground='blue'>$IPCACHE</span></tt></b>" >> /tmp/info-tarjetas-red
+IPPUBLICA=$(wget http://ipinfo.io/ip -qO - 2> /dev/null)
+echo "\n  -->  Dirección IP Pública Router: <b><tt><span foreground='blue'>$IPPUBLICA</span></tt></b>" >> /tmp/info-tarjetas-red
+
+route -n | grep -v ^Tabla | yad --title "Información de Parámetros de Red" \
+	--image preferences-system-network \
+	--width 700 --height 400 \
+	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+	--text \
+	"$(cat /tmp/info-tarjetas-red) \n\n  Tabla de Enrutamiento del Equipo: " \
+	--text-info --tail --button="Cerrar Ventana":0
+

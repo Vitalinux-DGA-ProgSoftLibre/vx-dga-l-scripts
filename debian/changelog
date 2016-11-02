@@ -1,0 +1,37 @@
+vx-dga-l-scripts (3.0-13) unstable; urgency=low
+
+  * scripts utiles para LVitalinux
+  * Se han añadido los scripts correspondientes a instalación de Java y PDIs
+  * Se ha modificado el script vx-autologin
+  * Se ha quitado -fullscreen del xterm al instalar Java
+  * Se ha añadido un script que reinicia la red: killall NetworkManager
+  * Se ha añadido un script para volver a la post-instalación
+  * Se ha añadido un script para actualizar el Computer_Name
+  * Se ha modificado el script de post-instalación para tener en cuenta la nueva ubicación de las claves de los clientes
+  * Se ha modificado el script de instalación de Java para la versión 8
+  * Se ha añadido un script para que configure el software necesario por las Pantallas Táctiles Wacom
+  * Se ha añadido un script para reparar el software
+  * Se ha añadido un script para redimensionar el sistema de archivos LVM
+  * Se ha modificado la aleatoriedad de la generación del Computer_Name
+  * Se ha añadido un script para modificar la IP del Servidor Caché de la Intranet del Centro
+  * Se ha actualizado el script de asignación de etiquetas migasfree
+  * Se ha mejorado el script de configuración e instalación de software de las PDIs
+  * Se han añadido scripts para cerrar sesión, apagar equipo y reiniciarlo
+  * Se han eliminado dependecias del control innecesarias
+  * Se ha añadido un script para habilitar o deshabilituar el dock plank manualmente
+  * Se ha modificado la instalación de la PDI IQBoard para que se inicie al iniciar sesión
+  * Se ha modificado el script de modificar la ip del caché
+  * Se ha creado un script para crear usb-bootable con formateo previo del usb con gparted
+  * Se ha mejorado el scripts de drivers pdis incluyendo un ckeck md5
+  * Se ha añadido un script para conocer la información de la red: ip, mac, gateway e ipcache
+  * Se han añadido scripts para matar el cliente migasfree
+  * Se ha añadido el paquete activinspire para la PDI Promethean
+  * Se añade orden de instalacion del paquete vx-dga-l-lsadrv-hitachi, para correcto funcionamiento de las PDI Hitachi Trio 77
+  * 6-6-2016: Se ha ajustado el script que mata el cliente migasfree
+  * 9-6-2016: Se arregla un bug con la instalacion para que se instale la pdi Hitachi
+  * 21-6-2016: Calibrate de Hitachi se ejecuta fuera de una terminal y mejora del script de pdis
+  * 4-8-2016: Update script pdi: Nuevo software de IQBoard 
+  * 6-8-2016: Bug script driver iqboard arquitectura
+ 
+ -- Arturo Martín <amartinromero@gmail.com>  Mon, 6 Jun 2016 00:10:00 +0200
+

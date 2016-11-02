@@ -1,0 +1,43 @@
+#!/bin/bash
+USER=$(whoami)
+
+function actualizar-contra-migasfree {
+
+(
+	echo "--> Va a empezar la actualización contra Migasfree ..."
+	echo "--> ¡¡No cierres la ventana!! Espera a se te indique ..."
+	echo "..."
+	sleep 5	
+	
+	migasfree -u | sed -r 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
+
+	yad --title "Actualización Terminada" \
+		 --text "   Actualización contra Migasfree terminada ...   \n   Si no ha detectado errores ya debería estar todo correcto ...   \n\n   Ya puedes cerrar la ventana anterior" \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--image "/usr/share/lxpanel/images/vitalinux.png" \
+		--width="400" --height="100" \
+		--center --justify="center" --text-align="center" --button=Terminar:0
+
+	echo -e "\n..."
+	echo "--> Ya puedes cerrar la ventana ..."
+	) | yad --title "Actualización contra Migasfree" --text-info --tail \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="500" --height="400" --center --button=Cerrar:0
+
+}
+
+if test $USER = "root" ; then
+
+	yad --title "Migasfree" --info --text "Actualización contra Migasfree" \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--image=/usr/share/lxpanel/images/vitalinux.png \
+		--width="400" --height="100" --center --justify="center" --text-align="center"
+
+	actualizar-contra-migasfree
+
+else
+		yad --title "Migasfree" --info --text "No tiene permisos para ejecutar el programa"\
+	   	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="350" --height="100" --center --justify="center" --text-align="center"
+fi
+

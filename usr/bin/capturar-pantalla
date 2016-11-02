@@ -1,0 +1,16 @@
+#!/bin/bash
+
+function mensaje {
+	yad --timeout=1 --title "Capturar Pantalla" \
+		--text "   La imagen ya esta guardada en tu carpeta:   \n   <b>Imágenes</b>   " \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--image "/usr/share/icons/vitalinux/vitalinux-48x48.png" \
+		--center --justify="center" --text-align="center" --button=Entendido:0
+}
+
+case $1 in
+	"-w") scrot -s '%Y-%m-%d_%H:%M:%S_$wx$h.png' -e 'mv $f ~/Imágenes/' && mensaje ;;
+	*) scrot '%Y-%m-%d_%H:%M:%S_$wx$h.png' -e 'mv $f ~/Imágenes/' && mensaje ;;
+esac
+
+exit 0

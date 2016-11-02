@@ -1,0 +1,44 @@
+#!/bin/bash
+USER=$(whoami)
+
+function asignar-etiquetas-migasfree {
+	(
+	echo "--> Va a comenzar asignación de Etiquetas Migasfree ..."
+	echo "--> Ten paciencia por favor ... "
+	echo "--> No cierres la ventana hasta que se te indique ..."
+	echo "..."
+	sleep 5
+
+	# Sacamos la ventana para que el usuario seleccione etiquetas Migasfree:
+	migasfree-tags -s | sed -r 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
+
+	yad --title "Modificar Etiquetas Migasfree" \
+		 --text "   Etiquetas correctamente modificadas   \n   Si no ha detectado errores ya debería estar todo configurado ...   \n\n   Ya puedes cerrar la ventana anterior" \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--image "/usr/share/lxpanel/images/vitalinux.png" \
+		--width="400" --height="100" \
+		--center --justify="center" --text-align="center" --button=Terminar:0
+ 
+	echo -e "\n\nGracias por la espera... \nAhora ya puedes cerrar la ventana ..."
+	) | yad --title "Migasfree" --text-info --tail \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="500" --height="400" --center --button=Cerrar:0
+
+
+}
+
+if test $USER = "root" ; then
+	yad --title "Migasfree etiquetas" \
+	--info --text "Programa para modificar las etiquetas de Migasfree"\
+	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+	--image "/usr/share/lxpanel/images/vitalinux.png" \
+	--width="400" --height="100" --center --justify="center" --text-align="center"
+
+	asignar-etiquetas-migasfree
+
+else
+	yad --title "Migasfree etiquetas" --info --text "No tiene permiso para ejecutar el programa"\
+	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+	--image "/usr/share/lxpanel/images/vitalinux.png" \
+	--width="400" --height="100" --center --justify="center" --text-align="center"
+fi

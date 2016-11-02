@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+## Comprobamos que existe el archivo donde estan definidas las resoluciones
+if test -f /usr/share/vitalinux/resolucion-pantalla/resoluciones-pantalla.txt ; then
+	# echo "Ok ... exite el archivo de definición de Resoluciones ..."
+	RESOLUTIONS="/usr/share/vitalinux/resolucion-pantalla/resoluciones-pantalla.txt"
+else
+	echo "Error ... no exite el archivo de definición de Resoluciones ..."
+	exit 1
+fi
+
+xrandr -q 2> /dev/null | grep -Po 'current\s*\K\d+\s*x\s*\d+' | sed 's/ *x */ /' | tr -s " " ":" > /tmp/resolucion-pantalla
+resolucionx=$(cat /tmp/resolucion-pantalla | cut -d":" -f1)
+resoluciony=$(cat /tmp/resolucion-pantalla | cut -d":" -f2)
+grep "$resolucionx" "$RESOLUTIONS" | grep "$resoluciony" | awk -F" " '{print $2}'

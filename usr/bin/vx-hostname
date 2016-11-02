@@ -1,0 +1,51 @@
+#!/bin/bash
+USER=$(whoami)
+NAMEHOST=$(cat /etc/hostname) ## Nombre del actual nombre del equipos
+
+function cancelar-operacion {
+	yad --title "Cambio de nombre" --info --text "Ha cancelado la operación" \
+				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+				--width="350" --height="100" --center --justify="center" --text-align="center"
+	exit 1
+}
+
+if test $USER = "root" ; then
+	
+    if yad --title "Cambio de nombre" --question \
+		--text " El nombre de su equipo actual es: $NAMEHOST \n ¿Quiere cambiar el nombre de su equipo?" \
+   	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="350" --height="100" --center --justify="center" --text-align="center" \
+		--button="No Continuar":1 --button="Continuar":0 ; then
+
+		if NEWHOST=$(yad --title "Cambio de nombre" --entry --text "Escriba el nombre del equipo"\
+			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+			--width="550" --height="200" --center --justify="center" --text-align="center" \
+			--button="No Cambiar":1 --button="Cambiar NOMBRE":0) ; then
+			if test $(expr length "$NEWHOST") -gt 0 ; then
+				## Cambia el nombre del equipo de ambos ficheros de configuración		
+				sed --follow-symlinks -i "s/$NAMEHOST/$NEWHOST/g" /etc/hosts
+				sed --follow-symlinks -i "s/$NAMEHOST/$NEWHOST/g" /etc/hostname
+				## Nombre del nombre del equipos actualizado		
+				ACTHOST=$(cat /etc/hostname)
+				yad  --title "Cambio de nombre" --info --text "Su nombre de equipos está actualizado: $ACTHOST" \
+					--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+					--width="550" --height="200" --center --justify="center" --text-align="center"
+			else
+				yad --title "Cambio de nombre" --info \
+					--text "Debes introducir un Nombre para el Equipo \n con al menos un caracter" \
+					--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+					--width="350" --height="100" --center --justify="center" --text-align="center"
+			fi
+		else
+			cancelar-operacion
+		fi
+	else
+			cancelar-operacion
+	fi
+else
+			yad --title "Cambio de nombre" \
+				--text "No tienes privilegios para \n <b>Cambiar el Nombre del Equipo</b>" \
+				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+				--width="350" --height="100" \
+				--center --justify="center" --text-align="center"
+fi

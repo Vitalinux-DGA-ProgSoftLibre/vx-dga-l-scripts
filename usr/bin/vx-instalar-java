@@ -1,0 +1,46 @@
+#!/bin/bash
+USER=$(whoami)
+
+function instalar-software {
+	(
+	echo "A continuación va a comenzar la instalación de todo lo necesario para Java8 - OpenJDK8..."
+	echo "Ten paciencia por favor ... "
+	echo "No cierres la ventana hasta que se te indique a no ser que aparezcan errores ..."
+	sleep 7
+	add-apt-repository ppa:openjdk-r/ppa -y
+	apt-get --assume-yes --force-yes update
+	apt-get --assume-yes --force-yes install openjdk-8-jdk
+	VERSION=`update-alternatives --list java | grep -n java | grep java-8-openjdk | cut -d":" -f1`
+	echo $VERSION | update-alternatives --config java &> /dev/null
+	echo -e "\n\nComprueba a continuación la versión de Java que tienes instalada:\n"
+	/usr/bin/java -version 2> /tmp/version-java
+	/bin/cat /tmp/version-java
+	echo -e "\n\nGracias por la espera... \nAhora ya puedes cerrar la ventana ..."
+	) | yad --title "Migasfree" --text-info --tail \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="500" --height="400" --center --button=Cerrar:0
+}
+
+if test $USER = "root"
+then
+	if yad --title "Instalación de Java 8" --question \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--image "/usr/share/lxpanel/images/java-48.png" \
+		--text "  ¿Deseas Instalar Java OpenJDK 8?" --width="350" --height="50" --center \
+		--button="Continuar Instalación":0 --button="Cancelar":1
+		then
+			instalar-software
+		else
+			yad --title "Cancelado" --info --text "Has cancelado la Instalación de Java" \
+			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+			--image "/usr/share/lxpanel/images/java-48.png" \
+			--center --width="350" --height="100" --button=Terminar:1
+			exit 0
+	fi
+else
+		yad --title "Instalación de Java" \
+		--info --text "No tiene permiso para ejecutar el programa" \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--image "/usr/share/lxpanel/images/java-48.png" \
+		--width="400" --height="100" --center --justify="center" --text-align="center"
+fi
