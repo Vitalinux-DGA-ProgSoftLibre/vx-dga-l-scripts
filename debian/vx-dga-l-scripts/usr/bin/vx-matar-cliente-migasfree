@@ -1,9 +1,0 @@
-#!/bin/bash
-## Equivalente a: ps -aux | grep migasfree-tray &> /dev/null && sudo killall migasfree-tray
-if ps -aux | grep migasfree-tray &> /dev/null ; then
-	sudo killall migasfree-tray
-fi
-if ps -aux | grep migasfree-tray &> /dev/null ; then
-	sudo killall migasfree-tray
-fi
-exit 0

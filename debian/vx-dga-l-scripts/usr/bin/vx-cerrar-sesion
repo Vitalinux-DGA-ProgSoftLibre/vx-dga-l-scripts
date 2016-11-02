@@ -1,3 +1,0 @@
-#!/bin/bash
-USERGRAFICO=$(who | grep " :0 " | cut -d" " -f1)
-killall -u $USERGRAFICO
