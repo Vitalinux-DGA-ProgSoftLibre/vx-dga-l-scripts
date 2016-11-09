@@ -1,4 +1,4 @@
-vx-dga-l-scripts (3.0-14) unstable; urgency=low
+vx-dga-l-scripts (3.0-15) unstable; urgency=low
 
   * scripts utiles para LVitalinux
   * Se han añadido los scripts correspondientes a instalación de Java y PDIs
@@ -33,6 +33,7 @@ vx-dga-l-scripts (3.0-14) unstable; urgency=low
   * 4-8-2016: Update script pdi: Nuevo software de IQBoard 
   * 6-8-2016: Bug script driver iqboard arquitectura
   * 3-11-2016: Funcionalidad para hitachi 32 y 64 bits y bug de instalacion de iqboard
+  * 2016-11-7: En el script de deshabilitar migasfree se ha tenido en cuenta migasfree-indicator.desktop
  
  -- Arturo Martín <amartinromero@gmail.com>  Mon, 6 Jun 2016 00:10:00 +0200
 
