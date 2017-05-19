@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Script que nos permite saber la lista de los USUARIOS con una shell válida
+if getent passwd \
+	| awk -F ":" \
+		'{if ( $3 > 999 \
+				&& $7~/\/bin\/.*/ \
+				&& $7 != "/bin/false" \
+				&& $7 != "/bin/sbin/nologin" ) \
+					{print $1}}' ; then
+	exit 0
+else
+	exit 1
+fi

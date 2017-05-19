@@ -1,15 +1,39 @@
 #!/bin/bash
+
 USER=$(whoami)
-  if test $USER = "root"
-	then
-		yad --title "Migasfree etiquetas" --info --text "Programa para comprobar las etiquetas de Migasfree"\
+if [[ ${USER} = "root" ]] && [[ -f /usr/bin/migasfree-tags ]] ; then
+	if test -f /usr/bin/migasfree-cid ; then
+		CID="$(migasfree-cid)"
+		NOMBRE="${HOSTNAME}"
+	fi
+	ETIQUETAS="$(migasfree-tags -g)"
+	(
+	echo ""
+	echo "A continuación se consultarán las Etiquetas Migasfree del Equipo:"
+	echo ""
+	echo "Nombre del Equipo (hostname): ${NOMBRE}"
+	echo "CID del Equipo: ${CID}"
+	echo ""
+	echo "Etiquetas Migasfree asignadas:"
+	echo ""
+	echo ${ETIQUETAS} | tr -s " " "\n" | grep -n "-" | sed -e "s/:/) /g" | sed -e "s/.*/  &/g"
+	echo ""
+	echo "### ---------- TOTAL ETIQUETAS ASIGNADAS: $(echo ${ETIQUETAS} | wc -w) -----------------###"
+	) |  yad \
+		--title "Etiquetas Migasfree del equipo ${NOMBRE} ${CID}" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--width="400" --height="100" --center --justify="center" --text-align="center"
-		migasfree-tags -g |  yad --title "Migasfree" --text-info --tail\
+		--image migasfree \
+		--text-info \
+		--text "\n Comprobación de las <b>Etiquetas Migasfree</b> asignadas: " \
+		--tail \
+		--width="700" --height="400" --center \
+		--button "Cerrar:0"
+
+else
+	yad --title "Migasfree etiquetas" \
+		--info --text "No tiene permisos para ejecutar el programa" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--width="500" --height="400" --center
-	else
-		yad --title "Migasfree etiquetas" --info --text "No tiene permisos para ejecutar el programa"\
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--width="400" --height="100" --center --justify="center" --text-align="center"
-  fi
+		--width="400" --height="100" --center \
+		--justify="center" --text-align="center" \
+		--button "Salir:1"
+fi

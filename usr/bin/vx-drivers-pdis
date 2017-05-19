@@ -1,50 +1,94 @@
 #!/bin/bash
-USER=$(whoami)
-PDI=""
 . /etc/default/vx-dga-variables/vx-dga-variables-general.conf
 MIGASFREE="migasfree.educa.aragon.es"
+USER=$(whoami)
+PDI=""
+ARCHSO=$(getconf LONG_BIT)
 
-function programa-abortado {
-	yad --center --width 300 --title "Software PDI Abortado" \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image=/usr/share/lxpanel/images/pdi.png \
-		--text "  El programa de Instalación de Software de PDIs  \n  ha sido aborado por el usuario" \
-		--button="Salir del Programa":0
-exit 1
+function close_yad(){
+    kill -s SIGUSR1 "$YAD_PID"
 }
+export -f close_yad
+
+function log_xsession(){
+#
+# Funcion que loguea el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
+# Si se quiere loguera en /var/log/vitalinux se llamará como log_xsession -o nombre_fichero
+# 
+	while getopts 'o:' OPT; do
+        case $OPT in
+            o) LOGFILE=$OPTARG;;
+        esac
+	done
+
+	if [ "$LOGFILE" ] ; then
+		if [ ! -d /var/log/vitalinux ]; then
+			mkdir -p /var/log/vitalinux
+		fi
+		LOGFILE="/var/log/vitalinux/$LOGFILE"
+	else
+		LOGFILE="/tmp/logfile"
+	fi
+	export fpipe=$(mktemp -u --tmpdir yadlog.XXXXXXXX)
+	mkfifo "$fpipe"
+	exec 3<> "$fpipe"
+	exec 2>&1
+	exec > >(tee -i "$fpipe" >> "$LOGFILE" )
+	yad --title "Ventana de Log" --text-info --tail \
+			--window-icon=/usr/share/lxpanel/images/pdi.svg \
+			--center --width="720" --height="520" \
+			--no-escape --no-focus --tail --button="Ocultar:bash -c close_yad" < "$fpipe" &
+
+	YAD_LOG=$!
+	export YAD_LOG
+}
+
+function close_exit(){
+	echo "Se cancela el proceso por parte del usuario antes de tiempo"
+    if [ -n "$YAD_LOG" ] && ps -p "$YAD_LOG" > /dev/null; then 
+    	kill -s SIGUSR1 "$YAD_LOG"
+    fi
+    if [ -n "$YAD_PID" ] && ps -p "$YAD_PID" > /dev/null; then 
+    	 kill -s SIGUSR1 "$YAD_PID"
+    fi
+    # Salimos del programa
+    exit 1
+
+}
+export -f close_exit
+
 
 function seleccionar-modelo-pdi {
 
 	PDI=$(yad --center --width 300 --title "Seleccionar PDI" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
 		--image=/usr/share/lxpanel/images/pdi.png \
-		--button="Continuar":0 --button="Abortar":1 \
+		--button="Continuar":0 --button="Canelar":1 \
 		--entry \
 		--text "Selecciona tu PDI:" \
 		--entry-text \
 		"eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard")
-	[[ $? -eq 1 ]] && exit 0
 }
 
 function comprobar-md5 {
 	ARCHIVO=$1
 	cd /opt/pkgs/pdis
 	echo ""
-	if test -f ./${ARCHIVO} -a -f ./${ARCHIVO}.md5 ; then
+	if test -f ./"${ARCHIVO}" -a -f ./"${ARCHIVO}".md5 ; then
 		echo "Ya están descargados los archivos ${ARCHIVO} y ${ARCHIVO}.md5 ..."
 		echo "----------------------------"
-		md5sum ${ARCHIVO}
-		cat ./${ARCHIVO}.md5
+		md5sum "${ARCHIVO}"
+		cat ./"${ARCHIVO}".md5
 		if test "$(md5sum ${ARCHIVO})" == "$(cat ./${ARCHIVO}.md5)" ; then
 			echo "--> Ok!! Coinciden el MD5 de ${ARCHIVO} con ${ARCHIVO}.md5 ..."
 			echo "----------------------------"
-	                echo ""
+	        echo ""
 			return 0
 		else
 			echo "--> Error!! No coinciden el MD5 de ${ARCHIVO} con ${ARCHIVO}.md5 ..."
 			echo "--> Se va a intentar volver a descargar los archivos ..."
 			echo "----------------------------"
-	                echo ""
+	        echo ""
 			rm -Rf ./${ARCHIVO}* &> /dev/null
 			return 1
 		fi
@@ -56,77 +100,70 @@ function comprobar-md5 {
 }
 
 function descargar-archivos {
+	YADBARS=""
+	CONTADOR=1
+	for ruta in $@ ; do
+		# Obtenemos el nombre del archivo a descargar de la URL proporcionada
+	  NOMBREARCHIVO=$(echo "$ruta" | awk -F "/" {'print $NF'})
+	  YADBARS="$YADBARS --bar=Descargando->$NOMBREARCHIVO:NORM"
+	  CONTADOR=$((CONTADOR + 1))
+	done
 
-YADBARS=""
-CONTADOR=1
-for ruta in $@ ; do
-	# Obtenemos el nombre del archivo a descargar de la URL proporcionada
-  NOMBREARCHIVO=$(echo "$ruta" | awk -F "/" {'print $NF'})
-  YADBARS="$YADBARS --bar=Descargando->$NOMBREARCHIVO:NORM"
-  CONTADOR=$(expr $CONTADOR + 1)
-done
-# echo "Se van a descargar $@ con una barra $YADBARS"
-
-(
-CONTADOR=1
-for ruta in $@ ; do
-	NOMBREARCHIVO=$(echo "$ruta" | awk -F "/" {'print $NF'})
-	# Para cada barra de progreso: El primer parametro es la barra de progreso afectada y el segundo el texto que mostrará
-	wget "$ruta" 2>&1 | sed -u \
-	"s/.* \([0-9]\+%\)\ \+\([0-9,.]\+.\) \(.*\)/$CONTADOR:\1\n$CONTADOR:# Descargando a \2\/s, T. Restante: \3/"
-	# Obtenemos el resultado de la descarga proporcionado por wget
-	RET_WGET="${PIPESTATUS[0]}"
-	if [[ "$RET_WGET" = 0 ]] ; then
-		echo "$CONTADOR:100%"
-		echo "$CONTADOR:#Descarga de $NOMBREARCHIVO Completada ..."
-	else
-		echo "$CONTADOR:#Error en la Descarga de $NOMBREARCHIVO ..."
-	fi
-	CONTADOR=$(expr $CONTADOR + 1)
-done
-) | yad --center --width 700 \
-	--title "Descarga de Drivers PDIs" \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-	--justify="center" --text-align="center" \
-	--text "  Descargando el Software necesario ... <b>¡¡paciencia!!</b> ... \n  Puede tardar <b>Varios Minutos</b>  \n   Modelo PDI: <b>$PDI</b>   " \
-	--multi-progress \
-	$YADBARS \
-	--auto-close --button="Abortar":1
-
-if test $? -eq 1 ; then
-	programa-abortado
-fi
-
-LISTAFALLIDA=""
-# Comprobamos mediante md5 que se han descargado satisfactoriamente ...
-# En caso contrario se descargarán de nuevo ...
-for ruta in $@ ; do
-	NOMBREARCHIVO=$(echo "$ruta" | awk -F "/" {'print $NF'})
-	if ! ( echo $NOMBREARCHIVO | grep md5 ) &> /dev/null ; then
-		if comprobar-md5 $NOMBREARCHIVO ; then
-			echo "--> Ok!! Se ha descargado integramente el archivo: $NOMBREARCHIVO ..."
+	(
+	CONTADOR=1
+	for ruta in $@ ; do
+		NOMBREARCHIVO=$(echo "$ruta" | awk -F "/" {'print $NF'})
+		# Para cada barra de progreso: El primer parametro es la barra de progreso afectada y el segundo el texto que mostrará
+		wget "$ruta" 2>&1 | sed -u \
+		"s/.* \([0-9]\+%\)\ \+\([0-9,.]\+.\) \(.*\)/$CONTADOR:\1\n$CONTADOR:# Descargando a \2\/s, T. Restante: \3/"
+		# Obtenemos el resultado de la descarga proporcionado por wget
+		RET_WGET="${PIPESTATUS[0]}"
+		if [[ "$RET_WGET" = 0 ]] ; then
+			echo "$CONTADOR:100%"
+			echo "$CONTADOR:#Descarga de $NOMBREARCHIVO Completada ..."
 		else
-			echo "--> Error!! NO se ha descargado integramente el archivo: $NOMBREARCHIVO ..."
-			echo "--> ... Se volverá a ordenar la descarga de $NOMBREARCHIVO ..."
-			LISTAFALLIDA="$LISTAFALLIDA $ruta ${ruta}.md5"
+			echo "$CONTADOR:#Error en la Descarga de $NOMBREARCHIVO ..."
 		fi
+		CONTADOR=$((CONTADOR + 1))
+	done
+	) | yad --center --width 700 \
+		--title "Descarga de Drivers PDIs" \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--justify="center" --text-align="center" \
+		--text "  Descargando el Software necesario ... <b>¡¡paciencia!!</b> ... \n  Puede tardar <b>Varios Minutos</b>  \n   Modelo PDI: <b>$PDI</b>   " \
+		--multi-progress \
+		$YADBARS \
+		--auto-close --button="Cancelar":1
+	##
+	## Si el usuario cancela la descarga o bien hay un error (no hay red por ejemplo)
+	if [ "$?" = "1" ] ; then
+		if yad --center --title "Drivers PDIs" --question \
+		--window-icon=/usr/share/lxpanel/images/pdi.svg \
+		--image=/usr/share/lxpanel/images/pdi.png \
+		--text "   Hubo un problema a la hora de descargar el software o ha sido cancelada la operación por el usuario...deseas reintentar la descarga?   " \
+		--width="350" --center \
+		--justify="center" --text-align="center" \
+		--button="Continuar":0 --button="Cancelar":1 ;  then
+			
+			descargar-archivos $@
+			return $?
+		else
+			
+			return 1
+		fi 
 	fi
-done
-
-if test "$LISTAFALLIDA" != "" ; then
-	descargar-archivos $LISTAFALLIDA
-fi
+	return 0
 
 }
 
 function comprobar-archivos {
 	LISTADESCARGAS=""
-	for RUTA in $* ; do
-		ARCHIVO=$(echo $RUTA | awk -F "/" {'print $NF'})
+	for RUTA in $@ ; do
+		ARCHIVO=$(echo "$RUTA" | awk -F "/" {'print $NF'})
 		if ! comprobar-md5 $ARCHIVO ; then
 			echo "--> El archivo $ARCHIVO NO se encentra de manera integra en /opt/pkgs/pdis ..."
 			echo "--> ... por lo tanto, $ARCHIVO se descargará a continuación ..."
-			if ping -c 1 $IPCACHE &> /dev/null && wget --spider -q "http://${IPCACHE}${RUTA}" ; then
+			if ping -c 1 "$IPCACHE" &> /dev/null && wget --spider -q "http://${IPCACHE}${RUTA}" ; then
 				LISTADESCARGAS="$LISTADESCARGAS http://${IPCACHE}${RUTA} http://${IPCACHE}${RUTA}.md5"
 			else
 				LISTADESCARGAS="$LISTADESCARGAS http://${MIGASFREE}${RUTA} http://${MIGASFREE}${RUTA}.md5"
@@ -136,12 +173,14 @@ function comprobar-archivos {
 			echo "--> ... por lo tanto, $ARCHIVO no se descargará de nuevo ..."
 		fi
 	done
-
-	if test "$LISTADESCARGAS" != "" ; then
-		descargar-archivos $LISTADESCARGAS
+	if test "$LISTADESCARGAS" = "" ; then
+		return 0
+	else
+		descargar-archivos "$LISTADESCARGAS"
 	fi
 }
 
+# Los archivos a descargar y posteriormente a instalar no se pueden pasar por parámetro ya que luego es importante el orden o acciones posteriores...
 function descargar-software-pdi {
 
 	if ! test -d /opt/pkgs/pdis ; then
@@ -149,51 +188,53 @@ function descargar-software-pdi {
 	fi
 	cd /opt/pkgs/pdis
 
-	seleccionar-modelo-pdi
-
 	case $PDI in
 
 		"eBeam")
-		comprobar-archivos "/pdis/eBeam/scrapbook-selfextracting"
-		if test -f ./scrapbook-selfextracting ; then
-			chmod +x ./scrapbook-selfextracting
-		fi
+		FILESPDI="/pdis/eBeam/scrapbook-selfextracting"
 		;;
 
 		"Hitachi") 
-		comprobar-archivos "/pdis/HITACHI/StarBoardSoftware_9.62_i586.deb"
+		
+		FILESPDI="/pdis/HITACHI/StarBoardSoftware_9.62_i586.deb"
 		;;
 
 		"Interwrite")
-		comprobar-archivos "/pdis/Interwrite/WorkSpace_Ubuntu_6.3.0.97"
-		if test -f ./WorkSpace_Ubuntu_6.3.0.97 ; then
-			chmod +x ./WorkSpace_Ubuntu_6.3.0.97
-		fi
+		FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.3.0.97"
 		;;
 
 		"IQBoard")
-		ARCHSO=$(getconf LONG_BIT)
 		if [ "$ARCHSO" = "64" ] ; then
-		  comprobar-archivos "/pdis/IQBoard/IQBoard_64/iqboard.deb" "/pdis/IQBoard/IQBoard_64/rsboardep.deb"
+		  FILESPDI="/pdis/IQBoard/IQBoard_64/iqboard.deb /pdis/IQBoard/IQBoard_64/rsboardep.deb"
 		else
-		  comprobar-archivos "/pdis/IQBoard/IQBoard_32/iqboard.deb" "/pdis/IQBoard/IQBoard_32/rsboardep.deb"
+		  FILESPDI="/pdis/IQBoard/IQBoard_32/iqboard.deb /pdis/IQBoard/IQBoard_32/rsboardep.deb"
 		fi
 		;;
 
 		"Multiclass")
-		comprobar-archivos "/pdis/multiCLASS/multiCLASSBoard.tar.gz"
+		FILESPDI="/pdis/multiCLASS/multiCLASSBoard.tar.gz"
 		;;
 
 		"Promethean")
-		comprobar-archivos "/pdis/Promethean/activaid_2.0.1-9~ubuntu~1204_i386.deb" "/pdis/Promethean/activdriver_5.10.14-1~ubuntu~1204_i386.deb" "/pdis/Promethean/activtools_5.10.14-1~ubuntu~1204_i386.deb" "/pdis/Promethean/libudev0_175-0ubuntu9_i386.deb" "/pdis/Promethean/activinspire_1.8.64351-2.i386_i386.deb"
+		if [ "$ARCHSO" = "64" ] ; then
+		  FILESPDI="/pdis/Promethean/promethean_64/activaid_5.14.21-0.deb \
+		  	/pdis/Promethean/promethean_64/activdriver_5.14.21-0.deb \
+		  	/pdis/Promethean/promethean_64/activtools_5.14.21-0.deb"
+		else
+		  FILESPDI="/pdis/Promethean/promethean_32/activaid_5.14.21-0.deb \
+		  	/pdis/Promethean/promethean_32/activdriver_5.14.21-0.deb \
+		  	/pdis/Promethean/promethean_32/activinspire_2.4.66096-1.i386_i386.deb \
+		  	/pdis/Promethean/promethean_32/activtools_5.14.21-0.deb"
+		fi
+		#comprobar-archivos "/pdis/Promethean/activaid_2.0.1-9~ubuntu~1204_i386.deb" "/pdis/Promethean/activdriver_5.10.14-1~ubuntu~1204_i386.deb" "/pdis/Promethean/activtools_5.10.14-1~ubuntu~1204_i386.deb" "/pdis/Promethean/libudev0_175-0ubuntu9_i386.deb" "/pdis/Promethean/activinspire_1.8.64351-2.i386_i386.deb"
 		;;
 
 		"Smartboard")
-		comprobar-archivos "/pdis/SmartBoard/smart-hwr_11.3.2087.1-1_i386.deb"
+		FILESPDI="/pdis/SmartBoard/smart-hwr_11.3.2087.1-1_i386.deb"
 		;;
 
 	esac
-
+	comprobar-archivos "$FILESPDI"
 }
 
 function ejecutar-comando {
@@ -205,220 +246,173 @@ function ejecutar-comando {
 
 function instalar-software-pdi {
 
-	descargar-software-pdi
-
 	cd /opt/pkgs/pdis
 	case $PDI in
 
 	"eBeam")
 	if test -f ./scrapbook-selfextracting ; then
-		cat > /tmp/programa-ejecutar<<EOF
-chmod +x /opt/pkgs/pdis/scrapbook-selfextracting
-/opt/pkgs/pdis/scrapbook-selfextracting
-EOF
-		ejecutar-comando
+		chmod +x /opt/pkgs/pdis/scrapbook-selfextracting
+		/opt/pkgs/pdis/scrapbook-selfextracting
 	fi
 	;;
 
 	"Hitachi")
 	if test -f ./StarBoardSoftware_9.62_i586.deb ; then
-		cat > /tmp/programa-ejecutar<<EOF
-if ! dpkg -l | grep -e "starboardsoftware[ ]*9.62" >/dev/null 2>/dev/null ; then
-	dpkg -i /opt/pkgs/pdis/StarBoardSoftware_9.62_i586.deb
-else
-	echo "El software para esta PDI esta actualizado a la ultima version...se omite la instalacion"
-fi
-/usr/local/StarBoardSoftware/install.sh
-apt-get -f --assume-yes --force-yes install
-# Instalamos los drivers necesarios
-# 1. El primero es para que el servicio que el demonio que se encarga de hablar con la pizarra (driver) DGBoard se pueda ejecutar en 64 bits
-apt-get --assume-yes --force-yes install libusb-0.1-4:i386
-# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
-# pero tampoco molesta que se cargue en memoria
-apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
-# Modificamos el lanzador de calibrado que no se ejecuta correctamente desde entorno grafico
-if [ -f /usr/share/applications/hitachi-starboard-calibrate.desktop ] ; then
-	sed -i 's/^Terminal=[Tt]rue/Terminal=false/g' /usr/share/applications/hitachi-starboard-calibrate.desktop
-fi
-EOF
-		ejecutar-comando
+		if ! dpkg -l | grep -e "starboardsoftware[ ]*9.62" >/dev/null 2>/dev/null ; then
+			dpkg -i /opt/pkgs/pdis/StarBoardSoftware_9.62_i586.deb
+		else
+			echo "El software para esta PDI esta actualizado a la ultima version...se omite su instalacion"
+		fi
+		/usr/local/StarBoardSoftware/install.sh
+		apt-get -f --assume-yes --force-yes install
+		# Instalamos los drivers necesarios
+		# 1. El primero es para que el servicio que el demonio que se encarga de hablar con la pizarra (driver) DGBoard se pueda ejecutar en 64 bits
+		apt-get --assume-yes --force-yes install libusb-0.1-4:i386
+		# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
+		# pero tampoco molesta que se cargue en memoria
+		apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
+		# Modificamos el lanzador de calibrado que no se ejecuta correctamente desde entorno grafico
+		if [ -f /usr/share/applications/hitachi-starboard-calibrate.desktop ] ; then
+			sed -i 's/^Terminal=[Tt]rue/Terminal=false/g' /usr/share/applications/hitachi-starboard-calibrate.desktop
+		fi
+
 	fi
 	;;
 
 	"Interwrite")
 	if test -f ./WorkSpace_Ubuntu_6.3.0.97 ; then
-		cat > /tmp/programa-ejecutar<<EOF
-chmod +x /opt/pkgs/pdis/WorkSpace_Ubuntu_6.3.0.97
-/opt/pkgs/pdis/WorkSpace_Ubuntu_6.3.0.97
-EOF
-		ejecutar-comando
+		chmod +x /opt/pkgs/pdis/WorkSpace_Ubuntu_6.3.0.97
+		/opt/pkgs/pdis/WorkSpace_Ubuntu_6.3.0.97
+
 	fi
 	;;
 
 	"IQBoard")
 	# Cosultar en /var/lib/dpkg/info/iqboard.deb.postinst que hay acciones que no se pueden realizar
 	if test -f ./iqboard.deb -a -f ./rsboardep.deb ; then
-		cat > /tmp/programa-ejecutar<<EOF
-# Borramos cualquier instalacion previa de drivers o software
-if dpkg -l | grep iqboard.deb >/dev/null 2>/dev/null ; then
-	echo "Borrando software instalado..."
-	dpkg -P iqboard.deb
-fi
-if dpkg -l | grep rsboard >/dev/null 2>/dev/null ; then
-	echo "Borrando driver instalado..."
-	dpkg -P rsboardep
-fi
-dpkg -i /opt/pkgs/pdis/rsboardep.deb
-dpkg -i /opt/pkgs/pdis/iqboard.deb
-if test -f /usr/share/applications/RSBoardEP_Server.desktop ; then
-  cp /usr/share/gnome/autostart/RSBoardEPStart.desktop /etc/xdg/autostart/
-fi
-EOF
-		ejecutar-comando
+		# Borramos cualquier instalacion previa de drivers o software
+		if dpkg -l | grep iqboard.deb >/dev/null 2>/dev/null ; then
+			echo "Borrando software instalado..."
+			dpkg -P iqboard.deb
+		fi
+		if dpkg -l | grep rsboard >/dev/null 2>/dev/null ; then
+			echo "Borrando driver instalado..."
+			dpkg -P rsboardep
+		fi
+		dpkg -i /opt/pkgs/pdis/rsboardep.deb
+		dpkg -i /opt/pkgs/pdis/iqboard.deb
+		if test -f /usr/share/applications/RSBoardEP_Server.desktop ; then
+		  cp /usr/share/gnome/autostart/RSBoardEPStart.desktop /etc/xdg/autostart/
+		fi
+
 	fi
 	;;
 
 	"Multiclass")
 	if test -f ./multiCLASSBoard.tar.gz ; then
-		cat > /tmp/programa-ejecutar<<EOF
-tar -xzvf /opt/pkgs/pdis/multiCLASSBoard.tar.gz
-cd /opt/pkgs/pdis/multiCLASSBoard/setup
-chmod +x ./setup.sh
-./setup.sh
-cd /opt/pkgs/pdis
-EOF
-		ejecutar-comando
+		tar -xzvf /opt/pkgs/pdis/multiCLASSBoard.tar.gz
+		cd /opt/pkgs/pdis/multiCLASSBoard/setup
+		chmod +x ./setup.sh
+		./setup.sh
+		cd /opt/pkgs/pdis
 	fi
 	;;
 
-	"Promethean") 
-	if test -f ./activaid_2.0.1-9~ubuntu~1204_i386.deb -a -f ./activdriver_5.10.14-1~ubuntu~1204_i386.deb -a -f ./activtools_5.10.14-1~ubuntu~1204_i386.deb -a -f ./activinspire_1.8.64351-2.i386_i386.deb ; then
-		cat > /tmp/programa-ejecutar<<EOF
-dpkg -i /opt/pkgs/pdis/activaid_2.0.1-9~ubuntu~1204_i386.deb
-dpkg -i /opt/pkgs/pdis/activdriver_5.10.14-1~ubuntu~1204_i386.deb
-dpkg -i /opt/pkgs/pdis/activtools_5.10.14-1~ubuntu~1204_i386.deb
-dpkg -i /opt/pkgs/pdis/libudev0_175-0ubuntu9_i386.deb
-dpkg -i /opt/pkgs/pdis/activinspire_1.8.64351-2.i386_i386.deb
-apt-get -f --assume-yes --force-yes install
-EOF
-		ejecutar-comando
+	"Promethean")
+	if [ "$ARCHSO" = "64" ] ; then
+		#apt-get install dkms libssl0.9.8 gamin libgamin0 libxdo3 xdotool libxcb-xinerama0
+		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
+		dpkg -i /opt/pkgs/pdis/activdriver_5.14.21-0.deb
+		dpkg -i /opt/pkgs/pdis/activtools_5.14.21-0.deb
+		apt-get -f --assume-yes --force-yes install
+
+	else
+		#apt-get install dkms libssl0.9.8 gamin libgamin0 libxdo3 xdotool libxcb-xinerama0
+		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
+		dpkg -i /opt/pkgs/pdis/activdriver_5.14.21-0.deb
+		dpkg -i /opt/pkgs/pdis/activtools_5.14.21-0.deb
+		dpkg -i /opt/pkgs/pdis/activinspire_2.4.66096-1.i386_i386.deb
+		apt-get -f --assume-yes --force-yes install
+	fi
 		#ping -c 1 $IPCACHE && wget http://172.30.1.249/pdis/Promethean/activinspire_1.8.64351-2.i386_i386.deb
 		##gdebi /opt/pkgs/activinspire_1.8.64351-2.i386_i386.deb
 		#rm -f activinspire_1.8.64351-2.i386_i386.deb
-	fi
 	;;
 
 	"Smartboard")
 	if test -f ./smart-hwr_11.3.2087.1-1_i386.deb ; then
-		cat > /tmp/programa-ejecutar<<EOF
 		dpkg -i /opt/pkgs/pdis/smart-hwr_11.3.2087.1-1_i386.deb
 		apt-get -f --assume-yes --force-yes install
-EOF
-		ejecutar-comando
 	fi
 	;;
 
 	esac
 
-	# Por último instalamos el open-sankore
+	# Por último instalamos el open-boad/open-sankore
 	if yad --center --title "Drivers PDIs" --question \
 		--window-icon=/usr/share/lxpanel/images/pdi.svg \
 		--image=/usr/share/lxpanel/images/pdi.png \
-		--text "   Por último se va a instalar <b>Open-Sankore</b>   " \
+		--text "   Deseas (se recomienda) instalar <b>Open-Board(64bits recomendado)/Open-Sankore</b>   " \
 		--width="350" --center \
 		--justify="center" --text-align="center" \
-		--button="Continuar":0 --button="Abortar":1 ;  then
+		--button="Continuar":0 --button="Cancelar":1 ;  then
 
 		cd /opt/pkgs/pdis
 
 		# Descargamos el Open-Sankore
-		comprobar-archivos "/pdis/Open-Sankore_2.5.1_i386.deb"
-
-		if test -f ./Open-Sankore_2.5.1_i386.deb ; then
-			cat > /tmp/programa-ejecutar<<EOF
-dpkg -i /opt/pkgs/pdis/Open-Sankore_2.5.1_i386.deb
-apt-get -f --assume-yes --force-yes install
-EOF
-			ejecutar-comando
-		fi
-	fi
-
-}
-
-function seleccionar-tarea {
-
-if RESULTADO=$(yad --title "Drivers PDIs" --center \
-	--text "Elije que operación quieres realizar: " \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-	--image=/usr/share/lxpanel/images/pdi.png \
-	--width=500 --height=200 \
-	--list --radiolist  \
-	--column Opcion:RD \
-	--column Descripcion:TEXT \
-	--column Numero:HD \
-	TRUE "Descargar Driver PDI" "1" \
-	FALSE "Descargar e Instalar el Driver PDI" "2" \
-	--button="Continuar":0 --button="Abortar":1) ; then
-
-	OPCION=$(echo $RESULTADO | cut -d"|" -f3)
-	ERROR=0
-	case $OPCION in
-		"1" ) descargar-software-pdi ;;
-		"2" ) instalar-software-pdi ;;
-	esac
-
-else
-	programa-abortado
-fi
-}
-
-if test $USER = "root" ; then
-	if yad --center --title "Drivers PDIs" --question \
-		--window-icon=/usr/share/lxpanel/images/pdi.svg \
-		--image=/usr/share/lxpanel/images/pdi.png \
-		--text "   ¿Desea continuar con la Instalación de <b>Drivers para las PDIs</b>?   \n   Para no demorar la instalación se aconseja haber descargado previamente de Internet, <b>http://migasfree.educa.aragon.es/pdis</b>, el software asociado al modelo de la PDI o contar con un servidor Caché para acelerar el proceso de instalación   " \
-		--width="350" --height="50" --center \
-		--justify="center" --text-align="center" \
-		--button="Continuar":0 --button="Abortar":1 ; then
-
-		if (
-		echo "--> Va a Instalarse software de la PDI que selecciones posteriormente ..."
-		echo "--> Ten paciencia por favor ... "
-		echo "--> No cierres la ventana hasta que se te indique ..."
-		echo "..."
-		sleep 2
-
-		seleccionar-tarea
-
-		yad --title "Instalación de Software de la PDI $PDI" \
-			 --text "   Ya se ha instalado lo necesario   \n   Si no ha detectado errores ya debería estar todo configurado ...   \n\n   Ya puedes cerrar la ventana anterior" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--image "/usr/share/lxpanel/images/vitalinux.png" \
-			--width="400" --height="100" \
-			--center --justify="center" --text-align="center" --button=Terminar:0
-
-		echo -e "\n\nGracias por la espera... \nAhora ya puedes cerrar la ventana ..."
-		) | yad --title "Instalando Driver PDI $PDI" --text-info \
-			--window-icon=/usr/share/lxpanel/images/pdi.svg --tail \
-			--center --width="720" --height="520" \
-			--button="Cerrar Ventana":0 --button="Abortar Programa":1 ; then
-
-			yad --title "Completado" --info \
-				--text "La Instalación del Driver para la PDI $PDI ha terminado ..." --center \
-				--window-icon=/usr/share/lxpanel/images/pdi.svg \
-				--image=/usr/share/lxpanel/images/pdi.png \
-				--width="350" --height="100" --button="Cerrar Ventana":0
-			exit 0
+		if [ "$ARCHSO" = "64" ] ; then
+			comprobar-archivos "/pdis/openboard_ubuntu_14.04_1.3.4_amd64.deb"
+			dpkg -i /opt/pkgs/pdis/openboard_ubuntu_14.04_1.3.4_amd64.deb
+			apt-get -f --assume-yes --force-yes install
 		else
-			programa-abortado
+			comprobar-archivos "/pdis/Open-Sankore_2.5.1_i386.deb"
+			dpkg -i /opt/pkgs/pdis/Open-Sankore_2.5.1_i386.deb
+			apt-get -f --assume-yes --force-yes install
 		fi
-	else
-		programa-abortado
+
+		#		if test -f ./Open-Sankore_2.5.1_i386.deb ; then
+		#			cat > /tmp/programa-ejecutar<<EOF
+		#dpkg -i /opt/pkgs/pdis/Open-Sankore_2.5.1_i386.deb
+		#apt-get -f --assume-yes --force-yes install
+		#EOF
+				
+		#		fi
 	fi
-else
-		yad --title "Instalación del Software de PDIs" \
+
+}
+
+if test "$USER" != "root" ; then
+	yad --title "Instalación del Software de PDIs" \
 			--center --justify="center" --text-align="center" \
 			--width="400" --height="100" \
 			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--text "No tiene permiso para ejecutar el programa"
+			--text "No tiene permiso para ejecutar el programa" \
+			--button="Continuar":1
+	exit 1
 fi
+log_xsession -o drivers-pdis
+yad --center --title "Drivers PDIs" --question \
+	--window-icon=/usr/share/lxpanel/images/pdi.svg \
+	--image=/usr/share/lxpanel/images/pdi.png \
+	--text "   ¿Desea continuar con la Instalación de <b>Drivers para las PDIs</b>?   \n   Para no demorar la instalación es aconsejable contar con un servidor caché, pero es posible realizar la descarga directamente desde Internet   " \
+	--width="350" --height="50" --center \
+	--justify="center" --text-align="center" \
+	--button="gtk-ok":0 \
+	--button="Salir":1
+if [ "$?" = "1" ]; then
+	close_exit
+fi
+
+seleccionar-modelo-pdi && descargar-software-pdi && instalar-software-pdi
+
+
+yad --title "Instalación de Software de la PDI $PDI" \
+	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Si no ha detectado errores debería estar todo configurado... "\
+	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+	--image "/usr/share/lxpanel/images/vitalinux.png" \
+	--width="400" --height="100" \
+	--center --justify="center" --text-align="center" --button="gtk-ok":0
+ if [ -n "$YAD_LOG" ] && ps -p "$YAD_LOG" > /dev/null; then 
+    	kill -s SIGUSR1 "$YAD_LOG"
+ fi
+ exit 0

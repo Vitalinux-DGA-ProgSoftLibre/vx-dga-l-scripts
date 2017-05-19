@@ -5,6 +5,23 @@
 
 echo "" > /tmp/info-tarjetas-red
 
+if test -f /usr/bin/migasfree-cid ; then
+	CID="$(migasfree-cid)"
+fi
+NOMBRE="${HOSTNAME}"
+echo -e "Información asociada al equipo Vitalinux: CID (<b><tt><span foreground='blue'>${CID}</span></tt></b>) y HostName (<b><tt><span foreground='blue'>${NOMBRE}</span></tt></b>)" >> /tmp/info-tarjetas-red
+DISTRO=$(lsb_release -a 2> /dev/null | grep "Description:" | tr -s " " " " | cut -d":" -f2)
+ARQUIDISTRO=$(getconf LONG_BIT)
+echo -e "Versión Ubuntu: <b><tt><span foreground='blue'>${DISTRO} (${ARQUIDISTRO}-bits)</span></tt></b>" >> /tmp/info-tarjetas-red
+ARQUIHARDWARE="$(lscpu | grep 'CPUs' | cut -d':' -f2)"
+echo -e "Arquitecturas de Vitalinux soportadas por el Hardware: <b><tt><span foreground='blue'>${ARQUIHARDWARE}</span></tt></b>" >> /tmp/info-tarjetas-red
+
+ETIQUETAS="$(sudo migasfree-tags -g)"
+echo -e "\nEtiquetas Migasfree asignadas:<b><tt><span foreground='blue'>" >> /tmp/info-tarjetas-red
+echo ${ETIQUETAS} | tr -s " " "\n" | grep -n "-" | sed -e "s/:/) /g" | sed -e "s/.*/  &/g" >> /tmp/info-tarjetas-red
+echo -e "</span></tt></b>" >> /tmp/info-tarjetas-red
+
+echo -e "Información del direccionamiento IP:"
 for TARJETA in $(ifconfig | grep ^[a-z] | cut -d" " -f1) ; do
 	MAC=$(ifconfig $TARJETA | grep HW | tr -s " " " " | cut -d" " -f5)
 	IP=$(ifconfig $TARJETA | grep inet: | tr -s " " " " | cut -d" " -f3 | cut -d":" -f2)
@@ -18,13 +35,20 @@ done
 
 GATEWAY=$(route -n | grep UG | tr -s " " " " | cut -d" " -f2)
 echo "  -->  Puerta de Enlace: <b><tt><span foreground='blue'>$GATEWAY</span></tt></b>" >> /tmp/info-tarjetas-red
-echo "\n  -->  Dirección IP del Servidor Caché: <b><tt><span foreground='blue'>$IPCACHE</span></tt></b>" >> /tmp/info-tarjetas-red
+echo "  -->  Dirección IP del Servidor Caché: <b><tt><span foreground='blue'>$IPCACHE</span></tt></b>" >> /tmp/info-tarjetas-red
+
+if [[ -f /etc/migasfree.conf ]] && ( grep ^Server /etc/migasfree.conf &> /dev/null ) ; then
+	SERVIDORMIGASFREE="$(cat /etc/migasfree.conf | grep ^Server | cut -d'=' -f2)"
+	echo "  --> Servidor Migasfree: <b><tt><span foreground='blue'>$SERVIDORMIGASFREE</span></tt></b>" >> /tmp/info-tarjetas-red
+fi	
+
 IPPUBLICA=$(wget http://ipinfo.io/ip -qO - 2> /dev/null)
-echo "\n  -->  Dirección IP Pública Router: <b><tt><span foreground='blue'>$IPPUBLICA</span></tt></b>" >> /tmp/info-tarjetas-red
+echo "  -->  Dirección IP Pública Router: <b><tt><span foreground='blue'>$IPPUBLICA</span></tt></b>" >> /tmp/info-tarjetas-red
 
 route -n | grep -v ^Tabla | yad --title "Información de Parámetros de Red" \
+	--center \
 	--image preferences-system-network \
-	--width 700 --height 400 \
+	--width 700 --height 450 \
 	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
 	--text \
 	"$(cat /tmp/info-tarjetas-red) \n\n  Tabla de Enrutamiento del Equipo: " \

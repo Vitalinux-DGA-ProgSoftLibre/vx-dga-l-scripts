@@ -1,109 +1,93 @@
 #!/bin/bash
+
 USER=$(whoami)
 
-if test $USER = "root"
-then
+if test $USER = "root" ; then
 
 # Exportamos las variables para saber cual es la IPCache Actual
 . /etc/default/vx-dga-variables/vx-dga-variables-general.conf
 
-if yad --title "Información IP Caché" \
-	--text "  La IP actual del servidor Caché es: <b>$IPCACHE</b>  \n  ¿Quieres Modificarla?" \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-	--image "/usr/share/icons/vitalinux/server-72x72.png" \
-	--width="350" --height="100" --justify="center" --center --text-align="center" \
-	--button=Continuar:0  --button="No Continuar":1 ; then
+	TEXTO="\tLa IP actual del servidor Caché es: \"<b>$IPCACHE</b>\" \n\t¿Quieres Modificarla?"
 
-	IPCACHENUEVA=$(yad --title "IP Caché" --text "Indica la IP del Servidor Caché:" \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-	--image "/usr/share/icons/vitalinux/server-72x72.png" \
-	--justify="center" --center --text-align="center" \
-	--form --field="IP " --button=Continuar:0 | cut -d"|" -f1)
-
-	if ping -c 1 $IPCACHENUEVA &> /dev/null ; then
-		yad --title "IP Caché" \
-		--text "  Ok!! Hay conexión con $IPCACHENUEVA \n  Se va a realizar la modificación ..." \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image "/usr/share/icons/vitalinux/server-72x72.png" \
-		--justify="center" --center --text-align="center" \
-		--timeout=7 --button=Continuar:0
-	else
-		if ! yad --title "IP Caché" \
-		--text "  ¡¡Problema!! No hay conexión con $IPCACHENUEVA \n  ¿Quieres continuar con el cambio de IP del Servidor?" \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image "/usr/share/icons/vitalinux/server-72x72.png" \
-		--justify="center" --center --text-align="center" \
-		--button=Continuar:0 --button="No Continuar":1 ; then
-			exit 0
+	VALIDO=0
+	while test $VALIDO -eq 0 ; do
+		if RESPUESTA=$(yad --center --width 640 \
+		--window-icon vitalinux \
+		--image server \
+		--title "Modificar IP del Servidor Caché" \
+		--text-align center --justify="center" \
+		--text "${TEXTO}" \
+		--form \
+		--field="Dirección IP del Servidor Caché: " "$IPCACHE" \
+		--button="Confirmar IP Caché":0 \
+		--button="Saltar":1 \
+		--buttons-layout center) ; then
+			CACHE=$(echo $RESPUESTA | cut -d"|" -f1)
+			# Mediante "sipcalc" comprobamos que se trata de una dirección IP
+			if ( test -z ${CACHE} ) || \
+				sipcalc ${CACHE} | grep "ERR" &> /dev/null ; then
+				TEXTO="\n\t¡¡Repasa la IP \"<b>${CACHE}</b>\" Indicada!! \n\tVuelve a introducir la IP del Servidor Caché, por favor ..."
+			else
+				if yad --center --width 400 \
+					--window-icon vitalinux \
+					--image server \
+					--title "IP del Servidor Caché" \
+					--text-align center --justify="center" \
+					--text "Por favor confirma la IP Indicada: \n\n $CACHE" \
+					--button="Corregir IP":1 --button="Confirmar IP":0 \
+					--buttons-layout center ; then
+				VALIDO=1
+				fi
+			fi
+		else
+			CACHE="172.30.1.249"
+			VALIDO=1
 		fi
+	done
+
+	# Antes de hacer el cambio, comprobamos si hay recursos compartidos en /etc/fstab:
+	# Desmontamos lo que haya en ese momento en el equipo
+	if test -f "/usr/bin/nfs-desmontajes.sh" ; then
+		/usr/bin/nfs-desmontajes.sh
 	fi
 
-	## Limpiamos el /etc/fstab de todos los puntos de montaje anteriores y comprobamos si tiene PRIVADO
-	if grep ".*:/nfs/.*" /etc/fstab &> /dev/null ; then
-		PRIVADO=0
-		if grep ".*:/nfs/privado.*" /etc/fstab &> /dev/null ; then
-			PRIVADO=1
-		fi
+	## Limpiamos el /etc/fstab (lo limpia el script anterior)
+	sed --follow-symlinks -i "/^#/d" /etc/fstab
+	sed --follow-symlinks -i "/^$/d" /etc/fstab
+	sed --follow-symlinks -i "/.*\/nfs\/alumnos.*/d" /etc/fstab
+	sed --follow-symlinks -i "/.*\/nfs\/profesor.*/d" /etc/fstab
+	sed --follow-symlinks -i "/.*\/nfs\/privado.*/d" /etc/fstab
+	sed --follow-symlinks -i "/.*\/nfs\/perfiles.*/d" /etc/fstab
 
-		sed -i "/^#/d" /etc/fstab
-		sed -i "/^$/d" /etc/fstab
-		sed -i "/.*\/nfs\/alumnos.*/d" /etc/fstab
-		sed -i "/.*\/nfs\/profesor.*/d" /etc/fstab
-		sed -i "/.*\/nfs\/privado.*/d" /etc/fstab
-		sed -i "/.*\/nfs\/perfiles.*/d" /etc/fstab
+	if test -f /etc/apt/sources.list.d/vx-dga-repos-mirror.list ; then
+		sed --follow-symlinks -i "s/${IPCACHE}/${CACHE}/g" /etc/apt/sources.list.d/vx-dga-repos-mirror.list
+	fi
+	if test -f /etc/default/vx-dga-variables/vx-dga-variables-general.conf ; then
+		sed --follow-symlinks -i "s/IPCACHE=.*/IPCACHE=${CACHE}/g" /etc/default/vx-dga-variables/vx-dga-variables-general.conf
 	fi
 
-	## Modificamos el /etc/fstab
-
-	if ps aux | grep nfs-cliente.sh &> /dev/null ;  then
-	  killall nfs-cliente.sh
-	fi
-
-	if ps aux | grep mount.nfs &> /dev/null ;  then
-	  killall mount.nfs
-	fi
-
-	if ! grep "^$IPCACHENUEVA:/nfs/" /etc/fstab &> /dev/null ; then
-	# Añadimos en el fstab los puntos de montaje para alumnos, profesores y perfiles
-		echo -e "$IPCACHENUEVA:/nfs/profesor /media/profesores nfs \
-actimeo=1800,noatime,nolock,bg,nfsvers=3,tcp,rw,noauto,user,hard,intr,defaults,exec 0 0\n\
-$IPCACHENUEVA:/nfs/alumnos /media/alumnos nfs \
-actimeo=1800,noatime,nolock,bg,nfsvers=3,tcp,rw,noauto,user,hard,intr,defaults,exec 0 0\n\
-$IPCACHENUEVA:/nfs/perfiles /perfiles nfs \
-actimeo=1800,noatime,nolock,bg,nfsvers=3,tcp,rw,noauto,user,hard,intr,defaults,exec 0 0" >> /etc/fstab
-	fi
-
-	if test $PRIVADO -eq 1 ; then
-	# Añadimos en el fstab el punto de montaje privado
-		echo "$IPCACHENUEVA:/nfs/privado /media/privado nfs \
-actimeo=1800,noatime,nolock,bg,nfsvers=3,tcp,rw,noauto,user,hard,intr,defaults,exec 0 0" >> /etc/fstab
-	fi
-
-if test -f /etc/apt/apt.conf.d/01cache_proxy ; then
-	echo -e 'Acquire::http { Proxy "http://'$IPCACHENUEVA'"; };' > /etc/apt/apt.conf.d/01cache_proxy
-	echo -e 'Acquire::https { Proxy "false"; };' >> /etc/apt/apt.conf.d/01cache_proxy
-fi
-
-	if sed -i "s/^IPCACHE.*/IPCACHE=$IPCACHENUEVA/g" /etc/default/vx-dga-variables/vx-dga-variables-general.conf ;  then
-	# Modificamos el valor de IPCACHE en el archivo de variables
-			yad --title "Completado" \
-			--image "/usr/share/icons/vitalinux/server-72x72.png" \
-			--text "Se ha modificado la IP del Caché a <b>$IPCACHENUEVA</b> con exito" \
-			--center \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--width="350" --height="100" --timeout=7 --text-align="center"
+	# Lanzamos el montaje de unidades NFS en el cliente:
+	if ! pgrep nfs-cliente &> /dev/null ; then
+		echo "--> El servicio de Carpetas Compartidas no esta activo ..."
+		echo "--> Se va a iniciar el Servicio de Carpetas Compartidas ..."
+		#su -c "/usr/bin/nfs-cliente.sh &" --login root
+		start-stop-daemon --start --oknodo --quiet -b \
+			--exec /usr/bin/nfs-cliente.sh
 	else
-			yad --title "Problemas ..." --info \
-			--image "/usr/share/icons/vitalinux/server-72x72.png" \
-			--text " Se ha producido algún problema al cambiar la IP del Caché ... " \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--center --width="350" --height="100" --timeout=7 --text-align="center"
+		echo "--> Ya existe un servicio de Carpetas Compartidas Activo ... "
+		echo "--> La nueva versión de este servicio actuará a partir del siguiente inicio de sesión ..."
 	fi
+
+	if test -f /etc/apt/apt.conf.d/01cache_proxy ; then
+		echo -e 'Acquire::http { Proxy "http://'${CACHE}':3142"; };' > /etc/apt/apt.conf.d/01cache_proxy
+		echo -e 'Acquire::https { Proxy "false"; };' >> /etc/apt/apt.conf.d/01cache_proxy
+	fi
+
+
 else
-		yad --title "Cambiar IP Caché" \
-			--image "/usr/share/icons/vitalinux/server-72x72.png" \
-			--info --text "No tiene permiso para ejecutar el programa" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		yad --title "Modificar IP del Servidor Caché" \
+			--image "server" \
+			--info --text "<b>No tiene permiso</b> para ejecutar el programa\n¡¡Debes ser \"<b>root</b>\"" \
+			--window-icon vitalinux \
 			--width="400" --height="100" --center --justify="center" --timeout=7 --text-align="center"
-fi
 fi

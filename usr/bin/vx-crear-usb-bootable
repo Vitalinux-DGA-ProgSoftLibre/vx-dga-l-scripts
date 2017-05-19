@@ -2,15 +2,26 @@
 
 USER=$(whoami)
 
+function abortar {
+	yad --title "Creador de USB Bootable Abortado" \
+			--window-icon vitalinux \
+			--image iso-to-usb \
+			--center --width 500 --height 90 \
+			--justify="center" --text-align="center" \
+			--text "El usuario ha abortado el proceso ..." \
+			--button="terminar":1
+	exit 1
+}
+
 if test $USER = "root"
 then
 
 	if yad --title "Crear USB Bootable" --center \
 		--text "  Vamos a crear un USB Bootable a partir de una imagen ISO ...  \n  <b>Pincha la memoria USB</b> que quieres formatear y sobre la cual quieres grabar la ISO.  \n  Una vez ya esté conectada la memoria y reconocida por el sistema pincha en <b>Continuar</b>.  \n Te recomendamos hacer uso de un <b>USB 3.0</b> para agilizar el proceso ..." --text-align="center" \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image=/usr/share/icons/vitalinux/iso-to-usb-80x.png \
+		--window-icon vitalinux \
+		--image iso-to-usb \
 		--width=700 --height=130 \
-	--button="Continuar":0 --button="Abortar":1 ; then
+		--button="Continuar":0 --button="Abortar":1 ; then
 
 		DISCOSUSB=""
 		echo "" > /tmp/creador-discos-info
@@ -18,11 +29,11 @@ then
 		while ! test $(ls -l /dev/disk/by-path/*-usb-* 2> /dev/null | fgrep -v part | tr -s " " "*" | cut -d"*" -f11 | cut -d"/" -f3 | wc -l) -gt 0 ; do
 			if ! yad --title "Crear USB Bootable" --center \
 				--text "  No se detecta ninguna memoria USB conectada al equipo ... \n  Por favor, conecta una memoria USB y pincha en <b>Continuar</b>" --text-align="center" \
-				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-				--image=/usr/share/icons/vitalinux/iso-to-usb-80x.png \
+				--window-icon vitalinux \
+				--image iso-to-usb \
 				--width=700 --height=80 \
 				--button="Continuar":0 --button="Abortar":1 ; then
-				exit 1
+				abortar
 			fi
 		done
 
@@ -41,8 +52,8 @@ then
 
 		ELECCION=$(yad --title "Elección de Memoria USB" --center \
 			--text "  Selecciona entre los USBs detectados aquel que quieres formatear  \n  y sobre el cual quieres grabar la imagen ISO que seleccionarás después:  \n" --text-align="center" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--image=/usr/share/icons/vitalinux/iso-to-usb-80x.png \
+			--window-icon vitalinux \
+			--image iso-to-usb \
 			--width=700 --height=200 \
 			--list --radiolist  \
 			--column Opcion:RD \
@@ -52,14 +63,14 @@ then
 			--button="Continuar":0 --button="Abortar":1)
 
 		if test $? -eq 1 ; then
-			exit 1
+			abortar
 		fi
 
 		USBSELECCIONADO=$(echo $ELECCION | cut -d"|" -f2)
 
 		if yad --title "Formatear y Crear particones en $USBSELECCIONADO" \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image=/usr/share/icons/vitalinux/iso-to-usb-80x.png \
+		--window-icon vitalinux \
+		--image iso-to-usb \
 		--center --width 600 --height 80 \
 		--justify="center" --text-align="center" \
 		--text " A continuación se iniciará el software GPARTED por si quieres \n crear las particiones y formatear en FAT32 el dispositivo USB $USBSELECCIONADO" \
@@ -72,38 +83,39 @@ then
 		fi
 
 		if yad --title "Grabar ISO en $USBSELECCIONADO" \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image=/usr/share/icons/vitalinux/iso-to-usb-80x.png \
+		--window-icon vitalinux \
+		--image iso-to-usb \
 		--center --width 600 --height 80 \
 		--justify="center" --text-align="center" \
 		--text " A continuación se iniciará el software para crear el USB Bootable ... \n Antes deberás <b>seleccionar la imagen ISO a grabar</b>. \n Después <b>seleccionarás el dispositio USB $USBSELECCIONADO</b> y <b>deberás borrar los datos del disco</b>,  \n si no lo has hecho previamente con GParted" \
 		--button="Pasar a Crear USB Bootable":0 --button="Abortar":1 ; then
 
-			USUARIOGUI=$(who | grep " :0 " | cut -d" " -f1 | uniq)
+			USUARIOGUI=$(vx-usuario-grafico)
 			if test -d /home/${USUARIOGUI}/Descargas ; then
 				cd /home/${USUARIOGUI}/Descargas
 			fi
 
 			REPETIR=1
+			TEXTO="Selecciona el <b>archivo ISO</b> a Grabar en el USB"
 			while test $REPETIR -eq 1 ; do
 				if FICHERO=$(yad --title "Selección de la imagen ISO" \
-					--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+					--window-icon vitalinux \
+					--image iso-to-usb \
 					--file --center --fullscreen \
-					--justify="center" --text-align="center" --text "Selecciona el archivo ISO a Grabar en el USB" \
+					--justify="center" --text-align="center" --text "${TEXTO}" \
 					--button="Seleccionar Imagen ISO":0 --button="Abortar Selección":1) ; then
-					if file $FICHERO | grep "x86 boot sector" &> /dev/null ; then
+
+					MIMETYPE="$(file -b --mime-type "${FICHERO}")"
+					if test "${MIMETYPE}" = "application/octet-stream" || \
+						test "${MIMETYPE}" = "application/x-iso9660-image" ; then
 						usb-creator-gtk --iso $FICHERO
 						exit 0
+					else
+						TEXTO="\n\n<b>¡¡Problema!!</b>\nEl archivo Seleccionado <b>NO es una imagen ISO</b>... \n Vuelve a buscar la ISO ... "
 					fi
-					if ! yad --title "Fichero ISO incorrecto" \
-						--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-						--image=/usr/share/icons/vitalinux/iso-to-usb-80x.png \
-						--center --width 500 --height 90 \
-						--justify="center" --text-align="center" \
-						--text "El archivo Seleccionado <b>NO es una imagen ISO</b>... \n Vuelve a buscar la ISO ... " \
-						--button="Volver a Buscar la ISO":0 --button="Abortar Programa":1 ; then
-						REPETIR=0
-					fi
+				else
+					REPETIR=0
+					exit 1
 				fi
 			done 
 			exit 1
@@ -111,18 +123,14 @@ then
 			exit 1
 		fi
 	else
-		yad --title "Creador de USB Bootable Abortado" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--image=/usr/share/icons/vitalinux/iso-to-usb-80x.png \
-			--center --width 500 --height 90 \
-			--justify="center" --text-align="center" --text "El usuario ha abortado el proceso ..." \
-			--button="terminar":1
-		exit 1
+		abortar
 	fi
 else
 		yad --title "Creador de USB Bootable" \
-			--image "/usr/share/icons/vitalinux/iso-to-usb-80x.png" \
-			--info --text "  No tiene permiso para ejecutar el programa  " \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--width="400" --height="100" --center --justify="center" --timeout=7 --text-align="center"
+			--image iso-to-usb \
+			--info \
+			--text-align center \
+			--text "  No tienes permiso para ejecutar el programa. \n  Requieres ser \"<b>root</b>\"  " \
+			--window-icon vitalinux \
+			--width="400" --height="100" --center --justify="center" --timeout=7
 fi

@@ -1,3 +1,43 @@
+vx-dga-l-scripts (3.0-20) unstable; urgency=low
+
+  * Se modifica el script de instalación de las PDI's con los nuevos drivers
+  * Soluciona bugs para detectar correctamente el usuario gráfico
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Fri, 5 May 2017 00:10:00 +0200
+
+vx-dga-l-scripts (3.0-19) unstable; urgency=low
+
+  * Se ha adecuado el script que modifica la IP del Caché
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 9 Feb 2017 00:10:00 +0200
+
+vx-dga-l-scripts (3.0-18) unstable; urgency=low
+
+  * Se ha adecuado el script que modifica el hostname
+  * Se ha adecuado el script que crea USB bootables a partir de una ISO
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 2 Feb 2017 00:10:00 +0200
+
+vx-dga-l-scripts (3.0-17) unstable; urgency=low
+
+  * Se ha modificado el vx-etiquetas para evitar conflictos con una comunicación migasfree activa
+  * Se ha añadido un script básico para saber quien es el usuario gráfico que inicia sesión: vx-usuario-grafico
+  * Se ha añadido otros scripts básicos para saber la lista de HOMES y usuarios gráficos
+  * Se ha corregido el script que mata a todos los procesos asociados a migasfree
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 29 Nov 2016 00:10:00 +0200
+
+vx-dga-l-scripts (3.0-16) unstable; urgency=low
+
+  * Para actualizar migasfree se ha modificado "migasfree -u" por "migasfree-launcher force-upgrade"
+  * Se ha mejorado la salida del script de Comprobación de Etiquetas Migasfree
+  * Se ha corregido el Bug de cancelar la actualización contra migasfree por parte del usuario
+  * Se ha mejorado la salida de la actualización contra migasfree
+  * Se ha mejorado la salida del script de modificación de etiquetas migasfree
+  * Se ha mejorado la información de salida de la ventana informativa de parámetros de red
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 29 Nov 2016 00:10:00 +0200
+
 vx-dga-l-scripts (3.0-15) unstable; urgency=low
 
   * scripts utiles para LVitalinux

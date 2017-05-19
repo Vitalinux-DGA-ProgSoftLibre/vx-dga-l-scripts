@@ -3,7 +3,9 @@ USER=$(whoami)
 
 if test $USER = "root" ; then
 
-    	if yad --title "Computer Name" --question --text "  ¿Quieres asignar un nuevo Computer Name a tu equipo?" \
+    	if yad --title "Migasfree Computer Name" \
+    		--question \
+    		--text "  ¿Quieres asignar un nuevo Migasfree Computer Name a tu equipo?" \
    	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
 	--width="350" --height="100" --center --justify="center" --text-align="center"
 	then

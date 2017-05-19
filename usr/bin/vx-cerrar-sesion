@@ -1,3 +1,4 @@
 #!/bin/bash
-USERGRAFICO=$(who | grep " :0 " | cut -d" " -f1 | uniq)
-killall -u $USERGRAFICO
+lxsession
+#USERGRAFICO=$(vx-usuario-grafico)
+#killall -u "$USERGRAFICO"

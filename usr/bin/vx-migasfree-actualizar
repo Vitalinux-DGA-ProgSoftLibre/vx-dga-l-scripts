@@ -5,35 +5,46 @@ function actualizar-contra-migasfree {
 
 (
 	echo "--> Va a empezar la actualización contra Migasfree ..."
-	echo "--> ¡¡No cierres la ventana!! Espera a se te indique ..."
+	echo "--> ¡¡No cierres la ventana!! Espera a que se te indique ..."
 	echo "..."
-	sleep 5	
+	echo ""
 	
-	migasfree -u | sed -r 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
+	#migasfree -u | sed -r 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
+	migasfree-launcher force-upgrade | sed -r 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
 
 	yad --title "Actualización Terminada" \
-		 --text "   Actualización contra Migasfree terminada ...   \n   Si no ha detectado errores ya debería estar todo correcto ...   \n\n   Ya puedes cerrar la ventana anterior" \
+		 --text "   <b>Actualización contra Migasfree terminada ...</b>   \n\n   Compruebe el resultado de la comunicación mostrado anteriormente ... \n Si no ha detectado errores debería estar todo correcto ...   \n\n   <b>¡¡Ya puedes cerrar la ventana anterior!!</b>" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image "/usr/share/lxpanel/images/vitalinux.png" \
-		--width="400" --height="100" \
+		--image migasfree \
+		--width="600" --height="100" \
 		--center --justify="center" --text-align="center" --button=Terminar:0
 
 	echo -e "\n..."
 	echo "--> Ya puedes cerrar la ventana ..."
-	) | yad --title "Actualización contra Migasfree" --text-info --tail \
+	) | yad --title "Actualización contra Migasfree" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--width="500" --height="400" --center --button=Cerrar:0
+		--image migasfree \
+		--text-info --text-align="center" \
+		--text "A continuación comenzará la actualización contra Migasfree: \n <b>¡¡No cierres la ventana hasta que no se te indique!!</b>" \
+		--tail \
+		--width="750" --height="420" --center --button "Cerrar Ventana":0
 
 }
 
 if test $USER = "root" ; then
 
-	yad --title "Migasfree" --info --text "Actualización contra Migasfree" \
+	if yad --title "Actualización contra Migasfree" \
+		--info \
+		--text "¿Deseas que tu equipo Vitalinux se comunique con Migasfree \n y actualice el estado de su Software?" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image=/usr/share/lxpanel/images/vitalinux.png \
-		--width="400" --height="100" --center --justify="center" --text-align="center"
+		--image migasfree \
+		--width="500" --height="100" \
+		--center --justify="center" --text-align="center" \
+		--button "Actualización Migasfree":0 --button "Salir":1 ; then
 
-	actualizar-contra-migasfree
+		actualizar-contra-migasfree
+
+	fi
 
 else
 		yad --title "Migasfree" --info --text "No tiene permisos para ejecutar el programa"\

@@ -2,37 +2,66 @@
 USER=$(whoami)
 
 function asignar-etiquetas-migasfree {
+	if test -f /usr/bin/migasfree-cid ; then
+		CID="$(migasfree-cid)"
+	fi
+	NOMBRE="${HOSTNAME}"
+
 	(
-	echo "--> Va a comenzar asignación de Etiquetas Migasfree ..."
+	echo "--> En breve comenzará la comunicación con el servidor Migasfree ..."
+	echo "--> Se mostrará un diálogo para que puedas seleccionar las Etiquetas deseadas ..."
 	echo "--> Ten paciencia por favor ... "
 	echo "--> No cierres la ventana hasta que se te indique ..."
 	echo "..."
-	sleep 5
 
+	ETIQUETASVIEJAS="$(migasfree-tags -g)"
+	echo "Etiquetas Migasfree previas del equipo antes de la reasignación: "
+	echo ${ETIQUETASVIEJAS} | tr -s ' ' '\n' | grep -n '-' | sed -e 's/:/) /g' | sed -e 's/.*/  &/g'
 	# Sacamos la ventana para que el usuario seleccione etiquetas Migasfree:
 	migasfree-tags -s | sed -r 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
 
-	yad --title "Modificar Etiquetas Migasfree" \
-		 --text "   Etiquetas correctamente modificadas   \n   Si no ha detectado errores ya debería estar todo configurado ...   \n\n   Ya puedes cerrar la ventana anterior" \
+	ETIQUETASNUEVAS="$(migasfree-tags -g)"
+
+	yad --title "Comprobación de la Asignación de Etiquetas Migasfree" \
+		--text "\n¡¡Ya ha terminado el proceso de <b>Asignación y Actualización del equipo contra Migasfree</b>!!\n\n\
+Antes de la reasignación las Etiquetas Migasfree del equipo eran las siguientes: \n\n\
+$(echo ${ETIQUETASVIEJAS} | tr -s ' ' '\n' | grep -n '-' | sed -e 's/:/) /g' | sed -e 's/.*/  &/g') \n\n \
+Tras la asignación de Etiquetas Migasfree, el listado de etiquetas para este equipo es el siguiente: \n\n\
+$(echo ${ETIQUETASNUEVAS} | tr -s ' ' '\n' | grep -n '-' | sed -e 's/:/) /g' | sed -e 's/.*/  &/g') \n\n \
+Esperamos que se haya modificado correctamente el etiquetado Migasfree del equipo. En caso contrario comprueba el correcto estado de la conexión con Internet.  \n\n   <b>¡¡Ya puedes cerrar la ventana anterior!!</b>" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image "/usr/share/lxpanel/images/vitalinux.png" \
-		--width="400" --height="100" \
-		--center --justify="center" --text-align="center" --button=Terminar:0
+		--image migasfree \
+		--width="620" --height="450" \
+		--center --justify="center" --text-align="left" --button=Terminar:0
  
 	echo -e "\n\nGracias por la espera... \nAhora ya puedes cerrar la ventana ..."
-	) | yad --title "Migasfree" --text-info --tail \
+	) | yad --title "Asignación de Etiquetas Migasfree" \
+		--text-info --tail \
+		--text-align="center" \
+		--text "\n A continuación podrás asignar las Etiquetas Migasfree que desees para este equipo: \n<b>CID (${CID}) y HostName (${NOMBRE})</b>\n" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--width="500" --height="400" --center --button=Cerrar:0
-
+		--image migasfree \
+		--width="750" --height="550" --center --button "Cerrar Ventana":0
 
 }
 
 if test $USER = "root" ; then
-	yad --title "Migasfree etiquetas" \
-	--info --text "Programa para modificar las etiquetas de Migasfree"\
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-	--image "/usr/share/lxpanel/images/vitalinux.png" \
-	--width="400" --height="100" --center --justify="center" --text-align="center"
+
+	if ! (
+		while ps -auxf | egrep  '/usr/bin/migasfree --update|/usr/bin/migasfree-launcher' \
+			| grep -v 'egrep' | grep -v indicator &> /dev/null ; do
+			echo "#Esperando a que termine la comunicación actual con Migasfree ..."
+			sleep 1
+		done
+	) | yad --title "Asignación de Etiquetas Migasfree" \
+	--center --width 650 \
+	--text-align center \
+	--window-icon migasfree \
+	--image migasfree \
+	--text "  Existe en este momento una comunicación activa con Migasfree ... \n  <b> Debes esperar a que termine esta comunicación ...</b>\n" \
+	--progress  --pulsate --auto-close  --button="Cancelar la Asignación ... Lo Intentaré más tarde":1 ; then
+		exit 1
+	fi
 
 	asignar-etiquetas-migasfree
 

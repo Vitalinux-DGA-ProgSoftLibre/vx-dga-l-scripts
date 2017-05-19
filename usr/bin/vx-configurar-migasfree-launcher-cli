@@ -1,0 +1,34 @@
+#!/bin/bash
+
+USER=$(whoami)
+ACCION="$1"
+RUTAS="/etc/xdg/autostart/migasfree-launcher.desktop /etc/xdg/autostart/migasfree-indicator.desktop"
+
+function modificar-permisos-migasfree-launcher {
+	PERMISOS="$1"
+	for RUTA in ${RUTAS} ; do
+		if test -f "${RUTA}" ; then
+			if chmod ${PERMISOS} "${RUTA}" ; then
+				exit 0
+			else
+				exit 1
+			fi
+		fi
+	done
+}
+
+if test $USER = "root" ; then
+
+	case ${ACCION} in
+		"habilitar")
+		modificar-permisos-migasfree-launcher "644"
+		;;
+		"deshabilitar")
+		modificar-permisos-migasfree-launcher "000"
+		;;
+	esac
+
+else
+	echo "¡¡No tienes permisos para ejecutar este programa!! ... "
+	echo "Debes ser \"root\" ... Prueba con \"sudo\" ..."
+fi

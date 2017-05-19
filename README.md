@@ -21,6 +21,9 @@ Para crear el paquete DEB será necesario encontrarse dentro del directorio dond
 apt-get install debhelper devscripts
 /usr/bin/debuild --no-tgz-check -us -uc
 ```
+En el caso de que no desees crear el paquete DEB a partir del código fuente, ya que no más a modificarlo ni introducir ninguna mejora, puedes obtener el paquete DEB aquí:
+
+[Listado de Paquetes del Proyecto de Software Libre](http://migasfree.educa.aragon.es/repo/Lubuntu-14.04/STORES/base/)
 
 # Como Instalar el paquete generado vx-dga-l-scripts*.deb:
 Para la instalación de paquetes que estan en el equipo local puede hacerse uso de ***dpkg*** o de ***gdebi***, siendo este último el más aconsejado para que se instalen también las dependencias correspondientes.

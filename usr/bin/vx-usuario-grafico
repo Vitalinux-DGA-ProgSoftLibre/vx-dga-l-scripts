@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Script que nos permite saber quien es el usuario gráfico activo
+
+#SEAT_ACTIVO=$(loginctl list-seats | sed -e '/^$/d' | grep -v SEAT | grep -v "seats listed")
+SEAT_ACTIVO="seat0"
+SESION_ACTIVA=$(loginctl show-seat ${SEAT_ACTIVO} | grep 'ActiveSession' | cut -d'=' -f2)
+USUARIO=$(loginctl list-sessions | grep "${SEAT_ACTIVO}" | grep "${SESION_ACTIVA}" | tr -s ' ' ' ' | cut -d' ' -f4)
+echo ${USUARIO}
