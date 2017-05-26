@@ -34,8 +34,10 @@ function log_xsession(){
 	exec 3<> "$fpipe"
 	exec 2>&1
 	exec > >(tee -i "$fpipe" >> "$LOGFILE" )
+	# Borramos la pipe cuando salgamos
+	trap "rm -f $fpipe" EXIT
 	yad --title "Ventana de Log" --text-info --tail \
-			--window-icon=/usr/share/lxpanel/images/pdi.svg \
+			--window-icon vitalinux \
 			--center --width="720" --height="520" \
 			--no-escape --no-focus --tail --button="Ocultar:bash -c close_yad" < "$fpipe" &
 
@@ -67,7 +69,7 @@ function seleccionar-modelo-pdi {
 		--entry \
 		--text "Selecciona tu PDI:" \
 		--entry-text \
-		"eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard")
+		"No driver" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard")
 }
 
 function comprobar-md5 {
@@ -128,7 +130,7 @@ function descargar-archivos {
 	done
 	) | yad --center --width 700 \
 		--title "Descarga de Drivers PDIs" \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--window-icon="/usr/share/lxpanel/images/vitalinux.svg" \
 		--justify="center" --text-align="center" \
 		--text "  Descargando el Software necesario ... <b>¡¡paciencia!!</b> ... \n  Puede tardar <b>Varios Minutos</b>  \n   Modelo PDI: <b>$PDI</b>   " \
 		--multi-progress \
@@ -138,8 +140,8 @@ function descargar-archivos {
 	## Si el usuario cancela la descarga o bien hay un error (no hay red por ejemplo)
 	if [ "$?" = "1" ] ; then
 		if yad --center --title "Drivers PDIs" --question \
-		--window-icon=/usr/share/lxpanel/images/pdi.svg \
-		--image=/usr/share/lxpanel/images/pdi.png \
+		--window-icon="/usr/share/lxpanel/images/vitalinux.svg" \
+		--image="/usr/share/lxpanel/images/pdi.png" \
 		--text "   Hubo un problema a la hora de descargar el software o ha sido cancelada la operación por el usuario...deseas reintentar la descarga?   " \
 		--width="350" --center \
 		--justify="center" --text-align="center" \
@@ -191,6 +193,15 @@ function descargar-software-pdi {
 	case $PDI in
 
 		"eBeam")
+		if [ "$ARCHSO" = "64" ] ; then
+			yad --title "Instalación de Software de la PDI $PDI" \
+				--text " Lo sentimos pero de momento eBeam NO facilita controladores para 64 bits "\
+				--window-icon="/usr/share/lxpanel/images/vitalinux.svg" \
+				--image="/usr/share/lxpanel/images/pdi.png" \
+				--width="400" --height="100" \
+				--center --justify="center" --text-align="center" --button="gtk-ok":0
+			return 1
+		fi
 		FILESPDI="/pdis/eBeam/scrapbook-selfextracting"
 		;;
 
@@ -226,7 +237,6 @@ function descargar-software-pdi {
 		  	/pdis/Promethean/promethean_32/activinspire_2.4.66096-1.i386_i386.deb \
 		  	/pdis/Promethean/promethean_32/activtools_5.14.21-0.deb"
 		fi
-		#comprobar-archivos "/pdis/Promethean/activaid_2.0.1-9~ubuntu~1204_i386.deb" "/pdis/Promethean/activdriver_5.10.14-1~ubuntu~1204_i386.deb" "/pdis/Promethean/activtools_5.10.14-1~ubuntu~1204_i386.deb" "/pdis/Promethean/libudev0_175-0ubuntu9_i386.deb" "/pdis/Promethean/activinspire_1.8.64351-2.i386_i386.deb"
 		;;
 
 		"Smartboard")
@@ -237,12 +247,6 @@ function descargar-software-pdi {
 	comprobar-archivos "$FILESPDI"
 }
 
-function ejecutar-comando {
-	if test -f /tmp/programa-ejecutar ; then
-		chmod +x /tmp/programa-ejecutar
-		/tmp/programa-ejecutar
-	fi
-}
 
 function instalar-software-pdi {
 
@@ -334,9 +338,6 @@ function instalar-software-pdi {
 		dpkg -i /opt/pkgs/pdis/activinspire_2.4.66096-1.i386_i386.deb
 		apt-get -f --assume-yes --force-yes install
 	fi
-		#ping -c 1 $IPCACHE && wget http://172.30.1.249/pdis/Promethean/activinspire_1.8.64351-2.i386_i386.deb
-		##gdebi /opt/pkgs/activinspire_1.8.64351-2.i386_i386.deb
-		#rm -f activinspire_1.8.64351-2.i386_i386.deb
 	;;
 
 	"Smartboard")
@@ -350,7 +351,7 @@ function instalar-software-pdi {
 
 	# Por último instalamos el open-boad/open-sankore
 	if yad --center --title "Drivers PDIs" --question \
-		--window-icon=/usr/share/lxpanel/images/pdi.svg \
+		--window-icon="/usr/share/lxpanel/images/vitalinux.svg" \
 		--image=/usr/share/lxpanel/images/pdi.png \
 		--text "   Deseas (se recomienda) instalar <b>Open-Board(64bits recomendado)/Open-Sankore</b>   " \
 		--width="350" --center \
@@ -370,13 +371,6 @@ function instalar-software-pdi {
 			apt-get -f --assume-yes --force-yes install
 		fi
 
-		#		if test -f ./Open-Sankore_2.5.1_i386.deb ; then
-		#			cat > /tmp/programa-ejecutar<<EOF
-		#dpkg -i /opt/pkgs/pdis/Open-Sankore_2.5.1_i386.deb
-		#apt-get -f --assume-yes --force-yes install
-		#EOF
-				
-		#		fi
 	fi
 
 }
@@ -385,15 +379,17 @@ if test "$USER" != "root" ; then
 	yad --title "Instalación del Software de PDIs" \
 			--center --justify="center" --text-align="center" \
 			--width="400" --height="100" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+			--window-icon="/usr/share/lxpanel/images/vitalinux.svg" \
 			--text "No tiene permiso para ejecutar el programa" \
 			--button="Continuar":1
 	exit 1
 fi
+
 log_xsession -o drivers-pdis
+
 yad --center --title "Drivers PDIs" --question \
-	--window-icon=/usr/share/lxpanel/images/pdi.svg \
-	--image=/usr/share/lxpanel/images/pdi.png \
+	--window-icon="/usr/share/lxpanel/images/vitalinux.svg" \
+	--image="/usr/share/lxpanel/images/pdi.png" \
 	--text "   ¿Desea continuar con la Instalación de <b>Drivers para las PDIs</b>?   \n   Para no demorar la instalación es aconsejable contar con un servidor caché, pero es posible realizar la descarga directamente desde Internet   " \
 	--width="350" --height="50" --center \
 	--justify="center" --text-align="center" \
@@ -408,8 +404,8 @@ seleccionar-modelo-pdi && descargar-software-pdi && instalar-software-pdi
 
 yad --title "Instalación de Software de la PDI $PDI" \
 	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Si no ha detectado errores debería estar todo configurado... "\
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-	--image "/usr/share/lxpanel/images/vitalinux.png" \
+	--window-icon="/usr/share/lxpanel/images/vitalinux.svg" \
+	--image="/usr/share/lxpanel/images/pdi.png" \
 	--width="400" --height="100" \
 	--center --justify="center" --text-align="center" --button="gtk-ok":0
  if [ -n "$YAD_LOG" ] && ps -p "$YAD_LOG" > /dev/null; then 
