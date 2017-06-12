@@ -8,19 +8,26 @@ then
 		--text "  Indica que quieres Hacer con el Gnome Pie ...  " \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
 		--image gnome-pie \
-		--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
+		--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=10 \
 		--button="Deshabilitar Gnome Pie":0  --button="Habilitar Gnome Pie":1 ; then
 
 		if test -f /etc/xdg/autostart/gnome-pie.desktop ; then
-			if chmod 000 /etc/xdg/autostart/gnome-pie.desktop ; then
-				echo "--> Se ha deshabilitado el dock circular Gnome Pie por defecto ..."
-			fi
+			desktop-file-edit --add-not-show-in=LXDE /etc/xdg/autostart/gnome-pie.desktop
+		else
+			yad --title "Configurar Comportamiento Gnome Pie" \
+				--text " Hay un error con la instalación base de Gnome-Pie" \
+				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+				--image plank \
+				--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
+				--button="Cerrar Ventana":0
+			exit 1
 		fi
-	
-		for HOMEUSU in $( getent passwd | awk -F ":" '{if ( $3 > 999 &&  $7~/\/bin\/.*/) {print $6}}' )
+		
+		# Borramos posibles lanzadores creados personalizados por usuarios
+		for HOMEUSU in $(vx-home-usuarios-graficos)
 		do
 			if test -f  $HOMEUSU/.config/autostart/gnome-pie.desktop ; then
-				chmod 000 $HOMEUSU/.config/autostart/gnome-pie.desktop
+				rm -f $HOMEUSU/.config/autostart/gnome-pie.desktop
 			fi
 		done
 
@@ -31,18 +38,20 @@ then
 				--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
 				--button="Cerrar Ventana":0
 
-	else
+	elif [[ $? -eq 1 ]]; then
 
-		if test -f /etc/xdg/autostart/gnome-pie.desktop ; then
-			chmod 644 /etc/xdg/autostart/gnome-pie.desktop
+		# Instalamos por si acaso el lanzador:
+		if ! test -f /usr/share/applications/gnome-pie.desktop ; then
+			yad --title "Configurar Comportamiento Dock Plank" \
+				--text " Hay un error con la instalación base de Gnome-Pie" \
+				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+				--image plank \
+				--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
+				--button="Cerrar Ventana":0
+			exit 1
 		fi
-
-		for HOMEUSU in $( getent passwd | awk -F ":" '{if ( $3 > 999 &&  $7~/\/bin\/.*/) {print $6}}' )
-		do
-			if test -f  $HOMEUSU/.config/autostart/gnome-pie.desktop ; then
-				chmod 644 $HOMEUSU/.config/autostart/gnome-pie.desktop
-			fi
-		done
+		desktop-file-install --dir=/etc/xdg/autostart/ /usr/share/applications/gnome-pie.desktop
+		desktop-file-edit --remove-not-show-in=LXDE /etc/xdg/autostart/gnome-pie.desktop
 
 		yad --title "Configurar Comportamiento Gnome Pie" \
 			--text "  Se ha habilitado el Gnome Pie  \n  Lo podrás comprobar la próxima vez que inicies sesión  " \
@@ -50,6 +59,13 @@ then
 			--image gnome-pie \
 			--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
 			--button="Cerrar Ventana":0
+	else
+		yad --title "Configurar Comportamiento Dock Plank" \
+				--text "  No se modifica el comportamiento ya establecido" \
+				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+				--image plank \
+				--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
+				--button="Cerrar Ventana":0
 	fi
 else
 		yad --title "Configurar Comportamiento Gnome Pie" \

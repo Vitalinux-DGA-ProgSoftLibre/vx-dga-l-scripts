@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Redimensionar Sistema Archivos del Disco
+Name[es]=Redimensionar Sistema Archivos del Disco
+Name[es_ES]=Redimensionar Sistema Archivos del Disco
+Comment=Aplicación que permite Redimensionar el Sistema Archivos del Disco
+Icon=hard-disk
+Exec=/usr/bin/vx-pk-redimensionar-disco-lvm
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

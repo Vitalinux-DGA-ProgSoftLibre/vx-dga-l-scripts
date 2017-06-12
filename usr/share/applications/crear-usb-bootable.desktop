@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Crear USB Bootable desde una ISO
+Name[es]=Crear USB Bootable desde una ISO
+Name[es_ES]=Crear USB Bootable desde una ISO
+Comment=Aplicación que permite la Creación de un USB Bootable a partir de una Imagen ISO
+Icon=usb-create
+Exec=/usr/bin/vx-pk-crear-usb-bootable
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

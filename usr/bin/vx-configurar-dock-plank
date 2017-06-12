@@ -8,28 +8,36 @@ then
 		--text "  Indica que quieres Hacer con el Dock Plank ...  " \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
 		--image plank \
-		--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
+		--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=10 \
 		--button="Deshabilitar Dock Plank":0  --button="Habilitar Dock Plank":1 ; then
 
-		# En la nueva versión de vx-dga-l-dock-plank el lanzador esta en /etc/xdg/autostart
-		if test -f /etc/xdg/autostart/lanzar-dock-plank.desktop ; then
-			if chmod 000 /etc/xdg/autostart/lanzar-dock-plank.desktop ; then
-							yad --title "Configurar Comportamiento Dock Plank" \
-				--text "  Se ha deshabilitado el dock plank  \n  Lo podrás comprobar la próxima vez que inicies sesión  " \
+		if test -f /etc/xdg/autostart/plank.desktop ; then
+			desktop-file-edit --add-not-show-in=LXDE etc/xdg/autostart/plank.desktop
+		else
+			yad --title "Configurar Comportamiento Dock Plank" \
+				--text " Hay un error con la instalación base del dock Plank" \
 				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
 				--image plank \
 				--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
 				--button="Cerrar Ventana":0
-			fi
+			exit 1
 		fi
+		
+		# Borramos posibles lanzadores creados personalizados por usuarios
+		for HOMEUSU in $(vx-home-usuarios-graficos)
+		do
+			if test -f  $HOMEUSU/.config/autostart/plank.desktop ; then
+				rm -f $HOMEUSU/.config/autostart/plank.desktop
+			fi
+		done
 		# En versiones viejas con vx-dga-l-dock-plank-and-conky se inicia en ~/.config/lxsession/Lubuntu/autostart
-		for HOMEUSU in $( getent passwd | awk -F ":" '{if ( $3 > 999 &&  $7~/\/bin\/.*/) {print $6}}' )
+		for HOMEUSU in $(vx-home-usuarios-graficos)
 		do
 			if test -f $HOMEUSU/.config/lxsession/Lubuntu/autostart ; then
 				sed --follow-symlinks -i "/.*plank.*/d" $HOMEUSU/.config/lxsession/Lubuntu/autostart
 			fi
 		done
-	else
+	elif [[ $? -eq 1 ]]; then
 
 		# En la nueva versión de vx-dga-l-dock-plank el lanzador esta en /etc/xdg/autostart
 		if test -f /etc/xdg/autostart/lanzar-dock-plank.desktop ; then
@@ -42,12 +50,18 @@ then
 				--button="Cerrar Ventana":0
 			fi
 		fi
-		
+	else
+		yad --title "Configurar Comportamiento Dock Plank" \
+				--text "  No se modifica el comportamiento ya establecido" \
+				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+				--image plank \
+				--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
+				--button="Cerrar Ventana":0
 	fi
 else
 		yad --title "Configurar Comportamiento Dock Plank" \
 			--image plank \
 			--info --text "No tiene permiso para ejecutar el programa" \
 			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--width="400" --height="100" --center --justify="center" --timeout=7 --text-align="center"
+			--width="400" --height="100" --center --justify="center" --text-align="center"
 fi

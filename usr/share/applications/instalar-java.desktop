@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Instalación de JAVA version 8
+Name[es]=Instalación de JAVA version 8
+Name[es_ES]=Instalación de JAVA version 8
+Comment=Programa que Instala JAVA 8 en el equipo
+Icon=java
+Exec=/usr/bin/vx-pk-instalar-java
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

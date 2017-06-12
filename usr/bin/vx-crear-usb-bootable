@@ -62,7 +62,7 @@ then
 			$(cat /tmp/creador-discos-info) \
 			--button="Continuar":0 --button="Abortar":1)
 
-		if test $? -eq 1 ; then
+		if [[ ! $? -eq 0 ]] ; then
 			abortar
 		fi
 

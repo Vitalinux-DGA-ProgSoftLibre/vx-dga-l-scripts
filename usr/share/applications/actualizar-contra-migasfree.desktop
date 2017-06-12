@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Actualización Migasfree
+Name[es]=Forzar Actualización contra Migasfree
+Name[es_ES]=Forzar Actualización contra Migasfree
+Comment=Permite Forzar Actualización contra Migasfree, similar a la barra de tareas
+Icon=migasfree
+Exec=/usr/bin/vx-pk-migasfree-actualizar
+Terminal=false
+Type=Application
+Categories=MigaScripts;
+StartupNotify=true
+Hidden=false

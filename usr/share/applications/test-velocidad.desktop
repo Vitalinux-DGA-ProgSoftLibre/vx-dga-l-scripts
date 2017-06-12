@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Test de Velocidad Internet
+Name[es]=Test de Velocidad Internet
+Name[es_ES]=Test de Velocidad Internet
+Comment=Test de Velocidad Internet que permite conocer la Velocidad de Subida y Bajada o Descarga
+Icon=upload-download
+Exec=/usr/bin/vx-test-velocidad
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

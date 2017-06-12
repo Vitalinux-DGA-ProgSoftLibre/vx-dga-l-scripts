@@ -46,7 +46,22 @@ Esperamos que se haya modificado correctamente el etiquetado Migasfree del equip
 }
 
 if test $USER = "root" ; then
-
+	# Comprobamos si hay conexión a red
+	if ! (
+		while ! wget -O /tmp/inet_connection_migasfree migasfree.educa.aragon.es > /dev/null 2>&1 ; do
+			echo "#No hay conexión al servidor ..."
+			sleep 1
+		done
+	) | yad --title "Asignación de Etiquetas Migasfree" \
+	--center --width 650 \
+	--text-align center \
+	--window-icon migasfree \
+	--image migasfree \
+	--text "  Hay un problema de conexión con el servidor ... \n  <b> Está el equipo conectado a Internet?...</b>\n" \
+	--progress  --pulsate --auto-close  --button="Cancelar la Asignación ... Lo Intentaré más tarde":1 ; then
+		exit 1
+	fi
+	# Comprobamos si ya hay un proceso activo
 	if ! (
 		while ps -auxf | egrep  '/usr/bin/migasfree --update|/usr/bin/migasfree-launcher' \
 			| grep -v 'egrep' | grep -v indicator &> /dev/null ; do
@@ -62,7 +77,6 @@ if test $USER = "root" ; then
 	--progress  --pulsate --auto-close  --button="Cancelar la Asignación ... Lo Intentaré más tarde":1 ; then
 		exit 1
 	fi
-
 	asignar-etiquetas-migasfree
 
 else

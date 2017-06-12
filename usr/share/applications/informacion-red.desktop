@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Conocer Dirección IP, MAC, Gateway, IPCache
+Name[es]=Conocer Dirección IP, MAC, Gateway, IPCache
+Name[es_ES]=Conocer Dirección IP, MAC, Gateway, IPCache
+Comment=Pequeño programa que permite conocer información de la Configuración de Red: dirección IP, MAC, Gateway, IPCache
+Icon=preferences-system-network
+Exec=/usr/bin/vx-informacion-red
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

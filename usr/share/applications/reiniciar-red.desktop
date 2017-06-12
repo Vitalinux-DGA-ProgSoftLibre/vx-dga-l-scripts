@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Reiniciar la Red
+Name[es]=Reiniciar la Red
+Name[es_ES]=Reiniciar la Red
+Comment=Aplicación que permite Reiniciar la Red
+Icon=vx-red
+Exec=/usr/bin/vx-pk-reiniciared
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

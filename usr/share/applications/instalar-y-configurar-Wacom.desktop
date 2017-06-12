@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Configurar Pantalla Tactil Wacom
+Name[es]=Configurar Pantalla Tactil Wacom
+Name[es_ES]=Configurar Pantalla Tactil Wacom
+Comment=Programa de Comprobación de Etiquetas de Migasfree
+Icon=wacom
+Exec=/usr/bin/vx-pk-instalar-wacom
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

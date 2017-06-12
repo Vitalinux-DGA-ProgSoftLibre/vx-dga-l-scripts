@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Modificación de Etiquetas
+Name[es]=Modificación de Etiquetas
+Name[es_ES]=Modificación de Etiquetas
+Comment=Programa de Modificación de Etiquetas de Migasfree
+Icon=vx-etiquetas
+Exec=/usr/bin/vx-pk-etiquetas
+Terminal=false
+Type=Application
+Categories=Etiquetas;
+StartupNotify=true
+Hidden=false

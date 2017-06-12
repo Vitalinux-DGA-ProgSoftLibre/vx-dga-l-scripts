@@ -21,7 +21,7 @@ echo -e "\nEtiquetas Migasfree asignadas:<b><tt><span foreground='blue'>" >> /tm
 echo ${ETIQUETAS} | tr -s " " "\n" | grep -n "-" | sed -e "s/:/) /g" | sed -e "s/.*/  &/g" >> /tmp/info-tarjetas-red
 echo -e "</span></tt></b>" >> /tmp/info-tarjetas-red
 
-echo -e "Información del direccionamiento IP:"
+echo -e "Información del direccionamiento IP:" >> /tmp/info-tarjetas-red
 for TARJETA in $(ifconfig | grep ^[a-z] | cut -d" " -f1) ; do
 	MAC=$(ifconfig $TARJETA | grep HW | tr -s " " " " | cut -d" " -f5)
 	IP=$(ifconfig $TARJETA | grep inet: | tr -s " " " " | cut -d" " -f3 | cut -d":" -f2)

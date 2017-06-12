@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Volver a la Post-Instalación
+Name[es]=Volver a la Post-Instalación
+Name[es_ES]=Volver a la Post-Instalación
+Comment=Aplicación que te permite Volver a la Post-Instalación
+Icon=vx-volver
+Exec=/usr/bin/vx-pk-volver-postinstalacion
+Terminal=false
+Type=Application
+Categories=Etiquetas;
+StartupNotify=true
+Hidden=false

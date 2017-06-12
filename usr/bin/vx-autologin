@@ -1,7 +1,7 @@
 #!/bin/bash
 USER=$(whoami)
-ACTUAL=$(cat /etc/lightdm/lightdm.conf | grep autologin-user | cut -d "=" -f2)
-TEXTO1="  Actualmente el equipo inicia sesión automática con el usuario: <b>$(echo $ACTUAL | cut -d' ' -f1)</b>  \n\n  Selecciona el Usuario con quien deseas que el equipo inicie <b>Sesión de manera Automática</b>:  "
+ACTUAL=$(grep 'autologin-user=' /etc/lightdm/lightdm.conf | cut -d "=" -f2)
+TEXTO1="  Actualmente el equipo inicia sesión automática con el usuario: <b>$ACTUAL</b>  \n\n  Selecciona el Usuario con quien deseas que el equipo inicie <b>Sesión de manera Automática</b>:  "
 TEXTO2="  Actualmente el equipo <b>NO</b> inicia Sesión Automática con ningún usuario.  \n\n  Selecciona el Usuario con quien deseas que el equipo inicie <b>Sesión de manera Automática</b>:  "
 USERDEFINITIVO=""
 
@@ -50,6 +50,9 @@ TEXTO="  Se va a crear un usuario para que inicie sesión automática  \n\
 	--field="Repetir Password":H \
 	--field="Comentario" \
 	--button="gtk-ok:0" --button="gtk-cancel:1")
+	if [[ ! $? -eq 0 ]] ; then
+                exit 0
+    fi
 	NOMBRE=$(echo $DATOS | cut -d"|" -f1)
 	PASS=$(echo $DATOS | cut -d"|" -f2)
 	REPPASS=$(echo $DATOS | cut -d"|" -f3)
@@ -97,9 +100,10 @@ function decidir-usuario-inicio-sesion {
 	"Usuario Nuevo a Crear" \
 	--button="gtk-ok:0" --button="gtk-cancel:1")
 
-	if test $? -eq 1 ; then
-		exit 0
-	fi
+	if [[ ! $? -eq 0 ]] ; then
+                exit 0
+    fi
+
 	
 	case "$USUARIO" in
 		"Usuario Nuevo a Crear" ) crear-usuario ;;

@@ -11,7 +11,7 @@ if test $USER = "root" ; then
 
 	VALIDO=0
 	while test $VALIDO -eq 0 ; do
-		if RESPUESTA=$(yad --center --width 640 \
+		RESPUESTA=$(yad --center --width 640 \
 		--window-icon vitalinux \
 		--image server \
 		--title "Modificar IP del Servidor Caché" \
@@ -19,29 +19,28 @@ if test $USER = "root" ; then
 		--text "${TEXTO}" \
 		--form \
 		--field="Dirección IP del Servidor Caché: " "$IPCACHE" \
-		--button="Confirmar IP Caché":0 \
-		--button="Saltar":1 \
-		--buttons-layout center) ; then
-			CACHE=$(echo $RESPUESTA | cut -d"|" -f1)
-			# Mediante "sipcalc" comprobamos que se trata de una dirección IP
-			if ( test -z ${CACHE} ) || \
-				sipcalc ${CACHE} | grep "ERR" &> /dev/null ; then
-				TEXTO="\n\t¡¡Repasa la IP \"<b>${CACHE}</b>\" Indicada!! \n\tVuelve a introducir la IP del Servidor Caché, por favor ..."
-			else
-				if yad --center --width 400 \
-					--window-icon vitalinux \
-					--image server \
-					--title "IP del Servidor Caché" \
-					--text-align center --justify="center" \
-					--text "Por favor confirma la IP Indicada: \n\n $CACHE" \
-					--button="Corregir IP":1 --button="Confirmar IP":0 \
-					--buttons-layout center ; then
-				VALIDO=1
-				fi
-			fi
+		--button="Modificar Caché":0 \
+		--button="Mantener anterior":1 \
+		--buttons-layout center)
+		if [[ ! $? -eq 0 ]] ; then
+                exit 0
+    	fi
+		CACHE=$(echo $RESPUESTA | cut -d"|" -f1)
+		# Mediante "sipcalc" comprobamos que se trata de una dirección IP
+		if ( test -z ${CACHE} ) || \
+			sipcalc ${CACHE} | grep "ERR" &> /dev/null ; then
+			TEXTO="\n\t¡¡Repasa la IP \"<b>${CACHE}</b>\" Indicada!! \n\tVuelve a introducir la IP del Servidor Caché, por favor ..."
 		else
-			CACHE="172.30.1.249"
+			if yad --center --width 400 \
+				--window-icon vitalinux \
+				--image server \
+				--title "IP del Servidor Caché" \
+				--text-align center --justify="center" \
+				--text "Por favor confirma la IP Indicada: \n\n $CACHE" \
+				--button="Confirmar IP":0 --button="Corregir IP":1 \
+				--buttons-layout center ; then
 			VALIDO=1
+			fi
 		fi
 	done
 

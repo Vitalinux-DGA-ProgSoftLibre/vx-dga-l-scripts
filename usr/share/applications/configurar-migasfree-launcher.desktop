@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Habilitar o Deshabilitar Cliente Migasfree
+Name[es]=Habilitar o Deshabilitar Cliente Migasfree
+Name[es_ES]=Habilitar o Deshabilitar Cliente Migasfree
+Comment=Permite habilitar o deshabilitar el Cliente Migasfree en el Arranque
+Icon=migasfree
+Exec=/usr/bin/vx-pk-configurar-migasfree-launcher
+Terminal=false
+Type=Application
+Categories=MigaScripts;
+StartupNotify=true
+Hidden=false

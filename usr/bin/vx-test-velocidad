@@ -3,7 +3,7 @@ USER=$(whoami)
 
 (
 echo "#Antes de comenzar el test de Velocidad comprobaremos la conexión con Internet ..."
-if ping -c 1 www.google.com &> /dev/null ; then
+if ping -c 1 8.8.8.8 &> /dev/null ; then
 	echo "#¡¡Ok!! Hay conexión con Internet ...\nEn breve comenzará el test y obtendremos un resultado ... ¡¡Ten paciencia!!"
 	/usr/bin/test-velocidad | tee /tmp/resultado-test-velocidad | sed -e "s/.*/#&/g"
 	DOWNLOAD=$(cat /tmp/resultado-test-velocidad | grep Download | cut -d":" -f2)

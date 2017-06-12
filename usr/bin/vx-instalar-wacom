@@ -31,6 +31,9 @@ if test $USER = "root"
 			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
 			--image "/usr/share/lxpanel/images/wacom-48.png" \
 			--width="400" --height="100" --center --justify="center" --text-align="center"
+			if [[ ! $? -eq 0 ]]; then
+				exit 0
+			fi
 			if aptitude search input-wacom | grep "^i" &> /dev/null ; then
 				if yad --title "Instalar y Configurar la Pantalla Táctil Wacom" \
 				 --text "   Parece que ya tienes instalado el software para la Pantalla Táctil Wacom ...\n   <b>¿Quieres continuar con la instalación</b>   " \

@@ -20,7 +20,7 @@ fi
 		--text " El nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\" \n ¿Quiere cambiar el nombre de su equipo?" \
    		--window-icon vitalinux \
 		--width="350" --height="100" --center --justify="center" --text-align="center" \
-		--button="No Continuar":1 --button="Continuar":0 ; then
+		--button="Continuar":0 --button="No Continuar":1; then
 
 		TEXTO="\nEl nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\""
 		TEXTO="${TEXTO}\n\n ¿Quieres cambiar el nombre del Equipo?"

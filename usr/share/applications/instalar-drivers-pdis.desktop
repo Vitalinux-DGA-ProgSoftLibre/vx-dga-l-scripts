@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Instalación Drivers PDIs
+Name[es]=Instalación Drivers PDIs
+Name[es_ES]=Instalación Drivers PDIs
+Comment=Programa de Instalación de Drivers PDIs
+Icon=pdi
+Exec=/usr/bin/vx-pk-drivers-pdis
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

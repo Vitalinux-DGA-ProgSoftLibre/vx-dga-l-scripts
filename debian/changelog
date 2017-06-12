@@ -1,3 +1,9 @@
+vx-dga-l-scripts (3.0-21) unstable; urgency=low
+
+  * Corrección de errores en el manejo de ventanas yad: 
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Fri, 30 May 2017 00:10:00 +0200
+
 vx-dga-l-scripts (3.0-20) unstable; urgency=low
 
   * Se modifica el script de instalación de las PDI's con los nuevos drivers
