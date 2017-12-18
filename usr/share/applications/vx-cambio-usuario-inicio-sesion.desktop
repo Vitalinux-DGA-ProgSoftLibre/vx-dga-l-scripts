@@ -1,0 +1,20 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=User login Change
+Name[en]=User login Change
+Name[es]=Cambio de Usuario para inicio de sesión
+Name[es_ES]=Cambio de Usuario para inicio de sesión
+
+Comment=Application that allows the user to change which login automatically
+Comment[en]=Application that allows the user to change which login automatically
+Comment[es]=Aplicación que permite el Cambio de usuario que inicio de sesión de forma automática
+Comment[es_ES]=Aplicación que permite el Cambio de usuario que inicio de sesión de forma automática
+
+Icon=vx-login
+Exec=/usr/bin/vx-pk-autologin
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

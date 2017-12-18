@@ -1,0 +1,19 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Global System Information
+Name[en]=Global System Information
+Name[es]=Información Global del Sistema
+Name[es_ES]=Información Global del Sistema
+
+Comment=Small program Which allow know Vitalinux system information: Architecture, IP, MAC, Gateway, IPCache, Migasfree Labels, etc.
+Comment[en]=Small program Which allow know Vitalinux system information: Architecture, IP, MAC, Gateway, IPCache, Migasfree Labels, etc.
+Comment[es]=Conoce toda la Información de tu Sistema: Arquitectura, IP, MAC, Gateway, IPCache, Etiquetas Migasfree, etc.
+Comment[es_ES]=Conoce toda la Información de tu Sistema: Arquitectura, IP, MAC, Gateway, IPCache, Etiquetas Migasfree, etc.
+
+Icon=preferences-system-network
+Exec=/usr/bin/vx-informacion-red
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

@@ -1,0 +1,21 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Close Graphical Session
+Name[en]=Close Graphical Session
+Name[es]=Cerrar Sesión Gráfica
+Name[es_ES]=Cerrar Sesión Gráfica
+
+Comment=Close the current User's Graphic session
+Comment[en]=Close the current User's Graphic session
+Comment[es]=Cierra la sesión Gráfica del Usuario actual
+Comment[es_ES]=Cierra la sesión Gráfica del Usuario actual
+
+Icon=shutdown
+
+Exec=/usr/bin/vx-cerrar-sesion
+Terminal=false
+Type=Application
+Categories=GestionApagado;SistemaApagado;
+StartupNotify=true
+Hidden=false

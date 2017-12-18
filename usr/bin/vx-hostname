@@ -1,101 +1,89 @@
 #!/bin/bash
 USER=$(whoami)
-NAMEHOST=$(cat /etc/hostname) ## Nombre del actual nombre del equipos
 
-function cancelar-operacion {
-	yad --title "Cambio de Nombre del Equipo" --info --text "Se ha cancelado la operación ..." \
-				--window-icon vitalinux \
-				--image vitalinux \
-				--width="350" --height="100" --center --justify="center" --text-align="center"
-	exit 1
+function aviso_reiniciar {
+	NOMBRE="${1}"
+	TEXTO="<b>¡¡Aviso!!</b> El nombre indicado para el equipo <b>\"${NOMBRE}\"</b> es válido.  Este <b>se asignará la próxima vez que reinicies el equipo</b> ...\n"
+	echo -e "=> El nombre deseado para el equipo \"${NOMBRE}\" se asignará al reiniciar el equipo ..."
+	yad --title "Cambio de Nombre del Equipo" \
+		--window-icon vitalinux \
+		--image vitalinux \
+		--info \
+		--text "${TEXTO}" \
+		--width="500" --height="100" \
+		--center \
+		--justify="center" \
+		--text-align="center" \
+		--buttons-layout center \
+		--button="<b>Entendido</b>":0
 }
 
-if test "${USER}" = "root" ; then
-
-if test -f /etc/default/vx-dga-variables/vx-dga-variables-general.conf ; then
-. /etc/default/vx-dga-variables/vx-dga-variables-general.conf
+if test "${USER}" != "root" ; then
+	yad --title "Cambio de Nombre del Equipo" \
+		--text "No tienes privilegios para \n <b>Cambiar el Nombre del Equipo</b>" \
+		--window-icon vitalinux \
+		--image vitalinux \
+		--width="350" --height="100" \
+		--center \
+		--justify="center" \
+		--text-align="center" \
+		--buttons-layout center \
+		--button="Cerrar":1
+	exit 1
 fi
 
-    if yad --title "Cambio de nombre" --question \
-		--text " El nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\" \n ¿Quiere cambiar el nombre de su equipo?" \
-   		--window-icon vitalinux \
-		--width="350" --height="100" --center --justify="center" --text-align="center" \
-		--button="Continuar":0 --button="No Continuar":1; then
+NAMEHOST=$(hostname) ## Nombre del actual nombre del equipos
 
-		TEXTO="\nEl nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\""
-		TEXTO="${TEXTO}\n\n ¿Quieres cambiar el nombre del Equipo?"
-		TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
-		TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
-		TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!\n\n"
-		VALIDO=0
+FICHCONF="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
+if test -f "${FICHCONF}" ; then
+	. /etc/default/vx-dga-variables/vx-dga-variables-general.conf
+fi
 
-		while test $VALIDO -eq 0 ; do
 
-		if RESULTADO=$(yad --title "Nombre del Equipo" \
-			--width="650" --height="100" \
-			--center --justify="center" --text-align="fill" \
-			--text "${TEXTO}" \
-		   	--window-icon vitalinux \
-		   	--image vitalinux \
-		   	--form --field "Nuevo Nombre para el Equipo: ":CBE "${NAMEHOST}" \
-			--button="<b>Modificar Nombre</b>":0 --button="Cancelar":1) ; then
+TEXTO="\nEl nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\""
+TEXTO="${TEXTO}\n\n ¿Quieres cambiar el nombre del Equipo?"
+TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
+TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
+TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!"
+TEXTO="${TEXTO}\n\n¡¡El cambio de Nombre requerirá <b>Reiniciar el Equipo</b>!!\n\n"
+VALIDO=0
 
-			NEWNAME="$(echo ${RESULTADO} | cut -d'|' -f1)"
-			IFSANT="${IFS}"
-			IFS="."
-			NARR=($NEWNAME)
-			ST=1
+while test "${VALIDO}" -eq 0 ; do
 
-			if ! test -z "${NEWNAME}" ; then
-				for i in ${!NARR[@]}; do 
-					[ ${#NARR[$i]} -gt 63 ] && { ST=0; break; };
-				done
-				if [ ${#NEWNAME} -le 253 ] && \
-					[ ${#NARR[@]} -le 4 ] && \
-					[[ ! "${NEWNAME}" =~ [^[:alnum:].-] ]] && \
-					[ ${ST} -eq 1 ] ; then
-					VALIDO=1
-				fi
-			fi
+	if RESULTADO=$(yad --title "Nombre del Equipo" \
+		--width="700" --height="500" \
+		--center \
+		--justify="center" \
+		--text-align="fill" \
+		--text "${TEXTO}" \
+	   	--window-icon vitalinux \
+	   	--image vitalinux \
+	   	--form --field "Nuevo Nombre para el Equipo: ":CBE "${NAMEHOST}" \
+	   	--buttons-layout center \
+		--button="<b>Modificar Nombre</b>":0 \
+		--button="Saltar":1) ; then
 
-		else
-			cancelar-operacion
-		fi
-
-		IFS="${IFSANT}"
-		TEXTO="\n¡¡Repasa el nombre indicado para el Equipo!!"
-		TEXTO="${TEXTO}\n => Nuevo nombre indicado: \"<b>${NEWNAME}</b>\" ¡¡No es correcto!!"
-		TEXTO="${TEXTO}\n\nEl nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\""
-		TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
-		TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
-		TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!\n\n"
-
-		done
-
-		TEXTO="\n\t<b>¡¡Ok!!</b> Confirma que el nuevo nombre que deseas \n\tpara tu equipo Vitalinux es: \"<b>${NEWNAME}</b>\""
-		if yad --title "Cambiar Nombre del Equipo" \
-			--width="450" --height="100" \
-			--center --text-align center \
-			--text "${TEXTO}" \
-		   	--window-icon vitalinux \
-		   	--image vitalinux \
-			--button="<b>Confirmar Nombre</b>":0 --button="Cancelar":1 ; then
-			if grep "127.0.1.1" /etc/hosts &> /dev/null ; then
-				sed --follow-symlinks -i "s/127\.0\.1\.1.*/127\.0\.1\.1\t${NEWNAME}/g" /etc/hosts
+		NAME="$(echo "${RESULTADO}" | cut -d'|' -f1)"
+		
+		if ! test -z "${NAME}" ; then
+			if vx-hostname-validar-cli "${NAME}" ; then
+				VALIDO=1
+				sed -i "/CAMBIARHOSTNAME.*/d" "${FICHCONF}"
+				sed -i '/Varibles utilizadas por los paquetes/a CAMBIARHOSTNAME=1' "${FICHCONF}"
+				sed -i "/NUEVOHOSTNAME.*/d" "${FICHCONF}"
+				sed -i "/Varibles utilizadas por los paquetes/a NUEVOHOSTNAME=${NAME}" "${FICHCONF}"
+				aviso_reiniciar "${NAME}"
 			else
-				echo -e "127.0.1.1\t${NEWNAME}" >> /etc/hosts
+				TEXTO="\n¡¡Repasa el nombre indicado para el Equipo!!"
+				TEXTO="${TEXTO}\n => Nuevo nombre indicado: \"<b>${NAME}</b>\" ¡¡No es correcto!!"
+				TEXTO="${TEXTO}\n\nEl nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\""
+				TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
+				TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
+				TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!"
+				TEXTO="${TEXTO}\n\n¡¡El cambio de Nombre requerirá <b>Reiniciar el Equipo</b>!!\n\n"
 			fi
-			##sed --follow-symlinks -i "s/${NAMEHOST}/${NEWNAME}/g" /etc/hostname
-			echo "${NEWNAME}" > /etc/hostname
 		fi
-
 	else
-			cancelar-operacion
+			VALIDO=1
 	fi
-else
-			yad --title "Cambio de nombre" \
-				--text "No tienes privilegios para \n <b>Cambiar el Nombre del Equipo</b>" \
-				--window-icon vitalinux \
-				--width="350" --height="100" \
-				--center --justify="center" --text-align="center"
-fi
+done

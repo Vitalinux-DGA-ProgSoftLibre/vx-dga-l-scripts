@@ -1,4 +1,51 @@
-vx-dga-l-scripts (3.0-21) unstable; urgency=low
+vx-dga-l-scripts (3.2-5) unstable; urgency=low
+
+  * Se incluye soporte para francés y alemán a los scripts de regenerar entorno de Escritorio y Perfil
+
+ -- Arturo Martín <amartinromero@gmail.com>  Mon, 18 Dec 2017 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-4) unstable; urgency=low
+
+  * Corrección de errores a la hora de cerrar el cliente en el scritp de cambio de IP cache
+  * Se modifica el script de cambio de nombre de equipo para que se produzca al cerrar sesión
+  * Por lo anterior, ese script requiere del paquete de scripts-inicio-apagado
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 12 Dec 2017 22:53:06 +0200
+
+vx-dga-l-scripts (3.2-3) unstable; urgency=low
+
+  * Eliminada la dependencia del paquete php5-cli no usada
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 12 Dec 2017 11:53:06 +0200
+
+vx-dga-l-scripts (3.2-2) unstable; urgency=low
+
+  * Se ha añadido un script para eliminar los archivos personales de configuración
+  * Se han movido a sus paquetes correspondientes todo aquello relacionado con gnome-pie y dock plank
+  * Se ha eliminado el pre-depends con gnome-pie y dock-plank al usar en esos el Replace
+  * Se han renombrado los scripts y lanzadores para que empiecen por vx
+  * Se ha modificado la forma de matar/cerrar la sesión del usuario activo
+  * Se ha duplicado el script obtener-resolucion-pantalla para guardar compatibilidad
+  * Se han eliminado las últimas líneas del fichero resoluciones-pantalla.txt que causaban errores
+  * Se ha añadido un script para regenerar el entorno de Escritorio de los usuarios del sistema
+  * Se ha añadido un script para regenerar el perfil de los usuarios del sistema
+
+ -- Arturo Martín <amartinromero@gmail.com>  Mon, 27 Nov 2017 00:10:00 +0200
+
+vx-dga-l-scripts (3.1-0) unstable; urgency=low
+
+  * Se han movido a otros paquetes todos los scripts relacionados con migasfree
+  * Se ha tenido en cuenta en el vx-drivers-pdis que el error de salida sea cualquiera
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Thu, 2 Nov 2017 00:10:00 +0200
+
+vx-dga-l-scripts (3.0-24) unstable; urgency=low
+
+  * El cambio de nombre del sistema requiere un reinicio para no dejar el sistema inestable
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Fri, 30 May 2017 00:10:00 +0200
+
+vx-dga-l-scripts (3.0-23) unstable; urgency=low
 
   * Corrección de errores en el manejo de ventanas yad: 
 

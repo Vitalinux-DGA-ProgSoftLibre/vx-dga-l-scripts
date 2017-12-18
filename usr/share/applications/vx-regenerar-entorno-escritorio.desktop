@@ -1,0 +1,19 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Regenerate Desktop Environment
+Name[en]=Regenerate Desktop Environment
+Name[es]=Regenerar Entornos de Escritorio
+Name[es_ES]=Regenerar Entornos de Escritorio
+
+Comment=Regenerate Desktop Environment by returning it to the Original State
+Comment[en]=Regenerate Desktop Environment by returning it to the Original State
+Comment[es]=Regenerar Entornos de Escritorio devolviendolos al Estado Original
+Comment[es_ES]=Regenerar Entornos de Escritorio devolviendolos al Estado Original
+
+Icon=vitalinux
+Exec=/usr/bin/vx-pk-regenerar-entorno-escritorio
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

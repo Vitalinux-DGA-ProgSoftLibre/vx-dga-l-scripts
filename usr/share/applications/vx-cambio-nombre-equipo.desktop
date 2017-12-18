@@ -1,0 +1,21 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Change of Name of the computer
+Name[en]=Change of Name of the computer
+Name[es]=Cambio de Nombre del Equipo
+Name[es_ES]=Cambio de Nombre del Equipo
+
+Comment=Application that allows the Change of Name of the computer
+Comment[en]=Application that allows the Change of Name of the computer
+Comment[es]=Aplicación que permite el Cambio de Nombre del Equipo
+Comment[es_ES]=Aplicación que permite el Cambio de Nombre del Equipo
+
+Icon=computer-icon
+
+Exec=/usr/bin/vx-pk-hostname
+Terminal=false
+Type=Application
+Categories=Sistema;
+StartupNotify=true
+Hidden=false

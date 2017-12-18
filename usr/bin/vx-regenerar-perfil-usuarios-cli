@@ -1,0 +1,85 @@
+#!/bin/bash
+
+#Diseñado por Arturo Martín
+#Proyecto Software Libre DGA
+
+EJECUTOR=$(whoami)
+
+function log_xsession(){
+#
+# Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
+# Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
+# 
+	while getopts 'o:' OPT; do
+        case ${OPT} in
+            o) LOGFILE=${OPTARG};;
+        esac
+	done
+
+	if [ "${LOGFILE}" ] ; then
+		if [ ! -d /var/log/vitalinux ]; then
+			mkdir -p /var/log/vitalinux
+		fi
+		LOGFILE="/var/log/vitalinux/${LOGFILE}"
+	else
+		LOGFILE="/tmp/logfile.regenerar-perfil-usuarios.log"
+	fi
+	
+	exec 2>&1
+	exec > >(tee -i "${LOGFILE}" )
+	
+}
+
+log_xsession -o vx-regenerar-perfil-usuarios.log
+
+if test "${EJECUTOR}" != "root" ; then
+	echo "Se requiren privilegios de \"root\" para lanzar Regenerar los perfiles de los usuarios ..."
+	exit 1
+fi
+
+echo "=> $(date) - Se va a Regenerar los perfiles de los usuarios del sistema ..."
+
+# 1) Comenzamos regenerando el contenido del Escritorio y resto de directorios del perfil de los usuarios
+for USUARIO in $(vx-usuarios-graficos) ; do
+
+	HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
+	BASE="/etc/skel/Escritorio/"
+	if test -d "${BASE}" ; then
+		for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
+			if test -d "${HOMEUSUARIO}/${DIR}" ; then
+				if su "${USUARIO}" \
+					-c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
+					--login &> /dev/null ; then
+					echo " --> OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+				else
+					echo " --> ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+				fi
+			fi
+		done
+	fi
+
+	BASE="$(su "${USUARIO}" -c 'mktemp -d --tmpdir vx-sincro-directorios.XXXXXXXX' --login)"
+	LISTA_SPA=(Descargas  Documentos  Imágenes  Música  Plantillas  Público  Vídeos)
+	LISTA_EN=(Downloads Pictures Templates Documents Music Public Videos)
+	LISTA_FR=(Documents Images Modèles Musique Public Téléchargements Vidéos)
+	LISTA_DE=(Bilder Dokumente Downloads Musik Öffentlich Videos Vorlagen)
+	for DIR in ${LISTA_SPA[*]} ${LISTA_EN[*]} ${LISTA_FR[*]} ${LISTA_DE[*]} ; do
+		if test -d "${HOMEUSUARIO}/${DIR}" ; then
+			if su "${USUARIO}" \
+					-c 'rsync --delete -rl '${BASE}'/ '${HOMEUSUARIO}'/'${DIR} \
+					--login > /dev/null 2>&1; then
+				echo " --> OK: Se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
+			else
+				echo " --> ERROR: No se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
+			fi
+		fi
+	done
+	rm -Rf "${BASE}"
+
+done
+
+# 2) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
+vx-eliminar-ficheros-conf-personales
+
+# Mensaje de terminación:
+echo "=> Ya se ha terminado de regenerar el los perfiles de los usuarios.  Comprobar que todo esta Ok!!"

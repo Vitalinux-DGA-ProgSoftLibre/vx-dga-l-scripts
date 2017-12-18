@@ -26,8 +26,8 @@ fi
 
 yad --title "Actualizar Sistema" \
  --text "   Se ha terminado de actualizar el Sistema   \n   Si no has detectado errores ya debería estar todo configurado ...   \n\n   Ya puedes cerrar la ventana anterior" \
---window-icon=/usr/share/lxpanel/images/vitalinux.svg \
---image "/usr/share/lxpanel/images/vitalinux.png" \
+--window-icon vitalinux \
+--image vitalinux \
 --width="400" --height="100" \
 --center --justify="center" --text-align="center" --button=Terminar:0
 
@@ -35,7 +35,8 @@ echo "..."
 echo "--> Comprueba los mensajes anteriores ..."
 echo "--> Ahora sí ... ¡¡Ya puedes cerrar la ventana!!"
 ) | yad --title "Actualizando" --text-info \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg --tail \
+	--window-icon vitalinux \
+	--tail \
 	--center --width="600" --height="500" --button="Cerrar":0
 
 }
@@ -43,7 +44,7 @@ echo "--> Ahora sí ... ¡¡Ya puedes cerrar la ventana!!"
 if test $USER = "root"
 then
 	if yad --title "Actualización del sistema" --question \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--window-icon vitalinux \
 		--text " ¿Deseas comenzar con la actualizacion del Sistema? \n No debes cerrar la ventana hasta que se te indique ..." \
 		--width="350" --height="50" --center \
 		--button="Continuar Actualización":0 --button="Abortar":1
@@ -52,14 +53,14 @@ then
 	else
 		yad --title "Actualización de Sistema Cancelada" \
 			--info --text "Has cancelado la actualización" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--image "/usr/share/lxpanel/images/vitalinux.png" \
+			--window-icon vitalinux \
+			--image vitalinux \
 			--center --width="350" --height="100"
 		exit 0
 	fi
 else
 	yad --title "Actualizar Sistema" --info --text "No tiene permiso para ejecutar el programa"\
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image "/usr/share/lxpanel/images/vitalinux.png" \
+		--window-icon vitalinux \
+		--image vitalinux \
 		--width="400" --height="100" --center --justify="center" --text-align="center"
 fi

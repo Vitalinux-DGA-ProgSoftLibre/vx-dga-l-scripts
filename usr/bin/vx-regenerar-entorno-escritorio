@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#Diseñado por Arturo Martín
+#Proyecto Software Libre DGA
+
+EJECUTOR=$(whoami)
+
+function mensaje-error-root {
+	TEXTO="Se requiren privilegios de \"administrador\" para <b>Regenerar los Entornos de Escritorio</b> de los usuarios del sistema ..."
+	yad --title "Regenerar Entornos de Escritorio" \
+	--center \
+	--image vitalinux \
+	--window-icon vitalinux \
+	--text "${TEXTO}" \
+	--button "Entendido":1
+	exit 1
+}
+
+if test "${EJECUTOR}" != "root" ; then
+	mensaje-error-root
+fi
+
+(
+	
+	vx-regenerar-entorno-escritorio-cli
+
+) | yad --title "Regenerar Entornos de Escritorio" --text-info \
+		--window-icon vitalinux --tail \
+		--width="620" --height="200" --center --image vitalinux

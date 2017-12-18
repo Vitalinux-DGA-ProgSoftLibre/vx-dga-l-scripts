@@ -1,0 +1,26 @@
+#!/bin/bash
+# Comprueba si el nombre indicado como parámetro es un nombre válido de equipo
+
+NAME="${1}"
+	
+IFSANT="${IFS}"
+IFS="."
+NARR=(${NAME})
+ST=1
+if ! test -z "${NAME}" ; then
+	for i in "${!NARR[@]}"; do 
+		[ ${#NARR[$i]} -gt 63 ] && { ST=0; break; };
+	done
+	if [ ${#NAME} -le 253 ] && [ ${#NARR[@]} -le 4 ] && [[ ! "${NAME}" =~ [^[:alnum:].-] ]] && [ ${ST} -eq 1 ] ; then
+		IFS="${IFSANT}"
+		echo "=> El nombre deseado para el Equipo es, \"${NAME}\", es un nombre ¡¡válido!! ..."
+		exit 0
+	else
+		IFS="${IFSANT}"
+		echo "=> El nombre deseado para el Equipo es, \"${NAME}\", es ¡¡inválido!! ..."
+		exit 1
+	fi
+fi
+
+		
+

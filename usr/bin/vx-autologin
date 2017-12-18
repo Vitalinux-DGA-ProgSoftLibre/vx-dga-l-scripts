@@ -39,8 +39,8 @@ TEXTO="  Se va a crear un usuario para que inicie sesión automática  \n\
    2.- No utilizes mayúsculas para el nombre \n\
    3.- Puedes usar números \n"
 	DATOS=$(yad --center --width 400 \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-	--image=/usr/share/lxpanel/images/usuario.png \
+	--window-icon vitalinux \
+	--image usuario \
 	--title "Inicio de Sesión Automático" \
 	--text-align center --justify="center" \
 	--text "$TEXTO" \
@@ -64,20 +64,20 @@ TEXTO="  Se va a crear un usuario para que inicie sesión automática  \n\
 			-c "$NOMBRE - $COMENTARIO" $NOMBRE ; then
 		configurar-usuario-inicio-automatico-lightdm $NOMBRE
 		if yad --center --width 500 \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+			--window-icon vitalinux \
 			--title "Inicio de Sesión Automático" \
 			--text-align center \
-			--image=/usr/share/lxpanel/images/usuario.png \
+			--image usuario \
 			--text "   ¿¿Te gustaría que el usuario <b>$NOMBRE</b>   \n    fuera <b>administrador</b> del equipo??   " \
 			--button="Si, <b>$NOMBRE</b> Administrador":0 --button="No":1 ; then
 			/usr/sbin/usermod -aG adm,cdrom,sudo,dip,plugdev,lpadmin,sambashare $NOMBRE
 		fi
 	else
 		yad --center --width 500 \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--window-icon vitalinux \
 		--title "Inicio de Sesión Automático" \
 		--text-align center \
-		--image=/usr/share/lxpanel/images/usuario.png \
+		--image usuario \
 		--text "  ¡¡El usuario $NOMBRE ya existe!!  \n  o  \n  ¡¡Las Password no Coinciden!!  " \
 		--button="Continuar":0
 		crear-usuario
@@ -87,10 +87,10 @@ TEXTO="  Se va a crear un usuario para que inicie sesión automática  \n\
 
 function decidir-usuario-inicio-sesion {
 	USUARIO=$(yad --center --width 500 \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+	--window-icon vitalinux \
 	--title "Inicio de Sesión Automático" \
 	--text-align center \
-	--image=/usr/share/lxpanel/images/usuario.png \
+	--image usuario \
 	--entry \
 	--text "$1" \
 	--entry-text \

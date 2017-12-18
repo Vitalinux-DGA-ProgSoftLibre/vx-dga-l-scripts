@@ -17,30 +17,30 @@ function instalar-software {
 	/bin/cat /tmp/version-java
 	echo -e "\n\nGracias por la espera... \nAhora ya puedes cerrar la ventana ..."
 	) | yad --title "Migasfree" --text-info --tail \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--window-icon vitalinux \
 		--width="500" --height="400" --center --button=Cerrar:0
 }
 
 if test $USER = "root"
 then
 	if yad --title "Instalación de Java 8" --question \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image "/usr/share/lxpanel/images/java-48.png" \
+		--window-icon vitalinux \
+		--image java-48 \
 		--text "  ¿Deseas Instalar Java OpenJDK 8?" --width="350" --height="50" --center \
 		--button="Continuar Instalación":0 --button="Cancelar":1
 		then
 			instalar-software
 		else
 			yad --title "Cancelado" --info --text "Has cancelado la Instalación de Java" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--image "/usr/share/lxpanel/images/java-48.png" \
+			--window-icon vitalinux \
+			--image java-48 \
 			--center --width="350" --height="100" --button=Terminar:1
 			exit 0
 	fi
 else
 		yad --title "Instalación de Java" \
 		--info --text "No tiene permiso para ejecutar el programa" \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image "/usr/share/lxpanel/images/java-48.png" \
+		--window-icon vitalinux \
+		--image java-48 \
 		--width="400" --height="100" --center --justify="center" --text-align="center"
 fi

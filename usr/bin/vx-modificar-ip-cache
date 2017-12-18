@@ -45,10 +45,12 @@ if test $USER = "root" ; then
 	done
 
 	# Antes de hacer el cambio, comprobamos si hay recursos compartidos en /etc/fstab:
-	# Desmontamos lo que haya en ese momento en el equipo
-	if test -f "/usr/bin/nfs-desmontajes.sh" ; then
-		/usr/bin/nfs-desmontajes.sh
-	fi
+	# Matamos el proceso cliente actual
+	# * con oknodo para que no de error la postinst 
+	# * y con tiempo de espera para que de timepo a finalizar, o sino se pase a mandar una señal de kill)
+	/sbin/start-stop-daemon --oknodo --stop --name "nfs-cliente.sh" --retry=TERM/10/KILL/5
+	# Desmontamos por si acaso (no será necesario con la version 3.0-18)
+	[ -f "/usr/bin/nfs-desmontajes.sh" ] && /usr/bin/nfs-desmontajes.sh
 
 	## Limpiamos el /etc/fstab (lo limpia el script anterior)
 	sed --follow-symlinks -i "/^#/d" /etc/fstab
@@ -70,8 +72,7 @@ if test $USER = "root" ; then
 		echo "--> El servicio de Carpetas Compartidas no esta activo ..."
 		echo "--> Se va a iniciar el Servicio de Carpetas Compartidas ..."
 		#su -c "/usr/bin/nfs-cliente.sh &" --login root
-		start-stop-daemon --start --oknodo --quiet -b \
-			--exec /usr/bin/nfs-cliente.sh
+		/sbin/start-stop-daemon --start --quiet -m --name nfs-cliente.sh --pidfile /run/nfs-cliente.pid -b -a /usr/bin/nfs-cliente.sh
 	else
 		echo "--> Ya existe un servicio de Carpetas Compartidas Activo ... "
 		echo "--> La nueva versión de este servicio actuará a partir del siguiente inicio de sesión ..."

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#Diseñado por Arturo Martín
+#Proyecto Software Libre DGA
+
+EJECUTOR=$(whoami)
+
+function mensaje-error-root {
+	TEXTO="Se requiren privilegios de \"administrador\" para <b>Regenerar el perfil</b> de los usuarios del sistema ..."
+	yad --title "Regenerar Perfiles de Usuarios" \
+	--center \
+	--image vitalinux \
+	--window-icon vitalinux \
+	--text "${TEXTO}" \
+	--button "Entendido":1
+	exit 1
+}
+
+if test "${EJECUTOR}" != "root" ; then
+	mensaje-error-root
+fi
+
+(
+	vx-regenerar-perfil-usuarios-cli
+
+) | yad --title "Regenerar Perfiles de Usuarios" --text-info \
+		--window-icon vitalinux --tail \
+		--width="620" --height="200" --center --image vitalinux

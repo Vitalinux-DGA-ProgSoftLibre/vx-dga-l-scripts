@@ -3,12 +3,30 @@ Section: utils
 Priority: extra
 Maintainer: Arturo Martín Romero <amartinromero@gmail.com>
 Build-Depends: debhelper (>= 8.0.0)
-Standards-Version: 3.9.5
+Standards-Version: 3.9.7
 Homepage: http://wiki.vitalinux.educa.aragon.es
 
 Package: vx-dga-l-scripts
 Architecture: all
-Depends: ${misc:Depends}, imagemagick, php5-cli, zenity, yad, lame, ghostscript, pdftk, evince, mplayer, vx-dga-l-variables-conf, gparted, dosfstools, lxsession
-Pre-depends: vx-dga-l-gnome-pie (>= 1.0-6), vx-dga-l-dock-plank (>= 1.0-2), vx-dga-l-menu-vitalinux (>=2.0-8)
+Depends: ${misc:Depends}, imagemagick, zenity, yad, lame, ghostscript, pdftk, evince, mplayer, vx-dga-l-variables-conf, gparted, dosfstools, lxsession, vx-dga-l-menu-vitalinux
+Pre-depends: vx-dga-l-menu-vitalinux (>= 2.0-8)
 Description: Scripts utiles para LVitalinux
- Scripts utiles para LVitalinux que añaden funcionalidades dentro del menú lxpanel
+ Scripts para LVitalinux que añaden funcionalidades útiles:
+ .
+ 1) Apagar equipo
+ 2) Reiniciar equipo
+ 3) Cerrar sesión
+ 4) Capturar pantalla completa, ventana o área
+ 5) Check password de usuario (para saber si pertenece al grupo sudo)
+ 6) Instalación de drivers-PDIs
+ 7) Comprobar el Estado del Software
+ 8) Eliminar ficheros de configuración del Entorno del Escritorio
+ 9) Regenerar el entorno de Escritorio de los usuarios del Sistema
+ 10) Conocer la Resolución de pantalla
+ 11) Modificar la dirección IP del servidor Caché
+ 12) Conocer los usuarios gráficos del sistema
+ 13) Conocer los HOMES de los usuarios gráficos del sistema
+ 14) Crear un USB bootable
+ 15) Test de velocidad
+ 16) Conocer información del Sistema
+ 17) ...

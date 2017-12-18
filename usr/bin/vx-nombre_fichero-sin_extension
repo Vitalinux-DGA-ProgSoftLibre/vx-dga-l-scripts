@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Script que devuelve a partir de una ruta relativa o absoluta el nombre de un archivo sin extensión:
+basename -s .$(echo "$1" | awk -F'.' '{ print $NF }') "$1"

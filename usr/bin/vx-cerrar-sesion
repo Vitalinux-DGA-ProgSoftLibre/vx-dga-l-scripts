@@ -1,4 +1,8 @@
 #!/bin/bash
-lxsession
+
 #USERGRAFICO=$(vx-usuario-grafico)
 #killall -u "$USERGRAFICO"
+
+#lxsession
+
+kill -1 ${_LXSESSION_PID}

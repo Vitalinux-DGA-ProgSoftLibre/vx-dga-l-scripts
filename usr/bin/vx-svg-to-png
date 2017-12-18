@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if test -z "${1}" ; then
+	echo "=> Error de uso:"
+	echo "=> Debes invocar al programa pasando como parámetros las imagenes SVG a convertir a PNG"
+	echo "=> Uso: vx-svg-to-png imagen1.svg /ruta/imagen2.svg ..."
+fi
+
+until test -z "${1}" ; do
+	if test -f "${1}" ; then
+		# Una vez que comprobamos que existe el archivo, comprobaremos si es una imagen SVG
+		TIPO="$(file --mime-type "${1}" | awk -F": " '{print $2}')"
+		if test "${TIPO}" == "image/svg+xml" ; then
+			DIRECTORIOBASE=$(dirname "$1")
+			NOMBRE=$(basename -s .$(echo "$1" | awk -F'.' '{ print $NF }') "$1")
+			if inkscape \
+				--export-png="${DIRECTORIOBASE}/${NOMBRE}.png" --export-dpi=200 \
+				--export-background-opacity=0 --without-gui "${1}" ; then
+				echo "=> Conversión: ${1} -> ${DIRECTORIOBASE}/${NOMBRE}.png"
+			fi
+		else
+			echo "=> Problema: ${1} no es una imagen SVG \"image/svg+xml\", sino \"${TIPO}\" ..."
+			echo "=> No se hará nada con ${1} ..."
+		fi
+	else
+		echo "=> Problema: ${1} no es un archivo existente ..."
+	fi
+	shift
+done

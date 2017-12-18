@@ -16,7 +16,13 @@ echo -e "Versión Ubuntu: <b><tt><span foreground='blue'>${DISTRO} (${ARQUIDISTR
 ARQUIHARDWARE="$(lscpu | grep 'CPUs' | cut -d':' -f2)"
 echo -e "Arquitecturas de Vitalinux soportadas por el Hardware: <b><tt><span foreground='blue'>${ARQUIHARDWARE}</span></tt></b>" >> /tmp/info-tarjetas-red
 
-ETIQUETAS="$(sudo migasfree-tags -g)"
+FICH="/tmp/migasfree.tags"
+if test -f "${FICH}" ; then
+	ETIQUETAS="$(cat "${FICH}")"
+else
+	ETIQUETAS="$(sudo migasfree-tags -g)"
+fi
+
 echo -e "\nEtiquetas Migasfree asignadas:<b><tt><span foreground='blue'>" >> /tmp/info-tarjetas-red
 echo ${ETIQUETAS} | tr -s " " "\n" | grep -n "-" | sed -e "s/:/) /g" | sed -e "s/.*/  &/g" >> /tmp/info-tarjetas-red
 echo -e "</span></tt></b>" >> /tmp/info-tarjetas-red
@@ -49,7 +55,7 @@ route -n | grep -v ^Tabla | yad --title "Información de Parámetros de Red" \
 	--center \
 	--image preferences-system-network \
 	--width 700 --height 450 \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+	--window-icon Vitalinux \
 	--text \
 	"$(cat /tmp/info-tarjetas-red) \n\n  Tabla de Enrutamiento del Equipo: " \
 	--text-info --tail --button="Cerrar Ventana":0

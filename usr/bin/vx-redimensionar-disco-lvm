@@ -5,8 +5,8 @@ ESTADO2=1
 if test $USER = "root"
 then
 	yad --title "Información" --info --text " A continuación se va a Comprobar si hay espacio \n para redimensionar el sistema de archivos ..." \
-	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-	--image "/usr/share/icons/vitalinux/Hard-drive-icon.png" \
+	--window-icon vitalinux \
+	--image disco-duro \
 	--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
 	--button=Continuar:0
 
@@ -65,13 +65,14 @@ then
 		echo "..."
 		echo "--> Ya puedes cerrar la ventana ..."
 		) | yad --title "Comprobando ..." --text-info \
-			--image "/usr/share/icons/vitalinux/Hard-drive-icon.png" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg --tail \
+			--image disco-duro \
+			--window-icon vitalinux \
+			--tail \
 			--center --width="600" --height="500" --button="Cerrar Ventana":0
 else
 		yad --title "Redimensionar Sistema de Archivos" \
-			--image "/usr/share/icons/vitalinux/Hard-drive-icon.png" \
+			--image disco-duro \
 			--info --text "No tiene permiso para ejecutar el programa" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+			--window-icon vitalinux \
 			--width="400" --height="100" --center --justify="center" --timeout=7 --text-align="center"
 fi

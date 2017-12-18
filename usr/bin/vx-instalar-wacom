@@ -14,13 +14,13 @@ function instalar-software {
 	apt-get --assume-yes --force-yes install lubuntu-desktop 
 	echo -e "\n\nGracias por la espera... \nAhora ya puedes cerrar la ventana ..."
 	) | yad --title "Migasfree" --text-info --tail \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--window-icon vitalinux \
 		--width="500" --height="400" --center --button=Cerrar:0
 
 	yad --title "Instalar y Configurar la Pantalla Táctil Wacom" \
 		 --text "   Si no has detectado errores ya debería estar todo configurado ...\n   <b>Reinicia el equipo para comprobar que funciona la Pantalla Táctil Wacom</b>   " \
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-		--image "/usr/share/lxpanel/images/wacom-48.png" \
+		--window-icon vitalinux \
+		--image wacom-48 \
 		--width="400" --height="100" --center --justify="center" --text-align="center" --button=Terminar:0
 }
 
@@ -28,8 +28,8 @@ if test $USER = "root"
 	then
 		if /usr/bin/xinput --list | grep Wacom &> /dev/null ; then
 			yad --title "Instalar y Configurar la Pantalla Táctil Wacom" --info --text "   Programa para Instalar y Configurar la Pantalla Táctil Wacom   " \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--image "/usr/share/lxpanel/images/wacom-48.png" \
+			--window-icon vitalinux \
+			--image wacom-48 \
 			--width="400" --height="100" --center --justify="center" --text-align="center"
 			if [[ ! $? -eq 0 ]]; then
 				exit 0
@@ -37,8 +37,8 @@ if test $USER = "root"
 			if aptitude search input-wacom | grep "^i" &> /dev/null ; then
 				if yad --title "Instalar y Configurar la Pantalla Táctil Wacom" \
 				 --text "   Parece que ya tienes instalado el software para la Pantalla Táctil Wacom ...\n   <b>¿Quieres continuar con la instalación</b>   " \
-				--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-				--image "/usr/share/lxpanel/images/wacom-48.png" \
+				--window-icon vitalinux \
+				--image wacom-48 \
 				--width="400" --height="100" --center --justify="center" --text-align="center" \
 				--button=Continuar:0 --button=Terminar:1 ; then
 					instalar-software
@@ -49,8 +49,8 @@ if test $USER = "root"
 		else
 			if yad --title "Instalar y Configurar la Pantalla Táctil Wacom" \
 			 --text "   Perdona pero hay un problema ...\n   <b>No se detecta ninguna Wacom en el equipo</b>   \n\n   <b>No obstante ... ¿Quieres Probar a Instalar el software necesario?</b>" \
-			--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
-			--image "/usr/share/lxpanel/images/wacom-48.png" \
+			--window-icon vitalinux \
+			--image wacom-48 \
 			--width="400" --height="100" --center --justify="center" --text-align="center" \
 			--button=Continuar:0 --button="No Seguir":1 ; then
 				instalar-software
@@ -59,6 +59,6 @@ if test $USER = "root"
 	else
 		yad --title "Instalar y Configurar la Pantalla Táctil Wacom" \
 		--text "No tiene permiso para ejecutar el programa"\
-		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--window-icon vitalinux \
 		--width="400" --height="100" --center --justify="center" --text-align="center" --button=Terminar:1
   fi

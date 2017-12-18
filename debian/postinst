@@ -21,10 +21,12 @@ set -e
 case "$1" in
     configure)
 
+    if test -f "/usr/bin/obtener-resolucion-pantalla" ; then
+        chmod 755 "/usr/bin/obtener-resolucion-pantalla"
+    fi
+
 	chmod 755 /usr/bin/vx-*
-	chmod 755 /usr/bin/test-velocidad
-	chmod 755 /usr/bin/obtener-resolucion-pantalla
-	chmod 755 /usr/bin/capturar-pantalla
+	
 	chmod u+s /usr/bin/pkexec
     ;;
 

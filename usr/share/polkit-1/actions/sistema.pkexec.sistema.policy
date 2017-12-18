@@ -4,10 +4,36 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
 
+<action id="sistema.pkexec.regenerarperfilusuarios">
+    <message>Authentication is required to be able to Regenerate User Profiles by returning it to the Original State</message>
+    <message xml:lang="es">Para Regenerar los Perfiles de los Usuarios debe autenticarse omo administrador del sistema</message>
+    <icon_name>vitalinux</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/vx-regenerar-perfil-usuarios</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+  </action>
+
+<action id="sistema.pkexec.regenerarentornoescritorio">
+    <message>Authentication is required to be able to Regenerate Desktop Environment by returning it to the Original State</message>
+    <message xml:lang="es">Para Regenerar los Entornos de Escritorio de los usuarios debe autenticarse omo administrador del sistema</message>
+    <icon_name>vitalinux</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/vx-regenerar-entorno-escritorio</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+  </action>
+
   <action id="sistema.pkexec.hostname">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -18,9 +44,9 @@
   </action>
 
 <action id="sistema.pkexec.login">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -31,9 +57,9 @@
   </action>
 
 <action id="sistema.pkexec.actualizar">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -44,9 +70,9 @@
   </action>
 
 <action id="sistema.pkexec.instjava">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -57,9 +83,9 @@
   </action>
 
 <action id="sistema.pkexec.driverpdi">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -70,9 +96,9 @@
   </action>
 
 <action id="sistema.pkexec.reiniciared">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -83,9 +109,9 @@
   </action>
 
 <action id="sistema.pkexec.instalarwacom">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -96,9 +122,9 @@
   </action>
 
 <action id="sistema.pkexec.repararsoftware">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -109,9 +135,9 @@
   </action>
 
 <action id="sistema.pkexec.redimensionardiscolvm">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -121,23 +147,10 @@
     <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
   </action>
 
-<action id="sistema.pkexec.evitardockplank">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
-    <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
-    <defaults>
-      <allow_any>auth_admin</allow_any>
-      <allow_inactive>auth_admin</allow_inactive>
-      <allow_active>auth_admin</allow_active>
-    </defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/vx-configurar-dock-plank</annotate>
-    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
-  </action>
-
 <action id="sistema.pkexec.crearusbbootable">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
+    <message>Authentication is required to be able to run the program</message>
     <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
+    <icon_name>vitalinux</icon_name>
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
@@ -147,17 +160,5 @@
     <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
   </action>
 
-<action id="sistema.pkexec.evitargnomepie">
-    <message>Se requiere autenticación para poder ejecutar el programa</message>
-    <message xml:lang="es">Para ejecutar el programa necesita autenticarse</message>
-    <icon_name>vitalinux-256x</icon_name>
-    <defaults>
-      <allow_any>auth_admin</allow_any>
-      <allow_inactive>auth_admin</allow_inactive>
-      <allow_active>auth_admin</allow_active>
-    </defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/vx-configurar-gnome-pie</annotate>
-    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
-  </action>
 
 </policyconfig>
