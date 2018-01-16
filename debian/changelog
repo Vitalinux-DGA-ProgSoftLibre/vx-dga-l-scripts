@@ -1,6 +1,26 @@
+vx-dga-l-scripts (3.2-8) unstable; urgency=low
+
+  * Modificación del script de pdis para que instale dependencias necesarias para la Hitachi
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 16 Jan 2017 13:53:06 +0200
+
+vx-dga-l-scripts (3.2-7) unstable; urgency=low
+
+  * Se ha repasado el vx-eliminar-ficheros-conf-personales
+
+ -- Arturo Martín <amartinromero@gmail.com>  Mon, 15 Jan 2018 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-6) unstable; urgency=low
+
+  * Se ha añadido la dependencia con vx-dga-l-skel-usuarios para la regeneración del perfil
+  * De esta forma se usan directorios patrón que podrán personalizarse por parte del usuario
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 19 Dec 2017 00:10:00 +0200
+
 vx-dga-l-scripts (3.2-5) unstable; urgency=low
 
   * Se incluye soporte para francés y alemán a los scripts de regenerar entorno de Escritorio y Perfil
+  * Se ha añadido la dependencia con vx-dga-l-skel-usuarios para la regeneración del perfil
 
  -- Arturo Martín <amartinromero@gmail.com>  Mon, 18 Dec 2017 00:10:00 +0200
 

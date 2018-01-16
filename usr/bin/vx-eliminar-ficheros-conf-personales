@@ -28,6 +28,7 @@ ERRORES=0
 USER="$(whoami)"
 if test "${USER}" == "root" ; then
 	for USUARIO in $(vx-usuarios-graficos) ; do
+
 		HOMEUSU="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
 		for DIR in ".config/openbox" \
 			".config/lxsession" \
@@ -43,29 +44,30 @@ if test "${USER}" == "root" ; then
 					echo "OK: Se ha eliminado ${HOMEUSU}/${DIR} ..."
 				fi
 			fi
-
-			# Copiamos desde el skel los archivos de configuración que no se autogeneran al iniciar sesión gráfica:
-			## ~/.config/pcmanfm/lubuntu/desktop-items-0.conf
-			## ~/.config/lxpanel/Lubuntu/panels/panel
-			## ~/.config/lxpanel/default/panels/panel
-			for DIR in ".config/pcmanfm" \
-				".config/lxpanel" ; do
-					if ! su "${USUARIO}" \
-						-c 'rsync -ahv /etc/skel/'${DIR}' '${HOMEUSU}'/.config' \
-						--login &> /dev/null ; then
-						ERRORES=1
-						echo "ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSU} ..."
-					else
-						echo "OK: copiado /etc/skel/${DIR} en ${HOMEUSU} ..."
-					fi
-			done
 		done
+
+		# Copiamos desde el skel los archivos de configuración que no se autogeneran al iniciar sesión gráfica:
+		## ~/.config/pcmanfm/lubuntu/desktop-items-0.conf
+		## ~/.config/lxpanel/Lubuntu/panels/panel
+		## ~/.config/lxpanel/default/panels/panel
+		for DIR in ".config/pcmanfm" \
+			".config/lxpanel" ; do
+				if ! su "${USUARIO}" \
+					-c 'rsync -ahv /etc/skel/'${DIR}' '${HOMEUSU}'/.config' \
+					--login &> /dev/null ; then
+					ERRORES=1
+					echo "ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSU} ..."
+				else
+					echo "OK: copiado /etc/skel/${DIR} en ${HOMEUSU} ..."
+				fi
+		done
+		
 	done
-	if test "${ERRORES}" -eq 0 ; then
-		exit 0
-	else
-		exit 1
-	fi
+	#if test "${ERRORES}" -eq 0 ; then
+	#	exit 0
+	#else
+	#	exit 1
+	#fi
 else
 	echo "=> Problema: Debes usuario \"root\" para poder ejecutar este script ..."
 	exit 1

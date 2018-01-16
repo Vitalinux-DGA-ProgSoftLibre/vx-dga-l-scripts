@@ -271,7 +271,7 @@ function instalar-software-pdi {
 		apt-get -f --assume-yes --force-yes install
 		# Instalamos los drivers necesarios
 		# 1. El primero es para que el servicio que el demonio que se encarga de hablar con la pizarra (driver) DGBoard se pueda ejecutar en 64 bits
-		apt-get --assume-yes --force-yes install libusb-0.1-4:i386
+		apt-get --assume-yes --force-yes install libusb-0.1-4:i386 libxtst6-dbg:i386 libxtst6:i386
 		# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
 		# pero tampoco molesta que se cargue en memoria
 		apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
