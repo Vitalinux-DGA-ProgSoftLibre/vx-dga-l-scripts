@@ -46,9 +46,10 @@ TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
 TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
 TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!"
 TEXTO="${TEXTO}\n\n¡¡El cambio de Nombre requerirá <b>Reiniciar el Equipo</b>!!\n\n"
-VALIDO=0
 
-while test "${VALIDO}" -eq 0 ; do
+SALTAR=0
+
+while test "${SALTAR}" -eq 0 ; do
 
 	if RESULTADO=$(yad --title "Nombre del Equipo" \
 		--width="700" --height="500" \
@@ -67,7 +68,7 @@ while test "${VALIDO}" -eq 0 ; do
 		
 		if ! test -z "${NAME}" ; then
 			if vx-hostname-validar-cli "${NAME}" ; then
-				VALIDO=1
+				SALTAR=1
 				sed -i "/CAMBIARHOSTNAME.*/d" "${FICHCONF}"
 				sed -i '/Varibles utilizadas por los paquetes/a CAMBIARHOSTNAME=1' "${FICHCONF}"
 				sed -i "/NUEVOHOSTNAME.*/d" "${FICHCONF}"
@@ -84,6 +85,6 @@ while test "${VALIDO}" -eq 0 ; do
 			fi
 		fi
 	else
-			VALIDO=1
+			SALTAR=1
 	fi
 done

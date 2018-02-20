@@ -1,0 +1,43 @@
+#!/bin/bash
+# Script para habilitar o deshabilitar el touchpad
+error(){
+	yad --title "Touchpad Control" \
+			--center --justify="center" --text-align="center" \
+			--width="400" --height="100" \
+			--window-icon vitalinux \
+			--text "Se ha encontrado un error...el dispositivo tiene Touchpad?" \
+			--button="Continuar":1
+	exit 1
+}
+# Comprobamos estado del TouchPad actual
+! synclient -l > /dev/null 2>&1 && error
+TOUCHNOW=$(synclient -l | grep TouchpadOff | cut -d'=' -f2 | sed 's/ //')
+[ -z "$TOUCHNOW" ] && error
+
+if [ "$TOUCHNOW" = "1" ]; then
+	IMAGEYAD="touchpad-disable-icon"
+	ESTADO="Deshabilitado" 
+else
+	IMAGEYAD="touchpad-enable-icon"
+	ESTADO="Habilitado"
+fi 
+
+yad --center --title "Touchpad Control" --question \
+	--window-icon touchpad-icon \
+	--image $IMAGEYAD \
+	--on-top \
+	--text " El Touchpad parece que se encuentra $ESTADO....ahora puedes cambiar el comportamiento " \
+	--width="400" --height="100" --center \
+	--justify="center" --text-align="center" \
+	--button="Habilitar":0 \
+	--button="Deshabilitar":1 \
+	--buttons-layout center
+ACC="$?"
+if [ "$ACC" = "0" ] ; then
+	! synclient TouchpadOff=0 && error
+elif [ "$ACC" = "1" ]; then
+	! synclient TouchpadOff=1 && error
+else
+    # Dejamos como está y devolvemos 0
+	exit 0
+fi

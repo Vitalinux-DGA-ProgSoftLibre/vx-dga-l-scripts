@@ -1,5 +1,44 @@
 #!/bin/bash
 
+mod_ip_cache(){
+  # modificar_ip_cache old_IP new_IP
+  [[ "$1" = "$2" ]] && return 0
+  # Modificamos la IP del Caché en el documento de variables:
+  FILEVAR="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
+
+  # Como vamos a modificar la ip del caché, debemos reiniciar el servicio de carpetas compartidos si está lanzado
+  /sbin/start-stop-daemon --status --name nfs-cliente.sh && /sbin/start-stop-daemon --oknodo --stop --name nfs-cliente.sh --retry=TERM/5/KILL/2
+  if [[ -f $FILEVAR ]]; then
+    sed -i "s#^IPCACHE=.*#IPCACHE=${2}#g" $FILEVAR
+  fi
+  /sbin/start-stop-daemon --start --quiet -m --name nfs-cliente.sh --pidfile /run/nfs-cliente.pid -b -a /usr/bin/nfs-cliente.sh
+
+  # Modificamos la configuración del proxy apt
+  local proxy_file="/etc/apt/apt.conf.d/01cache_proxy"
+  #Comprobamos lo primero si el servidor caché está en la red
+  if ping -c 1 "${2}" > /dev/null 2>&1 && nc -zv "${2}" 3142 > /dev/null 2>&1 ; then
+    # Servidor Cache que ofrece servicio APT-CACHER"
+    echo "Acquire::http { Proxy \"http://${2}:3142\"; };" > $proxy_file
+    echo 'Acquire::https { Proxy "false"; };' >> $proxy_file
+  else  
+    # Borrar el posible archivo generado anteriormente del proxy-cache
+    [[ -f $proxy_file ]] && rm -f $proxy_file
+  fi
+  # Actualizamos el nombre del servidor cache en el hosts
+  local hosts_file="/etc/hosts"
+  [ ! -f $hosts_file ] && echo "Error, no hay archivo hosts en éste equipo..." && return 1
+  if grep "servidor.vitalinux" $hosts_file &> /dev/null ; then
+    sed -i "s/.*servidor.vitalinux.*/${2} servidor.vitalinux/g" $hosts_file
+  else
+  	echo "${2} servidor.vitalinux" >> $hosts_file
+  fi
+  if grep "servidor.vx" $hosts_file &> /dev/null ; then
+  	sed -i "s/.*servidor.vx.*/${2} servidor.vx/g" $hosts_file
+  else
+  	echo "${2} servidor.vx" >> $hosts_file
+  fi
+}
+
 USER=$(whoami)
 
 if test $USER = "root" ; then
@@ -44,45 +83,7 @@ if test $USER = "root" ; then
 		fi
 	done
 
-	# Antes de hacer el cambio, comprobamos si hay recursos compartidos en /etc/fstab:
-	# Matamos el proceso cliente actual
-	# * con oknodo para que no de error la postinst 
-	# * y con tiempo de espera para que de timepo a finalizar, o sino se pase a mandar una señal de kill)
-	/sbin/start-stop-daemon --oknodo --stop --name "nfs-cliente.sh" --retry=TERM/10/KILL/5
-	# Desmontamos por si acaso (no será necesario con la version 3.0-18)
-	[ -f "/usr/bin/nfs-desmontajes.sh" ] && /usr/bin/nfs-desmontajes.sh
-
-	## Limpiamos el /etc/fstab (lo limpia el script anterior)
-	sed --follow-symlinks -i "/^#/d" /etc/fstab
-	sed --follow-symlinks -i "/^$/d" /etc/fstab
-	sed --follow-symlinks -i "/.*\/nfs\/alumnos.*/d" /etc/fstab
-	sed --follow-symlinks -i "/.*\/nfs\/profesor.*/d" /etc/fstab
-	sed --follow-symlinks -i "/.*\/nfs\/privado.*/d" /etc/fstab
-	sed --follow-symlinks -i "/.*\/nfs\/perfiles.*/d" /etc/fstab
-
-	if test -f /etc/apt/sources.list.d/vx-dga-repos-mirror.list ; then
-		sed --follow-symlinks -i "s/${IPCACHE}/${CACHE}/g" /etc/apt/sources.list.d/vx-dga-repos-mirror.list
-	fi
-	if test -f /etc/default/vx-dga-variables/vx-dga-variables-general.conf ; then
-		sed --follow-symlinks -i "s/IPCACHE=.*/IPCACHE=${CACHE}/g" /etc/default/vx-dga-variables/vx-dga-variables-general.conf
-	fi
-
-	# Lanzamos el montaje de unidades NFS en el cliente:
-	if ! pgrep nfs-cliente &> /dev/null ; then
-		echo "--> El servicio de Carpetas Compartidas no esta activo ..."
-		echo "--> Se va a iniciar el Servicio de Carpetas Compartidas ..."
-		#su -c "/usr/bin/nfs-cliente.sh &" --login root
-		/sbin/start-stop-daemon --start --quiet -m --name nfs-cliente.sh --pidfile /run/nfs-cliente.pid -b -a /usr/bin/nfs-cliente.sh
-	else
-		echo "--> Ya existe un servicio de Carpetas Compartidas Activo ... "
-		echo "--> La nueva versión de este servicio actuará a partir del siguiente inicio de sesión ..."
-	fi
-
-	if test -f /etc/apt/apt.conf.d/01cache_proxy ; then
-		echo -e 'Acquire::http { Proxy "http://'${CACHE}':3142"; };' > /etc/apt/apt.conf.d/01cache_proxy
-		echo -e 'Acquire::https { Proxy "false"; };' >> /etc/apt/apt.conf.d/01cache_proxy
-	fi
-
+	mod_ip_cache "${IPCACHE}" "${CACHE}"
 
 else
 		yad --title "Modificar IP del Servidor Caché" \

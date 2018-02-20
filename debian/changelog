@@ -1,3 +1,11 @@
+vx-dga-l-scripts (3.2-9) unstable; urgency=low
+
+  * El cambio de IP de caché actualiza su resolución por nombre
+  * Nuevos drivers para las PDI: multiclass y smartboard
+  * Se añaden los scripts para (des)habilitar el Touchpad y borrar todos los anillos de claves
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 16 Jan 2017 13:53:06 +0200
+
 vx-dga-l-scripts (3.2-8) unstable; urgency=low
 
   * Modificación del script de pdis para que instale dependencias necesarias para la Hitachi

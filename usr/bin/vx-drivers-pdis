@@ -1,9 +1,10 @@
 #!/bin/bash
 . /etc/default/vx-dga-variables/vx-dga-variables-general.conf
-MIGASFREE="migasfree.educa.aragon.es"
 USER=$(whoami)
 PDI=""
+SB480=""
 ARCHSO=$(getconf LONG_BIT)
+SERVERDOWNLOAD="migasfree.educa.aragon.es"
 
 function close_yad(){
     kill -s SIGUSR1 "$YAD_PID"
@@ -160,16 +161,13 @@ function descargar-archivos {
 
 function comprobar-archivos {
 	LISTADESCARGAS=""
+
 	for RUTA in $@ ; do
 		ARCHIVO=$(echo "$RUTA" | awk -F "/" {'print $NF'})
 		if ! comprobar-md5 $ARCHIVO ; then
 			echo "--> El archivo $ARCHIVO NO se encentra de manera integra en /opt/pkgs/pdis ..."
 			echo "--> ... por lo tanto, $ARCHIVO se descargará a continuación ..."
-			if ping -c 1 "$IPCACHE" &> /dev/null && wget --spider -q "http://${IPCACHE}${RUTA}" ; then
-				LISTADESCARGAS="$LISTADESCARGAS http://${IPCACHE}${RUTA} http://${IPCACHE}${RUTA}.md5"
-			else
-				LISTADESCARGAS="$LISTADESCARGAS http://${MIGASFREE}${RUTA} http://${MIGASFREE}${RUTA}.md5"
-			fi
+			LISTADESCARGAS="$LISTADESCARGAS http://${SERVERDOWNLOAD}${RUTA} http://${SERVERDOWNLOAD}${RUTA}.md5"
 		else
 			echo "--> El archivo $ARCHIVO ya existe de manera integra en /opt/pkgs/pdis ..."
 			echo "--> ... por lo tanto, $ARCHIVO no se descargará de nuevo ..."
@@ -223,7 +221,14 @@ function descargar-software-pdi {
 		;;
 
 		"Multiclass")
-		FILESPDI="/pdis/multiCLASS/multiCLASSBoard.tar.gz"
+		# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas
+		# En éste caso además se requiere instalación manual....
+		# FILESPDI="/pdis/multiCLASS/multiCLASSBoard.tar.gz"
+		if [ "$ARCHSO" = "64" ] ; then
+		  FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_64.deb"
+		else
+		  FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_32.deb"
+		fi
 		;;
 
 		"Promethean")
@@ -240,10 +245,66 @@ function descargar-software-pdi {
 		;;
 
 		"Smartboard")
-		FILESPDI="/pdis/SmartBoard/smart-hwr_11.3.2087.1-1_i386.deb"
+		# Lo primero es saber si es una SmartBoard480 o no:
+		if lsusb | grep "0b8c:0090" > /dev/null 2>&1 ; then
+			SB480="1"
+		else
+			SB480="0"
+		fi
+		if [ "$ARCHSO" = "64" ] && [ "$SB480" = "1" ]  ; then
+			yad --title "Instalación de Software de la PDI $PDI" \
+				--text " Lo sentimos pero de momento SmartBoard NO facilita controladores para 64 bits "\
+				--window-icon vitalinux \
+				--image pdi \
+				--width="400" --height="100" \
+				--center --justify="center" --text-align="center" --button="gtk-ok":0
+			return 1
+		elif [ "$ARCHSO" = "64" ] ; then
+			# Si la arquitectura es de 64 bits, pero no es la 480, podría funcionar el software...no lo sabemos
+			yad --title "Instalación de Software de la PDI $PDI" \
+				--text " Su sistema es de 64 bits. Es posible que el software que se instale no funcione adecuadamente...si es así hable con Soporte Vitalinux "\
+				--window-icon vitalinux \
+				--image pdi \
+				--width="400" --height="100" \
+				--center --justify="center" --text-align="center" --button="gtk-ok":0
+		elif [ "$SB480" = "1" ]  ; then
+			# Si es de 32 bits y es la 480, ofrecemos la instalación desatendida....
+			yad --title "Instalación de Software de la PDI $PDI" \
+				--text " Su PDI parece ser una SmartBoard 480....si lo desea puede solictar la instalación desatendida en éste equipo a través de soporte "\
+				--window-icon vitalinux \
+				--image pdi \
+				--width="400" --height="100" \
+				--center --justify="center" --text-align="center" \
+				--button="Continuar instalación manual":0 \
+				--button="Cancelar":1 \
+
+			if [ "$?" != "0" ]; then
+				return 1
+			fi
+		fi
+
+		FILESPDI="/pdis/SmartBoard/smart_board/nwfermi-0.6.5.1_i386.deb \
+			/pdis/SmartBoard/smart_board/smart-activation_1.1.2066.1-1_i386.deb \
+			/pdis/SmartBoard/smart_board/smart-common_10.3.2171.1-1_i386.deb \
+			/pdis/SmartBoard/smart_board/smart-gallerysetup_1.3.6235.1-1_i386.deb \
+			/pdis/SmartBoard/smart_board/smart-hwr_11.3.2121.1-1_i386.deb \
+			/pdis/SmartBoard/smart_board/smart-languagesetup_2.2.2060.4-1_i386.deb \
+			/pdis/SmartBoard/smart_board/smart-notebook_11.0.7511.0-1_i386.deb \
+			/pdis/SmartBoard/smart_board/smart-product-drivers_11.3.2121.1-1_i386.deb \
+			/pdis/SmartBoard/smart_board/xf86-input-nextwindow-trusty_0.3.4~trusty1_i386.deb"
 		;;
 
 	esac
+	# Configuramos el servidor de donde se realizarán las descargas:
+	echo "Comprobando servidor de descargas...por favor, espere"
+	if ping -c 1 "$IPCACHE" &> /dev/null && wget --spider -q "http://${IPCACHE}/pdis" ; then
+		SERVERDOWNLOAD="$IPCACHE"
+		echo "Se usuará el servidor caché del centro"
+	else
+		SERVERDOWNLOAD="migasfree.educa.aragon.es"
+		echo "Se usuará el servidor migasfree"
+	fi
+	
 	comprobar-archivos "$FILESPDI"
 }
 
@@ -313,13 +374,21 @@ function instalar-software-pdi {
 	;;
 
 	"Multiclass")
-	if test -f ./multiCLASSBoard.tar.gz ; then
-		tar -xzvf /opt/pkgs/pdis/multiCLASSBoard.tar.gz
-		cd /opt/pkgs/pdis/multiCLASSBoard/setup
-		chmod +x ./setup.sh
-		./setup.sh
-		cd /opt/pkgs/pdis
+	# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas
+	# En éste caso además se requiere instalación manual....
+	# 	if test -f ./multiCLASSBoard.tar.gz ; then
+	#	tar -xzvf /opt/pkgs/pdis/multiCLASSBoard.tar.gz
+	#	cd /opt/pkgs/pdis/multiCLASSBoard/setup
+	#	chmod +x ./setup.sh
+	#	./setup.sh
+	#	cd /opt/pkgs/pdis
+	#fi
+	if [ "$ARCHSO" = "64" ] ; then
+	  dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_64.deb
+	else
+	  dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_32.deb
 	fi
+
 	;;
 
 	"Promethean")
@@ -328,23 +397,30 @@ function instalar-software-pdi {
 		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
 		dpkg -i /opt/pkgs/pdis/activdriver_5.14.21-0.deb
 		dpkg -i /opt/pkgs/pdis/activtools_5.14.21-0.deb
-		apt-get -f --assume-yes --force-yes install
-
 	else
 		#apt-get install dkms libssl0.9.8 gamin libgamin0 libxdo3 xdotool libxcb-xinerama0
 		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
 		dpkg -i /opt/pkgs/pdis/activdriver_5.14.21-0.deb
 		dpkg -i /opt/pkgs/pdis/activtools_5.14.21-0.deb
 		dpkg -i /opt/pkgs/pdis/activinspire_2.4.66096-1.i386_i386.deb
-		apt-get -f --assume-yes --force-yes install
 	fi
+	apt-get -f --assume-yes --force-yes install
 	;;
 
 	"Smartboard")
-	if test -f ./smart-hwr_11.3.2087.1-1_i386.deb ; then
-		dpkg -i /opt/pkgs/pdis/smart-hwr_11.3.2087.1-1_i386.deb
-		apt-get -f --assume-yes --force-yes install
+	dpkg -i /opt/pkgs/pdis/smart-activation_1.1.2066.1-1_i386.deb \
+		/opt/pkgs/pdis/smart-common_10.3.2171.1-1_i386.deb \
+		/opt/pkgs/pdis/smart-gallerysetup_1.3.6235.1-1_i386.deb \
+		/opt/pkgs/pdis/smart-hwr_11.3.2121.1-1_i386.deb \
+		/opt/pkgs/pdis/smart-languagesetup_2.2.2060.4-1_i386.deb \
+		/opt/pkgs/pdis/smart-notebook_11.0.7511.0-1_i386.deb \
+		/opt/pkgs/pdis/smart-product-drivers_11.3.2121.1-1_i386.deb
+	if [ "$SB480" = "1" ]  ; then
+		apt-get -y --force-yes install libc6-dev=2.19-0ubuntu6.13 libc6=2.19-0ubuntu6.13 libc-dev-bin=2.19-0ubuntu6.13 dkms
+		dpkg -i /opt/pkgs/pdis/xf86-input-nextwindow-trusty_0.3.4~trusty1_i386.deb \
+			/opt/pkgs/pdis/nwfermi-0.6.5.1_i386.deb
 	fi
+	apt-get -f --assume-yes --force-yes install
 	;;
 
 	esac

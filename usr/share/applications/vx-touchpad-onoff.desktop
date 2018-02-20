@@ -1,0 +1,20 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Enable or Disable TouchPadd
+Name[en]=Enable or Disable TouchPadd
+Name[es]=Habilitar o Deshabilitar el Touchpad
+Name[es_ES]=Habilitar o Deshabilitar el Touchpad
+
+Comment=Program that allows Modifying the Touchpad status
+Comment[en]=Program that allows Modifying the Touchpad status
+Comment[es]=Programa que permite Modificar el estado del TouchPad
+Comment[es_ES]=Programa que permite Modificar el estado del TouchPad
+
+Icon=touchpad-icon
+Exec=/usr/bin/vx-touchpad-onoff
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;
+StartupNotify=true
+Hidden=false

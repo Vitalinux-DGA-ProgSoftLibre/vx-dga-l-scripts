@@ -1,0 +1,38 @@
+#!/bin/bash
+# Script que borrar todos los anillos de claves que encuentre por usuario
+
+del_keyrings(){
+  for HOMEUSU in $(vx-home-usuarios-graficos); do
+    find ${HOMEUSU} -name "*.keyring" -exec rm -f '{}' \;
+  done
+}
+
+USER=$(whoami)
+
+if [ "$USER" = "root" ]; then
+
+#. /etc/default/vx-dga-variables/vx-dga-variables-general.conf
+
+	TEXTO="\tEsta utilidad permite el borrado de los anillos de claves de TODOS los usuarios del sistema\n Está seguro?\n<b>Ésta acción no es reversible</b>"
+
+	yad --center --width 320 --question \
+	--window-icon vitalinux \
+	--image key-amarilla \
+	--title "Borrado de Anillos de Claves" \
+	--text-align center --justify="center" \
+	--text "${TEXTO}" \
+	--button=gtk-ok \
+	--button=gtk-close \
+	--buttons-layout center
+	if [[ ! $? -eq 0 ]] ; then
+            exit 0
+	fi
+	del_keyrings
+
+else
+		yad --title "Borrado Global de Anillos de Claves" \
+			--image key-amarilla \
+			--info --text "<b>No tiene permiso</b> para ejecutar éste programa\n¡¡Debes ser \"<b>administrador</b>\"" \
+			--window-icon vitalinux \
+			--width="400" --height="100" --center --justify="center" --timeout=7 --text-align="center"
+fi
