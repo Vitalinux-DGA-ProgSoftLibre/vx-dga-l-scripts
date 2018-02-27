@@ -1,3 +1,16 @@
+vx-dga-l-scripts (3.2-11) unstable; urgency=low
+
+  * Se ha añadido un script para crear uno o varios usuarios: vx-crear-usuarios
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 27 Feb 2018 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-10) unstable; urgency=low
+
+  * Lanzador de reparacion con icono
+  * XXXXXX
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 20 Feb 2017 13:53:06 +0200
+
 vx-dga-l-scripts (3.2-9) unstable; urgency=low
 
   * El cambio de IP de caché actualiza su resolución por nombre

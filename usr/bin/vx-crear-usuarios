@@ -1,0 +1,52 @@
+#!/bin/bash
+
+function Crear_Usuario {
+  while ! test -z "${1}" ; do
+    USUARIO="${1}"
+    PASSWORD="${2}"
+    USERID="${3}"
+    GPRIMARIO="${4}"
+    GRUPOID="${5}"
+      # echo "Se va a crear el usuario ${USUARIO} con password ${PASSWORD}"
+      if ! ( getent passwd "${USUARIO}" > /dev/null 2> /dev/null ) ; then
+        if /usr/sbin/useradd -m -d "/home/${USUARIO}" \
+          -s /bin/bash -c "Usuari@ ${USUARIO}" \
+          -u "${USERID}" \
+          -p "$(printf "${PASSWORD}" | mkpasswd -s -m sha-512)" "${USUARIO}" > /dev/null 2>&1 ; then
+          echo "$(date) - Se ha creado el usuario ${USUARIO}" >> "${FICH}"
+        fi
+      fi
+      # Comprobamos la existencia del usuario en el grupo propuesto:
+      if ! (getent group "${GPRIMARIO}" > /dev/null 2> /dev/null ) ; then
+        groupadd -g "${GRUPOID}" "${GPRIMARIO}" > /dev/null 2>&1
+      fi
+      if ! ( id "${USUARIO}" | grep -q "${GPRIMARIO}" ) && \
+        /usr/sbin/usermod -aG "${GPRIMARIO}" "${USUARIO}" > /dev/null 2>&1 ; then
+        echo "$(date) - Se ha añadido al usuario ${USUARIO} al grupo ${GPRIMARIO} ..." >> "${FICH}"
+      fi
+      # En el caso de ser un servidor Caché crearemos el usuario de Samba:
+      if ( migasfree-tags -g | grep -q "CHE-" ) ; then
+        if  ! ( pdbedit -Lw | grep -q "${USUARIO}" ) ; then
+                        (echo "${PASSWORD}"; echo "${PASSWORD}") | smbpasswd -as "${USUARIO}" > /dev/null 2>&1
+        fi
+      fi
+
+    shift; shift; shift; shift; shift
+  done
+}
+
+if ! test -d /var/log/vitalinux ; then
+  mkdir -p /var/log/vitalinux
+fi
+FICH="/var/log/vitalinux/falla-usuarios-tecnologia-IES_Corona.log"
+
+if test ${#} -eq 5 ; then
+	Crear_Usuario "$1" "$2" "$3" "$4" "$5"
+else
+	echo "Uso: Debes indicar 5 parametros en la llamada, o multiplos de 5 si se quieren crear varios usuarios ..."
+	echo "USUARIO PASSWORD USERID GPRIMARIO GRUPOID"
+	echo 'Crear_Usuario "USU-1" "faraday" "1301" "profesor" "1100"'
+    echo 'Crear_Usuario "USU-1" "faraday" "1301" "profesor" "1100" \
+        "USU-2" "ampere" "1302" "profesor" "1100" \
+        "USU-3" "ohm" "1303" "profesor" "1100"'
+fi
