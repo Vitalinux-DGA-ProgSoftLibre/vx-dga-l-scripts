@@ -1,0 +1,23 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+
+Comment=Create Direct Access in Desktop
+Comment[en]=Create Direct Access in Desktop
+Comment[es]=Crear Acceso Directo en Escritorio
+Comment[es_ES]=Crear Acceso Directo en Escritorio
+
+Name[es_ES]=Crear Acceso Directo en Escritorio
+Name[es] = Crear Acceso Directo en Escritorio
+Name[en] = Create Direct Access in Desktop
+Name = Create Direct Access in Desktop
+
+Icon=escritorio_vx-acceso_directo
+
+TryExec=vx-crear-acceso-directo-escritorio-gui
+Exec=vx-crear-acceso-directo-escritorio-gui
+Terminal=false
+Type=Application
+Categories=Vitalinux;
+StartupNotify=true
+Hidden=false

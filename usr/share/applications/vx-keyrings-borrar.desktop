@@ -1,9 +1,10 @@
 [Desktop Entry]
 Encoding=UTF-8
+
 Name=Delete All User's Keyring 
 Name[en]=Delete All User's Keyring 
-Name[es]=Borrar todos los anillos de claves de los usuarios
-Name[es_ES]=Borrar todos los anillos de claves de los usuarios
+Name[es]=Eliminar Anillos de Claves
+Name[es_ES]=Eliminar Anillos de Claves
 
 Comment=Delete all user's keyrings when we do not want to use them
 Comment[en]=Delete all user's keyrings when we do not want to use them
@@ -14,6 +15,6 @@ Icon=key-amarilla
 Exec=/usr/bin/vx-pk-keyrings-borrar
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

@@ -1,3 +1,72 @@
+vx-dga-l-scripts (3.2-21) unstable; urgency=low
+
+  * Upgrade script PDIS: Driver y software de Interwrite soluciona problema de CPU
+  * Upgrade scritp PDIS: Nuevos Drivers para Promethean. Soporte sistemas 64 bits
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Fri, 26 Apr 2019 10:00:06 +0200
+
+vx-dga-l-scripts (3.2-20) unstable; urgency=low
+
+  * Solucionado problema con trash:/// vx-check-if-is-in-profile-dirs
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 26 Mar 2019 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-19) unstable; urgency=low
+
+  * Se añaden impresoras en información global
+  * Se elimina la tabla de enrutamiento en información global
+  * Se crea un script para imponer permisos rx de manera recursiva
+  * Se corrigen los problemas en el script de resetear navegadores Web
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 21 Mar 2019 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-18) unstable; urgency=low
+
+  * Se corrige el problema de la rutas:
+  * trash:/// 
+  * smb:// 
+  * Distintas a una ruta linux en los scripts:
+  * vx-check-if-...-is-in-desktop-dir
+  * Si se detecta gui no sacamos ningún mensaje y salimos
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 14 Feb 2019 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-16) unstable; urgency=low
+
+  * Se añade las funciones en vx-funcs-bash para chequear si son directorios o archivos lo pasado como parámetros
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 17 Jun 2019 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-15) unstable; urgency=low
+
+  * Se ha separado la parte cli de vx-keyrings-borrar a vx-keyrings-borrar-cli
+  * Se eliminan los scripts de reinciado y apagado (synapse ya incluye) y cerrar sesión se desvincula del menu
+  * Los lanzadores se ubican en Vitalinux, sin agrupar por Sistema
+  * Se añade un conjunto de funciones en vx-funcs-bash para su reutilización en los scripts del proyecto Vitalinux
+  * Se añade la opción de consultar el home del usuario gráfico vx-home-usuario-grafico
+  * Se añade la opción de resetear los navegadores Web Firefox y Chrome
+  * Se añade en el fichero control un Replaces a vx-dga-l-actions-explorador-archivos por pasar a este paquete sus ejecutables
+  * Se añade un script para saber si un directorio o archivo no se encuentra en el DESKTOP DIR del usuario
+  * Se ha añadido un lanzador para poder crear accesos directos en el Escritorio
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 13 Dec 2018 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-13) unstable; urgency=low
+
+  * Se elimina la dependencia de la version de libc6 para la instalación de las pizarras Smartboard
+  * Se añade un script para habilitar o deshabilitar el touchscreen de los tablets (p.e. HP elite)
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 17 Sep 2018 11:53:06 +0200
+
+vx-dga-l-scripts (3.2-12) unstable; urgency=low
+
+  * Se ha añadido un script para configurar impresoras: vx-conf-impresoras
+  * Se ha añadido un script para parsear archivos INI: vx-configparser-ini
+  * Se ha añadido la opción de conocer el HOME de un usuario pasado por parámetro en vx-home-usuarios-graficos
+  * La reinstalación del driver de hitachi elimina y vuelve a instalar lsadrv para solucionar problemas de comunicación con Hitachi Trio
+
+ -- Arturo Martín <amartinromero@gmail.com>  Mon, 14 May 2018 00:10:00 +0200
+
 vx-dga-l-scripts (3.2-11) unstable; urgency=low
 
   * Se ha añadido un script para crear uno o varios usuarios: vx-crear-usuarios

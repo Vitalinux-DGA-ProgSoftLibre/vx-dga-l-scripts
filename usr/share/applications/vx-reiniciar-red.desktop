@@ -1,13 +1,20 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Reiniciar la Red
+
+Name=Restart the Network
+Name[en]=Restart the Network
 Name[es]=Reiniciar la Red
 Name[es_ES]=Reiniciar la Red
-Comment=Aplicación que permite Reiniciar la Red
+
+Comment=Application that allows Restart the Network environment
+Comment[en]=Application that allows Restart the Network environment
+Comment[es]=Aplicación que permite Reiniciar el entorno de Red
+
 Icon=vx-red
+
 Exec=/usr/bin/vx-pk-reiniciared
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

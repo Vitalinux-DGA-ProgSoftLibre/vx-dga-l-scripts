@@ -1,0 +1,17 @@
+#!/bin/bash
+
+function obtener_home_usuario() {
+  # Comprobamos que el usario existe y devolvemos su HOME:
+  if id "${1}" >& /dev/null && \
+    getent passwd "${1}" | awk -F ":" '{print $6}' ; then
+		exit 0
+	else
+		exit 1
+	fi
+}
+
+# Recibe como parámetro el usuario a conocer su HOME
+# En caso contrario se informará del home del usuario gráfico actual
+[ -z "${1}" ] && \
+  obtener_home_usuario "$(vx-usuario-grafico)" || \
+  obtener_home_usuario "${1}"

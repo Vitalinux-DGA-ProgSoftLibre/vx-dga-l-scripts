@@ -1,0 +1,20 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Enable or Disable TouchScreen Wacom
+Name[en]=Enable or Disable TouchScreen Wacom
+Name[es]=Habilitar o Deshabilitar el TouchScreen Wacom
+Name[es_ES]=Habilitar o Deshabilitar el TouchScreen Wacom
+
+Comment=Program that allows Modifying the TouchScreen Wacom status
+Comment[en]=Program that allows Modifying the TouchScreen Wacom status
+Comment[es]=Programa que permite Modificar el estado del TouchScreen Wacom
+Comment[es_ES]=Programa que permite Modificar el estado del TouchScreen Wacom
+
+Icon=wacom
+Exec=/usr/bin/vx-touchscreen-onoff
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;
+StartupNotify=true
+Hidden=false

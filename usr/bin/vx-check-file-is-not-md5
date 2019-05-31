@@ -1,0 +1,41 @@
+#!/bin/bash
+# Devuelve True o False si detecta que NO es un fichero MD5
+
+# El contenido del fichero MD5 contiene dos campos:
+# 1) El Código MD5 de 32 car.Hex. y 2) la Ruta del archivo del que se generó
+ISNOTMD5=0
+until [ -z "${1}" ] ; do
+    if [ -f "${1}" ] ; then
+        if (( $(wc -l < "${1}") == 1 )) ; then
+            COD="$(awk -F' ' '{print $1}' "${1}")"
+            RUTA="$(awk -F' ' '{print $2}' "${1}")"
+            DIRBASE="$(dirname "${1}")"
+                [[ "${RUTA}" =~ ^/ ]] && \
+                    FICH="${RUTA}" || \
+                    FICH="${DIRBASE}/${RUTA}"
+            if [ -f "${FICH}" ] && \
+            (( ${#COD} == 32 )) && \
+            [[ "$(file --mime-type -b "${1}")" == "text/plain" ]] && \
+            [[ "${1##*.}" =~ ^md5$|^md5sum$|^MD5$|^MD5SUM$ ]] ; then
+                ISNOTMD5=0
+                break
+            else
+                ISNOTMD5=1
+            fi
+        else
+            ISNOTMD5=1
+        fi
+    else
+        echo False
+        exit 1
+    fi
+    shift
+done
+
+if (( ${ISNOTMD5} == 1 )) ; then
+    echo True
+    exit 0
+else
+    echo False
+    exit 1
+fi

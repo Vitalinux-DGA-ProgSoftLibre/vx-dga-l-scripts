@@ -8,6 +8,6 @@ Icon=java
 Exec=/usr/bin/vx-pk-instalar-java
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

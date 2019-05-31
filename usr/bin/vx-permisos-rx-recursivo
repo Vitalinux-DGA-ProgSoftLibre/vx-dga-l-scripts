@@ -1,0 +1,30 @@
+#!/bin/bash
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+[ -z "${1}" ] && \
+vx-mensaje_y_salir "Aplicar Permisos (rx)" \
+"Debes pasar como parametro el directorio sobre el que actuar ..." \
+"1"
+
+until [ -z "${1}" ] ; do
+    RUTA="$(vx-obtener_ruta_absoluta "${1}")"
+    if vx-detectar_gui ; then
+        (
+            echo "#Asignando +rx sobre ${1}"
+            chmod -R +rx "${RUTA}"
+        ) | yad --title "Asignando Permisos de Lectura y Escritura" \
+        --center --width 500 \
+        --text-align center \
+        --window-icon vitalinux \
+        --image vitalinux \
+        --text "  Asignando permisos Lectura y Escritura en ${1}  " \
+        --progress  --pulsate --auto-close
+    else
+        chmod -Rv +rx "${RUTA}"
+    fi
+    shift
+done
+
+

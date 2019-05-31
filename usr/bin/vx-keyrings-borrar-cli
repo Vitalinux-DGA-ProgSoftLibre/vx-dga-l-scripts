@@ -1,0 +1,16 @@
+#!/bin/bash
+# Script que borrar todos los anillos de claves que encuentre por usuario
+
+del_keyrings(){
+  for HOMEUSU in $(vx-home-usuarios-graficos); do
+    find ${HOMEUSU} -name "*.keyring" -exec rm -f '{}' \;
+  done
+}
+
+USER=$(whoami)
+
+if [ "$USER" = "root" ]; then
+	del_keyrings
+else
+		echo "No tiene permiso para ejecutar éste programa ¡¡Debes ser \"administrador\"!!"
+fi

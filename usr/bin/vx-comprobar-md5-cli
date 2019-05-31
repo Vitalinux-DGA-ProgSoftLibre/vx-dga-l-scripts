@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Obtenemos la lista de los parámetros recibidos:
+# Recibimos una lista de archivos md5 para su posterior comprobación (*.md5 o *.md5sum)
+# Si procede de un "Custom Action": %F son la lista de todas las rutas absolutas de los archivos seleccionados
+NUMPARAM="${#}"
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+if [[ -z "${1}" ]] || [ ! -f "${1}" ]  ; then
+	TITULO="Error en la Llamada al Programa"
+	TEXTO="Debes Introducir al menos un parámetro: la ruta de un archivo MD5"
+	vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
+fi
+
+INCREMENTO="$(echo 100/$NUMPARAM | bc)"
+PORCENTAJE="$(( 0 + ${INCREMENTO} ))"
+NARCHIVO=1
+
+RESULTADO="#"
+# Comprobamos:
+# 1) Que hay parámetros
+# 2) Que los parámetros son ficheros existentes (tanto el fichero md5 como el FICH sobre el que se genero ese md5)
+# 3) Que los ficheros son ficheros de texto plano (los ficheros md5 lo son)
+# 4) Que la extensión del archivo "${1##*.}" es *.md5 o *.md5sum (la extensión le da igual a apriori a md5sum, pero nos sirve para filtrar archivos)
+until test -z "${1}" ; do
+    echo "${PORCENTAJE}"
+    FICHMD5="$(basename "${1}")"
+    # El contenido del fichero MD5 contiene dos campos:
+    # 1) El Código MD5 de 32 car.Hex. y 2) la Ruta del archivo del que se generó
+    COD="$(awk -F' ' '{print $1}' ${1})"
+    RUTA="$(awk -F' ' '{print $2}' ${1})"
+    DIRBASE="$(dirname "${1}")"
+    [[ "${RUTA}" =~ ^/ ]] && \
+        FICH="${RUTA}" || \
+        FICH="${DIRBASE}/${RUTA}"
+    [ -d "${DIRBASE}" ] && cd "${DIRBASE}"
+
+    if test -f "${1}" && \
+        test -f "${FICH}" && \
+        (( ${#COD} == 32 )) && \
+        test "$(file --mime-type -b "${1}")" = "text/plain" && \
+        [[ "${1##*.}" =~ ^md5$|^md5sum$|^MD5$|^MD5SUM$ ]] ; then
+   
+        echo "#=> Comprobando el MD5 de ${FICH} ..."
+        if md5sum -c "${1}" &> /dev/null ; then
+            RESULTADO="${RESULTADO}=> Ok: ${FICH} - MD5 correcto\n"
+        else
+            RESULTADO="${RESULTADO}=> Error: No se ha podido comprobar el MD5 de ${FICH}\n"
+        fi
+    else
+        RESULTADO="${RESULTADO}=> Error: Problemas para chequear el MD5 de ${FICH}\n"
+    fi
+    echo "${RESULTADO}"
+    ((++NARCHIVO))
+    PORCENTAJE="$(( ${PORCENTAJE} + ${INCREMENTO} ))"
+    shift
+done

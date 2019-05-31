@@ -15,6 +15,6 @@ Icon=camara
 Exec=gnome-screenshot --interactive
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

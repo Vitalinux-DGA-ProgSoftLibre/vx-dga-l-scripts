@@ -1,13 +1,20 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Comprobar y Reparar Software del Equipo
+
+Name=Check and Repair Computer Software
+Name[en]=Check and Repair Computer Software
 Name[es]=Comprobar y Reparar Software del Equipo
 Name[es_ES]=Comprobar y Reparar Software del Equipo
-Comment=Aplicación que permite Comprobar y Reparar el Software del Equipo
+
+Comment=Application that allows to Check and Repair the Software of the Equipment
+Comment[en]=Application that allows to Check and Repair the Software of the Equipment
+Comment[es]=Aplicación que permite Comprobar y Reparar el Software del Equipo
+
 Icon=application-check
+
 Exec=/usr/bin/vx-pk-comprobar-estado-software
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

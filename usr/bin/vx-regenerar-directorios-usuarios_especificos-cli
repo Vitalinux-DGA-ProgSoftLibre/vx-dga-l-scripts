@@ -1,0 +1,95 @@
+#!/bin/bash
+
+#Diseñado por Arturo Martín
+#Proyecto Software Libre DGA
+
+EJECUTOR=$(whoami)
+
+function log_xsession(){
+#
+# Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
+# Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
+# 
+	while getopts 'o:' OPT; do
+        case ${OPT} in
+            o) LOGFILE=${OPTARG};;
+        esac
+	done
+
+	if [ "${LOGFILE}" ] ; then
+		if [ ! -d /var/log/vitalinux ]; then
+			mkdir -p /var/log/vitalinux
+		fi
+		LOGFILE="/var/log/vitalinux/${LOGFILE}"
+	else
+		LOGFILE="/tmp/logfile.regenerar-perfil-usuarios_especificos.log"
+	fi
+	
+	exec 2>&1
+	exec > >(tee -i "${LOGFILE}" )
+	
+}
+
+log_xsession -o vx-regenerar-perfil-usuarios.log
+
+if test "${EJECUTOR}" != "root" ; then
+	echo "Se requiren privilegios de \"root\" para lanzar Regenerar los perfiles de los usuarios ..."
+	exit 1
+fi
+
+echo "=> $(date) - Se va a Regenerar los perfiles de los usuarios del sistema ..."
+
+# Recogemos los usuarios enviados como parámetros:
+USUARIOS="$*"
+
+for USUARIO in ${USUARIOS} ; do
+
+	HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
+	BASE="/etc/skel/Escritorio/"
+	if test -d "${BASE}" ; then
+		for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
+			if test -d "${HOMEUSUARIO}/${DIR}" ; then
+				if su "${USUARIO}" \
+					-c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
+					--login &> /dev/null ; then
+					echo " --> OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+				else
+					echo " --> ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+				fi
+			fi
+		done
+	fi
+
+	#BASE="$(su "${USUARIO}" -c 'mktemp -d --tmpdir vx-sincro-directorios.XXXXXXXX' --login)"
+	## Definimos los distintos nombres de los directorios del perfil en los 4 idiomas principales:
+	# Listas=(Español Inglés Alemán Francés)
+	LISTADO_DIRECTORIOS=(Descargas:Downloads:Downloads:Téléchargements \
+		Documentos:Documents:Dokumente:Documents \
+		Imágenes:Pictures:Bilder:Images \
+		Vídeos:Videos:Videos:Vidéos \
+		Música:Music:Musik:Musique \
+		Plantillas:Templates:Vorlagen:Modèles \
+		Público:Public:Öffentlich:Public)
+	
+	for DIRS in "${LISTADO_DIRECTORIOS[@]}" ; do
+    	SAVEIFS=${IFS}
+    	IFS=":"
+    	LISTA_DIR=( $DIRS )
+    	BASE="/etc/skel-directorios/${LISTA_DIR[0]}/"
+    	if test -d "${BASE}" ; then
+		    for DIR in ${LISTA_DIR[*]} ; do
+				echo "=> Se va a tratar de sincronizar el directorio: \"${DIR}\""
+		      	if test -d "${HOMEUSUARIO}/${DIR}" ; then
+		      		if su "${USUARIO}" \
+					-c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
+					--login > /dev/null 2>&1; then
+						echo " --> OK: Se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
+					else
+						echo " --> ERROR: No se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
+					fi
+				fi
+		    done
+		fi
+    	IFS=${SAVEIFS}
+  	done
+done

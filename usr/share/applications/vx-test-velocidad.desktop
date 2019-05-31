@@ -1,13 +1,20 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Test de Velocidad Internet
+
+Name=Internet Speed Test
+Name[en]=Internet Speed Test
 Name[es]=Test de Velocidad Internet
 Name[es_ES]=Test de Velocidad Internet
-Comment=Test de Velocidad Internet que permite conocer la Velocidad de Subida y Bajada o Descarga
+
+Comment=Internet Speed Test that allows to know the Speed of Ascent and Descent or Download
+Comment[en]=Internet Speed Test that allows to know the Speed of Ascent and Descent or Download
+Comment[es]=Test de Velocidad Internet que permite conocer la Velocidad de Subida y Bajada o Descarga
+
 Icon=upload-download
+
 Exec=/usr/bin/vx-test-velocidad
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

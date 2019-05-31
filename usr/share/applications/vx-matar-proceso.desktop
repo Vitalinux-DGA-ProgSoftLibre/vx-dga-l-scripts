@@ -1,13 +1,20 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Detener o Matar Programa
+
+Name=Stop or Kill Program
+Name[en]=Stop or Kill Program
 Name[es]=Detener o Matar Programa
 Name[es_ES]=Detener o Matar Programa
-Comment=Fuerza la Finalización de un Programa en Ejecución
-Icon=pistola-512x
+
+Comment=Force the Completion of a Program in Execution
+Comment[en]=Force the Completion of a Program in Execution
+Comment[es]=Fuerza la Finalización de un Programa en Ejecución
+
+Icon=pistola
+
 Exec=/usr/bin/xkill
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

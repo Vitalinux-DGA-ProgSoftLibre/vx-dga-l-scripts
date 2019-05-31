@@ -1,0 +1,158 @@
+#!/bin/bash
+
+USER=$(whoami)
+if test "${USER}" != "root" ; then
+	echo "=> Necesitas privilegios de \"root\" para poder lanzar este programa ..."
+  exit 1
+fi
+
+function conftea4cups() {
+  ## Imponemos que una determinada impresora la gestione tea4cups:
+  IMPRESORA="${1}"
+  FICHERO="/etc/cups/printers.conf"
+  # Ponemos cada impresora en una única línea, separando los campos mediante un "^", para luego modificarlo con un sed:
+  ## 1) Mediante el comando tr elinamos los saltos de línea: tr -s "\n" "^" < "${FICHERO}"
+  ## 2) Separamos cada impresora configurada en cups en una línea diferente al saber que empiezan por un "<" (el </ es su cierre): sed -e "s#<[^/]#\n&#g"
+  ## 3) Eliminamos las líneas comentadas y las líneas en blanco: sed -e "/^#.*/d" | sed -e "/^$/d"
+  ## 4) Nos quedamos con la línea asociada a la impresora a configurarle el tea4cups: grep "<Printer[ ]*${IMPRESORA}"
+  ## 3) Nos aseguramos de que no este ya definido el protocolo tea4cups para esa impresora: /tea4cups/!
+  tr -s "\n" "^" < "${FICHERO}" | \
+    sed -e "s#<[^/]#\n&#g" | \
+    sed -e "/^#.*/d" | \
+    sed -e "/^$/d" | \
+    grep "<Printer[ ]*${IMPRESORA}" | \
+    sed -e "/\^DeviceURI.*/ { /tea4cups:/! { s/\(DeviceURI[ ][^a-zA-Z]*\)\(.*\)/DeviceURI tea4cups:\/\2/g} }"
+}
+
+function confimpresora {
+  # Recibimos los siguientes parámetros:
+  ## 1) La URL de Internet donde localizar el PPD. De ella extraemos el nombre del PPD y la ruta de DESTINO
+  ## 2) El nombre con el que queremos que aparezca la impresora en el sistema
+  ## 3) El tipo de conexión (p.e. tea4cups:/socket://192.168.1.100:9100)
+  ## 4) Se indica con "1" o un "0"  si queremos que sea la impresora predeterminada
+  PPD="$1"
+  NOMBREPPD="$(basename "${PPD}")"
+  DIR="/usr/share/cups/model/vitalinux"
+  DESTINO="${DIR}/${NOMBREPPD}"
+  NOMBRE="$2"
+  CONEXION="$3"
+  IP="$(echo "${CONEXION}" | awk -F "//" '{ print $2 }' | cut -d":" -f1)"
+  PREDETERMINADA="$4"
+  # Comprobamos si existe el directorio de destino de los PPDs
+  if ! test -d "${DIR}" ; then
+      mkdir -p "${DIR}"
+  fi
+  # Comprobamos si existe el PPD de destino:
+  if ! test -f "${DESTINO}" ; then
+    cd "${DIR}" || return
+    wget "${PPD}" || return
+  fi
+  lpadmin -p "${NOMBRE}" -E -v "${CONEXION}" -P "${DESTINO}"
+  # Comprobamos si queremos que sea la impresora predeterminada:
+  if test "${PREDETERMINADA}" -eq 1 ; then
+    lpadmin -d "${NOMBRE}" 
+  fi
+  # Habilitamos la impresora:
+  # /etc/init.d/cups restart &> /dev/null
+  cupsenable "${NOMBRE}"
+  cupsaccept "${NOMBRE}"
+}
+
+function filtros_konica()
+{
+  # Instalamos los filtros de konica:
+  DIR="/usr/lib/cups/filter"
+  if test -d "${DIR}" ; then
+    cd "${DIR}" || return
+    if ! test -f "${DIR}/KMbeuEmpPS.pl" ; then
+      wget http://migasfree.educa.aragon.es/ppds/ies-torreespejos/KMbeuEmpPS.pl
+      chmod +x "${DIR}/KMbeuEmpPS.pl"
+    fi
+    if ! test -f "${DIR}/KMbeuEnc.pm" ; then
+      wget http://migasfree.educa.aragon.es/ppds/ies-torreespejos/KMbeuEnc.pm
+      chmod +x "${DIR}/KMbeuEnc.pm"
+    fi
+  fi
+}
+
+function eliminar_impresoras_mal_instaladas()
+{
+  # Eliminamos impresoras mal instaladas (protocolo /dev/null):
+  for NOMBRE in $(lpstat -v | grep "/dev/null" | cut -d" " -f3 | cut -d":" -f1) ; do
+    if (lpstat -v | grep "${NOMBRE}:" &> /dev/null) ; then
+      lpadmin -x "${NOMBRE}"
+    fi
+  done
+}
+
+function eliminar_impresoras_diferentes_a() {
+  # Eliminamos la Impresoras existen diferentes a las pasadas como parámetros.
+  ## Creamos un listado de impresoras a mantener separadas por un "\|" para que lo reconozca el grep (p.e. "CUPS-PDF-Printer\|DCP-7045N")
+  LISTA_IMPRESORAS="${1}"
+  shift
+  until test -z "${1}" ; do
+    LISTA_IMPRESORAS="${LISTA_IMPRESORAS}\|${1}"
+    shift
+  done
+
+  for IMPRESORA in $( lpstat -v | cut -d" " -f3 | cut -d":" -f1 | grep -v "${LISTA_IMPRESORAS}" ) ; do
+    if (lpstat -v | grep "${IMPRESORA}:" &> /dev/null) ; then
+      lpadmin -x "${IMPRESORA}"
+    fi
+  done
+}
+
+function eliminar_impresoras() {
+  # Eliminamos las Impresoras pasadas como parámetros.
+  until test -z "${1}" ; do
+    IMPRESORA="${1}"
+    if (lpstat -v | grep "${IMPRESORA}:" &> /dev/null) ; then
+      lpadmin -x "${IMPRESORA}"
+    fi
+    shift
+  done
+}
+
+
+# Para llamar a la función a ejecutar pasada como parámetro, acompañado este a su vez de sus parámetros, se puede hacer uso de "$@":
+## "$@"
+## En este caso analizaremos los parámetros para controlar desde aquí lo que le llega a cada función:
+
+if ! test -z "${1}" ; then
+  OPCION="${1}"
+  shift
+  # Calculamos cuantos parámetros acompañan a la OPCION elegida:
+  NUMPAR="$#"
+fi
+
+case "${OPCION}" in
+  "instalar" )
+    if test "${NUMPAR}" -eq 4 ; then
+      confimpresora "${1}" "${2}" "${3}" "${4}"
+    else
+      mensaje_error "Debes introducir al menos 4 parámetros"
+    fi
+  ;;
+  "eliminar" )
+    eliminar_impresoras "$@"
+  ;;
+  "eleminar_diferentes_a" )
+    eliminar_impresoras_diferentes_a "$@"
+  ;;
+  "tea4cups" )
+    if ! test -z "${1}" ; then
+      conftea4cups "${1}"
+    else
+      mensaje_error "Debes introducir como parámetro el nombre de la impresora a configurarle el tea4cups"
+    fi
+  ;;
+  "filtroskonica" )
+    filtros_konica
+  ;;
+esac
+
+# Eliminamos aquellas impresoras que no se hayan instalado correctamente: /dev/null
+eliminar_impresoras_mal_instaladas
+# Reiniciamos cups para que surta efecto toda la configuración hecha:
+sleep 1
+/etc/init.d/cups restart &> /dev/null

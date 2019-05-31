@@ -16,6 +16,6 @@ Icon=computer-icon
 Exec=/usr/bin/vx-pk-hostname
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

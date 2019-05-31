@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Chequeamos si el usuario que llama al script pertenece al grupo sudo:
+if [[ "$(id -Gn | tr -s " " ":" | sed "s/.*/:&:/g")" =~ :sudo: ]] ; then
+    echo True
+    exit 0
+else
+    echo False
+    exit 1
+fi

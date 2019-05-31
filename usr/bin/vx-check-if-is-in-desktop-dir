@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#  Permite saber si el archivo o directorio pasado como parámetro esta en el
+## Escritorio del usuario
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+function salir() {
+    TITULO="Error en la Llamada al Programa"
+	TEXTO="${1:-"Debes tener una sesión gráfica abierta e introducir al menos un parámetro: la ruta de un Directorio o Archivo"}"
+    if ! vx-detectar_gui ; then
+	    vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
+    fi
+    exit 1
+}
+
+[ -z "${1}" ] && salir
+
+HOMEUSU="$(vx-home-usuario-grafico)"
+## Obtenemos el directorio que hace de Escritorio en el usuario:
+# DIRDESKTOP=$(xdg-user-dir DESKTOP)
+[ -f "${HOMEUSU}/.config/user-dirs.dirs" ] && \
+    . "${HOMEUSU}/.config/user-dirs.dirs" || \
+    salir
+DIRDESKTOP="${HOMEUSU}/$(basename "${XDG_DESKTOP_DIR}")"
+#echo "=> DESKTOR DIR de $(vx-usuario-grafico): \"${DIRDESKTOP}\""
+
+ISINDESKTOP=0
+until [ -z "${1}" ] ; do
+    # Comprobamos si la ruta es relativa o comienza por ~:
+    # [[ "hola que tal" =~ ^([^/]|~) ]] && echo ... || echo ...
+    [[ "${1}" =~ ^[^/] ]] && RUTA="$(pwd)/${1}"
+    [[ "${1}" =~ ^~ ]] && RUTA="${1//\~/$(vx-home-usuario-grafico)}"
+    [[ "${1}" =~ ^/ ]] && RUTA="${1}"
+    ! ( [ -d "${RUTA}" ] || [ -f "${RUTA}" ] || [[ "${RUTA}" =~ trash:/// ]] ) && salir
+    #echo "=> DIR BASE de ${1}: \"$(dirname "${RUTA}")\""
+    if [[ "${DIRDESKTOP}" == "$(dirname "${RUTA}")" ]] ; then
+        #echo "=> ${1} esta en el DESKTOP DIR de $(vx-usuario-grafico)"
+        ISINDESKTOP=1
+    fi
+    shift
+done
+[[ "${ISINDESKTOP}" == "1" ]] && ( echo True && exit 0 ) || (echo False && exit 1)
+

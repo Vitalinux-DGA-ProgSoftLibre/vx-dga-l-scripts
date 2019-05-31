@@ -4,6 +4,32 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
 
+<action id="sistema.pkexec.xdgopen">
+    <message>Authentication is required to Open as Root: </message>
+    <message xml:lang="es">Se requiere autenticación para Abrir como Root: </message>
+    <icon_name>vitalinux</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/xdg-open</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+  </action>
+
+<action id="sistema.pkexec.openasroot">
+    <message>Authentication is required to Open as Root</message>
+    <message xml:lang="es">Se requiere autenticación para Abrir como Root: </message>
+    <icon_name>vitalinux</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/vx-abrir-como-root</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+  </action>
+
 <action id="sistema.pkexec.keyringsdeleteall">
     <message>Authentication is required to delete keyring's users</message>
     <message xml:lang="es">Para borrar los anillos de claves de los usuarios debe autenticarse omo administrador del sistema</message>

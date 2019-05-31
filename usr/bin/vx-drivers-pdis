@@ -209,7 +209,8 @@ function descargar-software-pdi {
 		;;
 
 		"Interwrite")
-		FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.3.0.97"
+		  FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.5.0.24 \
+		    /pdis/Interwrite/DeviceManager_Ubuntu_7.7.0.5"
 		;;
 
 		"IQBoard")
@@ -233,6 +234,26 @@ function descargar-software-pdi {
 
 		"Promethean")
 		if [ "$ARCHSO" = "64" ] ; then
+		  FILESPDI="/pdis/Promethean/xenial_last/promethean64_xenial/activaid_2.0.1~Ubuntu~1604_amd64.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire_2.14.67304-1.amd64_amd64.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-help-es_1.0.2-14_all.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activresources-core-es_1.0.1-147_all.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activdriver_5.17.14-0~Ubuntu~1604_amd64.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-32bitdependsfor64bit_2.14.67304-1.i386_i386.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activ-meta-es_2.0.0-71_amd64.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activtools_5.17.14-0~Ubuntu~1604_amd64.deb"
+		/pdis/Promethean/xenial_last/promethean32_xenial/
+		else
+		  FILESPDI="/pdis/Promethean/xenial_last/promethean32_xenial/activaid_2.0.1~Ubuntu~1604_i386.deb \
+		    /pdis/Promethean/xenial_last/promethean32_xenial/activhwr-es_1.0.1-79_all.deb \
+		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire-help-es_1.0.2-14_all.deb \
+		    /pdis/Promethean/xenial_last/promethean32_xenial/activtools_5.17.14-0~Ubuntu~1604_i386.deb \
+		    /pdis/Promethean/xenial_last/promethean32_xenial/activdriver_5.17.14-0~Ubuntu~1604_i386.deb \
+		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb
+		    /pdis/Promethean/xenial_last/promethean32_xenial/activ-meta-es_2.0.0-71_i386.deb"
+		fi
+<<COMMENT
+		if [ "$ARCHSO" = "64" ] ; then
 		  FILESPDI="/pdis/Promethean/promethean_64/activaid_5.14.21-0.deb \
 		  	/pdis/Promethean/promethean_64/activdriver_5.14.21-0.deb \
 		  	/pdis/Promethean/promethean_64/activtools_5.14.21-0.deb"
@@ -242,6 +263,7 @@ function descargar-software-pdi {
 		  	/pdis/Promethean/promethean_32/activinspire_2.4.66096-1.i386_i386.deb \
 		  	/pdis/Promethean/promethean_32/activtools_5.14.21-0.deb"
 		fi
+COMMENT
 		;;
 
 		"Smartboard")
@@ -335,6 +357,8 @@ function instalar-software-pdi {
 		apt-get --assume-yes --force-yes install libusb-0.1-4:i386 libxtst6-dbg:i386 libxtst6:i386
 		# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
 		# pero tampoco molesta que se cargue en memoria
+		dpkg -l | grep -e "vx-dga-l-lsadrv-hitachi" >/dev/null 2>/dev/null  && \
+                        apt-get --assume-yes --force-yes purge vx-dga-l-lsadrv-hitachi
 		apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
 		# Modificamos el lanzador de calibrado que no se ejecuta correctamente desde entorno grafico
 		if [ -f /usr/share/applications/hitachi-starboard-calibrate.desktop ] ; then
@@ -345,11 +369,12 @@ function instalar-software-pdi {
 	;;
 
 	"Interwrite")
-	if test -f ./WorkSpace_Ubuntu_6.3.0.97 ; then
-		chmod +x /opt/pkgs/pdis/WorkSpace_Ubuntu_6.3.0.97
-		/opt/pkgs/pdis/WorkSpace_Ubuntu_6.3.0.97
-
-	fi
+	[ -f WorkSpace_Ubuntu_6.5.0.24 ] && \
+		chmod +x WorkSpace_Ubuntu_6.5.0.24 && \
+		  ./WorkSpace_Ubuntu_6.5.0.24
+	[ -f DeviceManager_Ubuntu_7.7.0.5 ] && \
+		chmod +x DeviceManager_Ubuntu_7.7.0.5 && \
+		  ./DeviceManager_Ubuntu_7.7.0.5
 	;;
 
 	"IQBoard")
@@ -392,6 +417,9 @@ function instalar-software-pdi {
 	;;
 
 	"Promethean")
+		dpkg -i /opt/pkgs/pdis/activ*.deb
+		apt-get -f --assume-yes --force-yes install
+<<COMMENT
 	if [ "$ARCHSO" = "64" ] ; then
 		#apt-get install dkms libssl0.9.8 gamin libgamin0 libxdo3 xdotool libxcb-xinerama0
 		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
@@ -405,6 +433,7 @@ function instalar-software-pdi {
 		dpkg -i /opt/pkgs/pdis/activinspire_2.4.66096-1.i386_i386.deb
 	fi
 	apt-get -f --assume-yes --force-yes install
+COMMENT
 	;;
 
 	"Smartboard")
@@ -416,7 +445,7 @@ function instalar-software-pdi {
 		/opt/pkgs/pdis/smart-notebook_11.0.7511.0-1_i386.deb \
 		/opt/pkgs/pdis/smart-product-drivers_11.3.2121.1-1_i386.deb
 	if [ "$SB480" = "1" ]  ; then
-		apt-get -y --force-yes install libc6-dev=2.19-0ubuntu6.13 libc6=2.19-0ubuntu6.13 libc-dev-bin=2.19-0ubuntu6.13 dkms
+		apt-get -y --force-yes install libc6-dev libc6 libc-dev-bin dkms
 		dpkg -i /opt/pkgs/pdis/xf86-input-nextwindow-trusty_0.3.4~trusty1_i386.deb \
 			/opt/pkgs/pdis/nwfermi-0.6.5.1_i386.deb
 	fi

@@ -1,0 +1,24 @@
+#!/bin/bash
+# El comando lp/lpr permiten a través de CUPS imprimir directamente diversos tipos de archivos:
+## texto, PostScript, PDF, imagenes, etc.
+
+function salir() {
+    echo "${1}"
+    exit 1
+}
+
+# Importamos las funciones básicas de BASH creadas en el proyecto Vitalinux:
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+# Puede recibir 1 o 2 parámetros: ${#}
+[[ "${#}" < 1 ]] && salir "Debes indicar 1 o 2 parámetros: 1) Documento, [ 2) Impresora ]"
+
+[ -f "${1}" ] && DOCUMENTO="${1}" || salir "El documento indicado no existe ..."
+
+! [ -z "${2}" ] && IMP_PREDETERMINADA="${2}" || IMP_PREDETERMINADA="$(lpstat -d | awk -F ": " '{print $2}')"
+lp -d "${IMP_PREDETERMINADA}" "${DOCUMENTO}" && \
+    vx-mensaje "Servicio de Impresión" \
+        "Se ha mandado el documento <b>${DOCUMENTO}</b> a la impresora <b>${IMP_PREDETERMINADA}</b>" \
+        "impresora" \
+        "Cerrar"

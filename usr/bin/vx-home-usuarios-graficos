@@ -1,14 +1,23 @@
 #!/bin/bash
 
-# Script que nos permite saber la lista de los HOME de los USUARIOS con una shell válida
-if getent passwd \
-	| awk -F ":" \
-		'{if ( $3 > 999 \
-				&& $7~/\/bin\/.*/ \
-				&& $7 != "/bin/false" \
-				&& $7 != "/bin/sbin/nologin" ) \
-					{print $6}}' ; then
-	exit 0
+if test -z "${1}" ; then
+	# Nos permite saber la lista de los HOME de los USUARIOS con una shell válida:
+	if getent passwd \
+		| awk -F ":" \
+			'{if ( $3 > 999 \
+					&& $7~/\/bin\/.*/ \
+					&& $7 != "/bin/false" \
+					&& $7 != "/bin/sbin/nologin" ) \
+						{print $6}}' ; then
+		exit 0
+	else
+		exit 1
+	fi
 else
-	exit 1
+	# Si se le pasa como parámetro el nombre de un usuario se le indica su HOME:
+	if getent passwd "${1}" | awk -F ":" '{print $6}' ; then
+		exit 0
+	else
+		exit 1
+	fi
 fi

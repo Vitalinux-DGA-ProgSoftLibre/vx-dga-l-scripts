@@ -1,0 +1,10 @@
+#!/bin/bash
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+RUTA="$(vx-yad-file-select "" "" "escritorio_vx-acceso_directo")"
+
+if [ -d "${RUTA}" ] || [ -f "${RUTA}" ] ; then
+	vx-crear-acceso-directo-escritorio "${RUTA}"
+fi

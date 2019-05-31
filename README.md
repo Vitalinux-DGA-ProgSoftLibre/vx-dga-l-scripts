@@ -9,6 +9,7 @@ Paquete obligatorio para los equipos Vitalinux DGA. Añade funcionalidades extra
 * Obtener información interesante: datos del equipo, comprobar etiquetas
 * Configurar diferentes parámetros: nombre, etiquetas del equipo, dock y pie...
 * Atajos: reiniciar, cerrar sesión.... 
+* Script para habilitar o desabilitar tanto el touchpad como el touch screen
 
 # Aspectos Interesantes
 ```

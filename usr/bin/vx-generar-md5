@@ -1,0 +1,11 @@
+#!/bin/bash
+
+TITULO="Comprobación de Integridad MD5"
+(
+    vx-generar-md5-cli "$@"
+) | yad --title "${TITULO}" \
+		--window-icon vitalinux-actions \
+		--image md5 \
+		--width 660 \
+		--center \
+		--progress --percentage=0 --button="Cerrar":0

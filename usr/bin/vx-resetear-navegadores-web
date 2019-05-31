@@ -1,0 +1,27 @@
+#!/bin/bash
+
+FICHLOG=".vx-resetear-navegadores-web.log"
+LOG="#### $(date)"
+
+# Cierra y Elimina toda la información de los navegadores Web:
+
+# 1) Comenzamos cerrando las posibles sesiones abiertas de los navegadores:
+for NAVEGADOR in "firefox" "chrome" ; do
+    pkill -f "${NAVEGADOR}" && \
+    LOG="${LOG}\nSe han cerrado las ventanas abiertas de ${NAVEGADOR} ..." || \
+    LOG="${LOG}\nNo había ninguna ventana abierta en ${NAVEGADOR} ..."
+done
+
+# 2) Eliminamos los datos almacenados por los navegadores de los usuarios con permisos de hacerlo:
+USUARIO="$(whoami)"
+[[ "${USUARIO}" == "root" ]] && \
+LISTA_USUARIOS="$(vx-home-usuarios-graficos)" || \
+LISTA_USUARIOS="$(vx-home-usuario-grafico)"
+for HOMEUSU in ${LISTA_USUARIOS} ; do
+    for DIR in ".config/google-chrome" ".mozilla" ; do
+        [ -d "${HOMEUSU}/${DIR}" ] && \
+        LOG="${LOG}\nSe va a eliminar ${HOMEUSU}/${DIR}" && \
+        rm -Rf "${HOMEUSU}/${DIR}"
+        echo -e "${LOG}" > "${HOMEUSU}/${FICHLOG}"
+    done
+done

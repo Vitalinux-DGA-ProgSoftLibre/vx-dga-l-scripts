@@ -1,0 +1,8 @@
+#!/bin/bash
+if file "${1}" | cut -d":" -f2 | grep -E "[Tt]ext|ASCII|UTF-" > /dev/null 2>&1 ; then
+    echo True
+    exit 0
+else
+    echo False
+    exit 1
+fi

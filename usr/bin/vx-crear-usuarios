@@ -24,12 +24,6 @@ function Crear_Usuario {
         /usr/sbin/usermod -aG "${GPRIMARIO}" "${USUARIO}" > /dev/null 2>&1 ; then
         echo "$(date) - Se ha añadido al usuario ${USUARIO} al grupo ${GPRIMARIO} ..." >> "${FICH}"
       fi
-      # En el caso de ser un servidor Caché crearemos el usuario de Samba:
-      if ( migasfree-tags -g | grep -q "CHE-" ) ; then
-        if  ! ( pdbedit -Lw | grep -q "${USUARIO}" ) ; then
-                        (echo "${PASSWORD}"; echo "${PASSWORD}") | smbpasswd -as "${USUARIO}" > /dev/null 2>&1
-        fi
-      fi
 
     shift; shift; shift; shift; shift
   done
@@ -38,15 +32,15 @@ function Crear_Usuario {
 if ! test -d /var/log/vitalinux ; then
   mkdir -p /var/log/vitalinux
 fi
-FICH="/var/log/vitalinux/falla-usuarios-tecnologia-IES_Corona.log"
+FICH="/var/log/vitalinux/crear_usuarios.log"
 
-if test ${#} -eq 5 ; then
-	Crear_Usuario "$1" "$2" "$3" "$4" "$5"
+if (( ${#} % 5 == 0 )) ; then
+	Crear_Usuario $*
 else
 	echo "Uso: Debes indicar 5 parametros en la llamada, o multiplos de 5 si se quieren crear varios usuarios ..."
 	echo "USUARIO PASSWORD USERID GPRIMARIO GRUPOID"
-	echo 'Crear_Usuario "USU-1" "faraday" "1301" "profesor" "1100"'
-    echo 'Crear_Usuario "USU-1" "faraday" "1301" "profesor" "1100" \
-        "USU-2" "ampere" "1302" "profesor" "1100" \
-        "USU-3" "ohm" "1303" "profesor" "1100"'
+	echo 'Crear_Usuario "USU-1" "password1" "1301" "profesor" "1100"'
+    echo 'Crear_Usuario "USU-1" "password1" "1301" "profesor" "1100" \
+        "USU-2" "password2" "1302" "profesor" "1100" \
+        "USU-3" "password3" "1303" "profesor" "1100"'
 fi

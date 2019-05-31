@@ -5,9 +5,18 @@
 
 echo "" > /tmp/info-tarjetas-red
 
-if test -f /usr/bin/migasfree-cid ; then
-	CID="$(migasfree-cid)"
+# CID:
+CID=""
+if [ -f "/tmp/.cid.html" ] ; then
+    CID="$(cat "/tmp/.cid.html"  | \
+        grep -E "<h1>.*</h1>" | \
+        sed -e "s#\(<h1>\)\(.*\)\(</h1>\)#\2#g" | \
+        tr -d '[:space:]')"
 fi
+if (( ${#CID} == 0 )) && [ -f "/usr/bin/migasfree-cid" ] ; then
+    CID="$(migasfree-cid)"
+fi
+
 NOMBRE="${HOSTNAME}"
 echo -e "Información asociada al equipo Vitalinux: CID (<b><tt><span foreground='blue'>${CID}</span></tt></b>) y HostName (<b><tt><span foreground='blue'>${NOMBRE}</span></tt></b>)" >> /tmp/info-tarjetas-red
 DISTRO=$(lsb_release -a 2> /dev/null | grep "Description:" | tr -s " " " " | cut -d":" -f2)
@@ -18,45 +27,77 @@ echo -e "Arquitecturas de Vitalinux soportadas por el Hardware: <b><tt><span for
 
 FICH="/tmp/migasfree.tags"
 if test -f "${FICH}" ; then
-	ETIQUETAS="$(cat "${FICH}")"
+    ETIQUETAS="$(cat "${FICH}")"
 else
-	ETIQUETAS="$(sudo migasfree-tags -g)"
+    ETIQUETAS="$(sudo migasfree-tags -g)"
 fi
-
 echo -e "\nEtiquetas Migasfree asignadas:<b><tt><span foreground='blue'>" >> /tmp/info-tarjetas-red
-echo ${ETIQUETAS} | tr -s " " "\n" | grep -n "-" | sed -e "s/:/) /g" | sed -e "s/.*/  &/g" >> /tmp/info-tarjetas-red
+if (( ${#ETIQUETAS} == 0 )) ; then
+    echo " -- Ninguna -- " >> /tmp/info-tarjetas-red
+else
+    echo ${ETIQUETAS} | tr -s " " "\n" | grep -n "-" | sed -e "s/:/) /g" | sed -e "s/.*/  &/g" >> /tmp/info-tarjetas-red
+fi
 echo -e "</span></tt></b>" >> /tmp/info-tarjetas-red
 
 echo -e "Información del direccionamiento IP:" >> /tmp/info-tarjetas-red
 for TARJETA in $(ifconfig | grep ^[a-z] | cut -d" " -f1) ; do
-	MAC=$(ifconfig $TARJETA | grep HW | tr -s " " " " | cut -d" " -f5)
-	IP=$(ifconfig $TARJETA | grep inet: | tr -s " " " " | cut -d" " -f3 | cut -d":" -f2)
-	if test "$IP" != "" -a "$MAC" != "" ; then
-		echo "  -->  Interfaz <b><tt><span foreground='blue'>$TARJETA</span></tt></b>: " >> /tmp/info-tarjetas-red
-		echo "\t\tIP -> <b><tt><span foreground='blue'>$IP</span></tt></b> " >> /tmp/info-tarjetas-red
-		echo "\t\tMAC -> <b><tt><span foreground='blue'>$MAC</span></tt></b>" >> /tmp/info-tarjetas-red
-		echo "" >> /tmp/info-tarjetas-red
-	fi
+    MAC=$(ifconfig $TARJETA | grep HW | tr -s " " " " | cut -d" " -f5)
+    IP=$(ifconfig $TARJETA | grep inet: | tr -s " " " " | cut -d" " -f3 | cut -d":" -f2)
+    if test "$IP" != "" -a "$MAC" != "" ; then
+        echo "  =>  Interfaz <b><tt><span foreground='blue'>$TARJETA</span></tt></b>: " >> /tmp/info-tarjetas-red
+        echo "\t\tIP -> <b><tt><span foreground='blue'>$IP</span></tt></b> " >> /tmp/info-tarjetas-red
+        echo "\t\tMAC -> <b><tt><span foreground='blue'>$MAC</span></tt></b>" >> /tmp/info-tarjetas-red
+        echo "" >> /tmp/info-tarjetas-red
+    fi
 done
 
 GATEWAY=$(route -n | grep UG | tr -s " " " " | cut -d" " -f2)
-echo "  -->  Puerta de Enlace: <b><tt><span foreground='blue'>$GATEWAY</span></tt></b>" >> /tmp/info-tarjetas-red
-echo "  -->  Dirección IP del Servidor Caché: <b><tt><span foreground='blue'>$IPCACHE</span></tt></b>" >> /tmp/info-tarjetas-red
+echo "  =>  Puerta de Enlace: <b><tt><span foreground='blue'>$GATEWAY</span></tt></b>" >> /tmp/info-tarjetas-red
+
+DNS="$(nmcli dev list | grep ^IP4.DNS | tr -s " " " " | cut -d" " -f2 | tr -s "\n" " ")"
+echo "  =>  DNSs: <b><tt><span foreground='blue'>${DNS}</span></tt></b>" >> /tmp/info-tarjetas-red
+
+# IPCACHE
+echo "  =>  Dirección IP del Servidor Caché: <b><tt><span foreground='blue'>$IPCACHE</span></tt></b>" >> /tmp/info-tarjetas-red
 
 if [[ -f /etc/migasfree.conf ]] && ( grep ^Server /etc/migasfree.conf &> /dev/null ) ; then
-	SERVIDORMIGASFREE="$(cat /etc/migasfree.conf | grep ^Server | cut -d'=' -f2)"
-	echo "  --> Servidor Migasfree: <b><tt><span foreground='blue'>$SERVIDORMIGASFREE</span></tt></b>" >> /tmp/info-tarjetas-red
-fi	
+    SERVIDORMIGASFREE="$(grep "^Server" /etc/migasfree.conf | cut -d'=' -f2)"
+    echo "  =>  Servidor Migasfree: <b><tt><span foreground='blue'>$SERVIDORMIGASFREE</span></tt></b>" >> /tmp/info-tarjetas-red
+fi
 
 IPPUBLICA=$(wget http://ipinfo.io/ip -qO - 2> /dev/null)
-echo "  -->  Dirección IP Pública Router: <b><tt><span foreground='blue'>$IPPUBLICA</span></tt></b>" >> /tmp/info-tarjetas-red
+echo "  =>  Dirección IP Pública Router: <b><tt><span foreground='blue'>$IPPUBLICA</span></tt></b>" >> /tmp/info-tarjetas-red
 
-route -n | grep -v ^Tabla | yad --title "Información de Parámetros de Red" \
-	--center \
-	--image preferences-system-network \
-	--width 700 --height 450 \
-	--window-icon Vitalinux \
-	--text \
-	"$(cat /tmp/info-tarjetas-red) \n\n  Tabla de Enrutamiento del Equipo: " \
-	--text-info --tail --button="Cerrar Ventana":0
+echo "" >> /tmp/info-tarjetas-red
+
+LISTAIMPRESORAS=($(lpstat -v | awk -F "dispositivo para" '{ print $2 }' | cut -d":" -f1 | tr -s "\n" " "))
+if (( ${#LISTAIMPRESORAS[*]} == 0 )) ; then
+    echo "  =>  Lista de Impresoras: <b><tt><span foreground='blue'>NINGUNA IMPRESORA CONFIGURADA</span></tt></b>" >> /tmp/info-tarjetas-red
+else
+    echo "  =>  Lista de Impresoras:" >> /tmp/info-tarjetas-red
+fi
+CONTADOR=1
+for IMPRESORA in "${LISTAIMPRESORAS[@]}" ; do
+    echo "\t\t(${CONTADOR}) <b><tt><span foreground='blue'>${IMPRESORA}</span></tt></b>" >> /tmp/info-tarjetas-red
+    (( CONTADOR++ ))
+done
+
+yad --title "Información de Parámetros de Red" \
+--center \
+--image preferences-system-network \
+--width 700 --height 450 \
+--fixed \
+--window-icon Vitalinux \
+--text \
+"$(cat /tmp/info-tarjetas-red) \n" \
+--button="Cerrar Ventana":0
+
+# route -n | grep -v ^Tabla | yad --title "Información de Parámetros de Red" \
+# --center \
+# --image preferences-system-network \
+# --width 700 --height 450 \
+# --window-icon Vitalinux \
+# --text \
+# "$(cat /tmp/info-tarjetas-red) \n\n  Tabla de Enrutamiento del Equipo: " \
+# --text-info --tail --button="Cerrar Ventana":0
 

@@ -1,13 +1,20 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Instalación Drivers PDIs
+
+Name=Drivers PDIs installation
+Name[en]=Drivers PDIs installation
 Name[es]=Instalación Drivers PDIs
 Name[es_ES]=Instalación Drivers PDIs
-Comment=Programa de Instalación de Drivers PDIs
+
+Comment=PDI Drivers Installation Program
+Comment[en]=PDI Drivers Installation Program
+Comment[es]=Programa de Instalación de Drivers PDIs
+
 Icon=pdi
+
 Exec=/usr/bin/vx-pk-drivers-pdis
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

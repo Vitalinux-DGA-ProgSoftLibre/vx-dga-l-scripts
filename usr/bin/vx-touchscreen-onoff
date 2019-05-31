@@ -1,0 +1,35 @@
+#!/bin/bash
+# Script para habilitar o deshabilitar el touchscreen o wacom de las tabletas
+error(){
+	yad --title "Touchscreen Control" \
+			--center --justify="center" --text-align="center" \
+			--width="400" --height="100" \
+			--window-icon vitalinux \
+			--text "Se ha encontrado un error...¿El equipo tiene Touchscreen?" \
+			--button="Continuar":1
+	exit 1
+}
+
+# Comprobamos si el equipo tiene TouchScreen:
+! ( xinput | grep "Wacom" > /dev/null 2>&1 ) && error
+
+# Preguntamos si quiere activarlo o desactivarlo:
+yad --center --title "Touchscreen Control" --question \
+	--window-icon touchpad-icon \
+	--image wacom \
+	--on-top \
+	--text " Indica el comportamiento deseado para tu TouchScreen " \
+	--width="400" --height="100" --center \
+	--justify="center" --text-align="center" \
+	--button="Habilitar":0 \
+	--button="Deshabilitar":1 \
+	--buttons-layout center
+ACC="$?"
+if [ "$ACC" = "0" ] ; then
+	vx-touchscreen-onoff-cli on
+elif [ "$ACC" = "1" ]; then
+	vx-touchscreen-onoff-cli off
+else
+    # Dejamos como está y devolvemos 0
+	exit 0
+fi

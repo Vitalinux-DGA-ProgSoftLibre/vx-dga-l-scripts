@@ -10,6 +10,7 @@ Package: vx-dga-l-scripts
 Architecture: all
 Depends: ${misc:Depends}, imagemagick, zenity, yad, lame, ghostscript, pdftk, evince, mplayer, vx-dga-l-variables-conf, gparted, dosfstools, lxsession, vx-dga-l-menu-vitalinux, vx-dga-l-skel-usuarios (>= 2.0-1)
 Pre-depends: vx-dga-l-menu-vitalinux (>= 2.0-8)
+Replaces: vx-dga-l-actions-explorador-archivos
 Description: Scripts utiles para LVitalinux
  Scripts para LVitalinux que añaden funcionalidades útiles:
  .
@@ -29,4 +30,9 @@ Description: Scripts utiles para LVitalinux
  14) Crear un USB bootable
  15) Test de velocidad
  16) Conocer información del Sistema
- 17) ...
+ 17) Parsear archivos INI
+ 18) Configurar impresoras
+ 19) Habilitar y deshabilitar touchpad
+ 20) Habilitar y deshabilitar touchscreen
+ 21) Resetear navegadores Web Firefox y Chrome
+ 22) ...

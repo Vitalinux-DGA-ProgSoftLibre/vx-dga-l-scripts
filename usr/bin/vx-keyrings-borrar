@@ -1,12 +1,6 @@
 #!/bin/bash
 # Script que borrar todos los anillos de claves que encuentre por usuario
 
-del_keyrings(){
-  for HOMEUSU in $(vx-home-usuarios-graficos); do
-    find ${HOMEUSU} -name "*.keyring" -exec rm -f '{}' \;
-  done
-}
-
 USER=$(whoami)
 
 if [ "$USER" = "root" ]; then
@@ -27,7 +21,8 @@ if [ "$USER" = "root" ]; then
 	if [[ ! $? -eq 0 ]] ; then
             exit 0
 	fi
-	del_keyrings
+
+	vx-keyrings-borrar-cli
 
 else
 		yad --title "Borrado Global de Anillos de Claves" \

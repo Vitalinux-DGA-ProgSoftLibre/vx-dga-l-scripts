@@ -15,6 +15,6 @@ Icon=vx-login
 Exec=/usr/bin/vx-pk-autologin
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

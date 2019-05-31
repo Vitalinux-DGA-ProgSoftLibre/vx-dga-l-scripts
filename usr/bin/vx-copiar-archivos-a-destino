@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function vx-copiar-en-destino() {
+	if rsync -ahv "${@}" "${DESTINO}" ; then
+		echo "#=> Ok: Sincronizado lo seleccionado en ${DESTINO}"
+	else
+		echo "#=> Error: No se han podido copiar en ${DESTINO}..."
+	fi
+}
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+# Obtenemos el número de parámetros recibidos: %F son el número de rutas absolutas de los archivos seleccionados
+NUMPARAM="${#}"
+if (( NUMPARAM == 0 )) ; then
+	TITULO="Error por Falta de parámetros"
+	TEXTO="¡¡Problema!! Debes indicar o seleccionar al menos un archivo o directorio a copiar ..."
+	vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
+fi
+
+if vx-detectar_gui ; then
+	if ! DESTINO=$(yad \
+		--title="Directorio destino donde Copiar los Archivos" \
+		--file \
+		--directory \
+		--window-icon vitalinux \
+		--image cab_extract \
+		--width 780 \
+		--height 580 \
+		--text "\n  Indica el <b>directorio de Destino</b> para la copia de los Archivos:\n\n" \
+		--center \
+		--button "Ok":0 \
+		--button "Cancelar":1) ; then
+		exit 1
+	fi
+else
+	echo -n "=> Indica el directorio donde copiar los archivos: "
+	read DESTINO
+fi
+
+if [ ! -d "${DESTINO}" ] && ! mkdir -p "${DESTINO}" ; then
+		TEXTO="Error: No existe el directorio de destino <b>$DESTINO</b> y no se ha podido crear ...\n¿Problemas con permisos? (¿not root?)"
+		TITULO="Problemas con el directorio de Destino"
+		vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
+fi
+
+if vx-detectar_gui ; then
+(
+	echo "#Va a empezar la copia a ${DESTINO}..."
+	vx-copiar-en-destino "${@}"
+) | yad --title "Herramienta para Crear BACKUP de Archivos" \
+	--window-icon vitalinux \
+	--image cab_extract \
+	--width 600 \
+	--center \
+	--progress \
+	--pulsate \
+	--button "Cerrar":0 \
+	--button "Cancelar":1
+else
+	vx-copiar-en-destino "${@}"
+fi
+exit 0

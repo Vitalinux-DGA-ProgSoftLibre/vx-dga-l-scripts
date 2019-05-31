@@ -1,0 +1,184 @@
+#!/bin/bash
+# Autor: Arturo Martín Romero
+# amartinromero@gmail.com
+
+function mensaje_error() {
+	MENSAJE="${1}"
+	echo -e "\033[1;31m${MENSAJE}\033[0m"
+	echo -e "=> Uso de \033[1mvx-configparser-ini:\033[0m"
+	echo -e "1) Indicar como primer parámetro el fichero a parsear"
+	echo -e "\tSi no introduce más parámetros simplemente se mostrará su contenido"
+	echo -e "\tEj.: \033[1;31m$ vx-configparser-ini /tmp/fichero\033[0m"
+	echo -e "2) Indicar como segundo parámetro la sección del fichero a parsear"
+	echo -e "\tSi no introduce más parámetros y existe la sección se mostrará"
+	echo -e "\tSi no introduce más parámetros y no existe la sección se creará"
+	echo -e "\tEj.: \033[1;31m$ vx-configparser-ini /tmp/fichero seccion1\033[0m"
+	echo -e "2) Puedes indicar como segundo parámetro \033[1m\"del\"\033[0m para eliminar una seccion o clave"
+	echo -e "\tA continuación de \033[1m\"del\"\033[0m debes indicar la seccion a eliminar. Esto eliminará todas sus claves"
+	echo -e "\tSi quieres eliminar sólo una clave dentro de una sección debes indicar tras \033[1m\"del\"\033[0m seccion y la clave"
+	echo -e "\tEj.: \033[1;31m$ vx-configparser-ini /tmp/fichero del seccion1\033[0m"
+	echo -e "\tEj.: \033[1;31m$ vx-configparser-ini /tmp/fichero del seccion3 miclave32\033[0m"
+	echo -e "3) Indicar como tercer parámetro la clave dentro de la sección indicada"
+	echo -e "\tSi no introuce más parámetros se mostrará la clave con su valor asignado"
+	echo -e "\tEj.: \033[1;31m$ vx-configparser-ini /tmp/fichero seccion3 clave2\033[0m"
+	echo -e "4) Indicar como cuarto parámetro el valor a asignar"
+	echo -e "\tSi no existen ni la sección, ni la clave se crearán"
+	echo -e "\tSi no existe la pareja clave-valor se crearán"
+	echo -e "\tSi ya existe la pareja clave-valor se actualizará su valor"
+	echo -e "\tEj.: \033[1;31m$ vx-configparser-ini /tmp/fichero seccion5 clave52 valor544\033[0m"
+	echo -e "Ejemplos)"
+	echo -e "\033[1;32m$ vx-configparser /tmp/fichero \"Mi Seccion1\" clave1 \"valor 111\"\033[0m"
+	echo -e "\033[1;32m$ vx-configparser ~/Documentos/misdatos Cursos Java \"Realizado 13-5-2018\"\033[0m"
+	echo -e "\033[1;32m$ sudo vx-configparser /etc/samba/smb.conf MiRecurso \"guest ok\" yes\033[0m"
+	echo -e "\033[1;32m$ sudo vx-configparser del /etc/samba/smb.conf del global \"max log size\"\033[0m"
+	exit 1
+}
+
+function mostrar_fichero() {
+	# Para mostrar el archivo devolvemos los saltos de línea y eliminamos:
+	# 1) Las líneas en blanco
+	# 2) Las líneas comentadas
+	tr -s "\^" "\n" < "${TEMPORAL}" | \
+		sed -e 's/^#.*//g' | \
+		sed -e 's/^;.*//g' | \
+		sed -e '/^$/d'
+		
+}
+
+function actualizar_fichero() {
+	tr -s "\^" "\n" < "${TEMPORAL}" > "${FICHERO}"
+}
+
+function añadir_seccion() {
+	# En caso de no existir la sección la creamos:
+	echo -e "\033[34m=> La sección \033[1m${SECCION}\033[0;34m no existe ... por defecto se creará\033[0m"
+	echo -e "\033[34m=> Si quieres eliminarla (del): $ vx-configparser-ini ${FICHERO} \033[1;35mdel \033[34m${SECCION}\033[0m"
+	echo ""
+	(
+		echo -e "\n[${SECCION}]"
+		#echo "# Nueva Sección creada: ${SECCION}"
+	) >> "${TEMPORAL}"
+	actualizar_fichero
+}
+
+function mostrar_seccion() {
+	if LINEA_SECCION="$(grep "^\[${SECCION}\]" "${TEMPORAL}")" ; then
+		# En caso de existir la sección mostramos su contenido:
+		echo "${LINEA_SECCION}" | \
+			tr -s "\^" "\n" | \
+			sed -e 's/^#.*//g' | \
+			sed -e '/^$/d'
+	else
+		añadir_seccion
+		mostrar_fichero
+	fi
+}
+
+function borrar_seccion() {
+	if grep "^\[${SECCION}\]" "${TEMPORAL}" &> /dev/null ; then
+		# En caso de existir la sección la eliminamos, ya que como segundo parámetro se ha indicado un "del" (delete):
+		if sed -i "/^\[${SECCION}\].*/d" "${TEMPORAL}" ; then
+			actualizar_fichero
+			echo -e "\033[34mSe ha eliminado la sección \033[1m${SECCION}\033[0;34m de \033[1m${FICHERO}\033[0;34m ...\033[0m"
+			mostrar_fichero
+		else
+			echo -e "\033[31m¡¡Problemas para eliminar las \033[1m${SECCION}\033[0;34m de \033[1m${FICHERO}\033[0;34m ... comprueba si tienes permisos de escritura en el archivo"
+		fi
+	else
+		# En caso de no existir la sección informamos de ello:
+		echo -e "\033[1;34mMediante la opción \033[1;35mdel \033[1;34m(delete) estas indicando que quieres eliminar la sección ${SECCION} pero esta no existe ...\033[0m"
+		echo -e "\033[1;34mRevisa el contenido del archivo ${FICHERO} para asegurarte de que sección quieres eliminar ...\033[0m"
+		mostrar_fichero
+	fi
+}
+
+function mostrar_key() {
+	if grep "^\[${SECCION}\]" "${TEMPORAL}" | grep "${CLAVE} = " &> /dev/null ; then
+		grep "^\[${SECCION}\]" "${TEMPORAL}" | tr -s "\^" "\n" | grep "${SECCION}\|${CLAVE}"
+	else
+		mensaje_error "¡¡La clave ${CLAVE} no existe en ${SECCION}!! ... Si quieres puedes crearla añadiendo un valor"
+	fi
+}
+
+function añadir_clave() {
+	# sed -i '/\[${SECCION}\]/a ${CLAVE} = ${VALOR}' "${FICHERO}"
+	sed -i "s/\[${SECCION}\]/\[${SECCION}\]\^${CLAVE} = ${VALOR}/g" "${TEMPORAL}"
+	actualizar_fichero
+}
+
+function asignar_key() {
+	if ! grep "^\[${SECCION}\]" "${TEMPORAL}" &> /dev/null ; then
+		añadir_seccion
+	fi
+	if grep "^\[${SECCION}\]" "${TEMPORAL}" | grep "${CLAVE} = " &> /dev/null ; then
+		sed -i "s/\(^\[${SECCION}\].*${CLAVE}[ ]*=[ ]*\)\(.[^\^]*\)\(.*\)/\1${VALOR}\^\3/g" "${TEMPORAL}"
+		#mv "${TEMPORAL}" "${FICHERO}"
+		actualizar_fichero
+	else
+		añadir_clave
+	fi
+	mostrar_fichero
+}
+
+function borrar_key() {
+	if grep "^\[${SECCION}\]" "${TEMPORAL}" | grep "${CLAVE} = " &> /dev/null ; then
+		sed -i "s/\(.*\)\(\^${CLAVE}.[^\^]*\)\(.*\)/\1\3/g" "${TEMPORAL}"
+		actualizar_fichero
+		mostrar_fichero
+	else
+		mensaje_error "¡¡La clave ${CLAVE} no existe, por lo que no se puede borrar!!"
+	fi
+}
+
+function preparar_temporal() {
+	sed -e 's/[ ]*=[ ]*/ = /g' "${FICHERO}" | \
+		tr -s "\n" "\^" | \
+		sed -e 's/\[/\n\[/g' > "${TEMPORAL}"
+}
+
+if test "$#" -lt 1 ; then
+	mensaje_error "¡¡Debes introducir al menos un parametro!!"
+fi
+
+NUMPAR="$#"
+FICHERO="${1}"
+TEMPORAL="/tmp/aux-configparse"
+if test "${NUMPAR}" -ge 1 && test -f "${FICHERO}" ; then
+	preparar_temporal
+	case "${NUMPAR}" in
+		"1" ) mostrar_fichero
+		;;
+		"2" )
+			SECCION="${2}"
+			mostrar_seccion
+		;;
+		"3" )
+			if test "${2}" != "del" ; then
+				SECCION="${2}"
+				CLAVE="${3}"
+				mostrar_key
+			else
+				SECCION="${3}"
+				borrar_seccion
+			fi
+		;;
+		"4" )
+			if test "${2}" != "del" ; then
+				SECCION="${2}"
+				CLAVE="${3}"
+				VALOR="${4}"
+				asignar_key
+			else
+				SECCION="${3}"
+				CLAVE="${4}"
+				borrar_key
+			fi
+		;;
+		* )
+			mensaje_error "=> ¡¡Ojo!! Estas introduciendo demasiados parámetros ... échale un ojo a la ayuda siguiente ..."
+		;;
+	esac
+else
+	mensaje_error "=> ¡¡Ojo!! El primer parámetro debe ser un fichero ..."
+fi
+

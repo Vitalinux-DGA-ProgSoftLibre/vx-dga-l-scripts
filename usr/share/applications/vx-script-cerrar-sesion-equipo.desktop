@@ -11,11 +11,10 @@ Comment[en]=Close the current User's Graphic session
 Comment[es]=Cierra la sesión Gráfica del Usuario actual
 Comment[es_ES]=Cierra la sesión Gráfica del Usuario actual
 
-Icon=shutdown
+Icon=system-logout
 
 Exec=/usr/bin/vx-cerrar-sesion
 Terminal=false
 Type=Application
-Categories=GestionApagado;SistemaApagado;
 StartupNotify=true
 Hidden=false

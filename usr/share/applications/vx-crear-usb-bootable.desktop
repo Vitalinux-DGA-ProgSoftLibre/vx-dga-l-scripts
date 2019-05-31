@@ -1,13 +1,20 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Crear USB Bootable desde una ISO
+
+Name=Create USB Booteable from an ISO
+Name[en]=Create USB Booteable from an ISO
 Name[es]=Crear USB Bootable desde una ISO
 Name[es_ES]=Crear USB Bootable desde una ISO
-Comment=Aplicación que permite la Creación de un USB Bootable a partir de una Imagen ISO
+
+Comment=Application that allows the creation of a USB Bootable from an ISO Image
+Comment[en]=Application that allows the creation of a USB Bootable from an ISO Image
+Comment[es]=Aplicación que permite la Creación de un USB Bootable a partir de una Imagen ISO
+
 Icon=usb-create
+
 Exec=/usr/bin/vx-pk-crear-usb-bootable
 Terminal=false
 Type=Application
-Categories=Sistema;
+Categories=Vitalinux;
 StartupNotify=true
 Hidden=false

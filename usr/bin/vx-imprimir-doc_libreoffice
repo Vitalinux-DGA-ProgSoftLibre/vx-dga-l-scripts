@@ -1,0 +1,18 @@
+#!/bin/bash
+# El comando lowriter imprime en la impresora configurada por defecto el documento indicado como parámetro
+
+function salir() {
+    echo "${1}"
+    exit 1
+}
+
+# Puede recibir 1 o 2 parámetros: ${#}
+[[ "${#}" < 1 ]] && salir "Debes indicar como parámetro el documento a imprimir ..."
+
+DOCUMENTO="${1}"
+[ -f "${DOCUMENTO}" ] && \
+    lowriter -p "${DOCUMENTO}" && \
+    vx-mensaje "Servicio de Impresión" \
+        "Se ha mandado el documento <b>${DOCUMENTO}</b> a la impresora <b>${IMP_PREDETERMINADA}</b>" \
+        "impresora" \
+        "Cerrar"
