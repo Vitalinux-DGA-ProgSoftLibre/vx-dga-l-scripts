@@ -1,0 +1,54 @@
+#!/bin/bash
+
+USER=$(whoami)
+[ "${USER}" != "root" ] && echo "Debes ser root para ejecutar este script" && exit 1
+[ -z "${1}" ] && echo "Debes pasar como parametro la IP del Caché que deseas imponer" && exit 1
+CACHE="${1}"
+sipcalc "${CACHE}" | grep "ERR" &> /dev/null && \
+echo "Repasa la IP indicada como parametro, no es correcta" && exit 1
+
+mod_ip_cache(){
+    # modificar_ip_cache old_IP new_IP
+    [[ "$1" = "$2" ]] && echo "No hay cambios en la IP del cache" && return 0
+    echo "Va a modificarse la IP del Cache: \"${1}\" por \"${2}\""
+    # Modificamos la IP del Caché en el documento de variables:
+    # Como vamos a modificar la ip del caché, debemos reiniciar el servicio de carpetas compartidos si está lanzado
+    /sbin/start-stop-daemon --status --name nfs-cliente.sh && \
+    /sbin/start-stop-daemon --oknodo --stop --name nfs-cliente.sh --retry=TERM/5/KILL/2
+    if [[ -f "${FILEVAR}" ]]; then
+        sed -i "s#^IPCACHE=.*#IPCACHE=${2}#g" "${FILEVAR}"
+    fi
+    [ -f "/usr/bin/nfs-cliente.sh" ] && \
+    /sbin/start-stop-daemon --start --quiet -m --name nfs-cliente.sh --pidfile /run/nfs-cliente.pid -b -a /usr/bin/nfs-cliente.sh
+    
+    # Modificamos la configuración del proxy apt
+    local proxy_file="/etc/apt/apt.conf.d/01cache_proxy"
+    #Comprobamos lo primero si el servidor caché está en la red
+    if ping -c 1 "${2}" > /dev/null 2>&1 && nc -zv "${2}" 3142 > /dev/null 2>&1 ; then
+        # Servidor Cache que ofrece servicio APT-CACHER"
+        echo "Acquire::http { Proxy \"http://${2}:3142\"; };" > $proxy_file
+        echo 'Acquire::https { Proxy "false"; };' >> $proxy_file
+    else
+        # Borrar el posible archivo generado anteriormente del proxy-cache
+        [[ -f $proxy_file ]] && rm -f $proxy_file
+    fi
+    # Actualizamos el nombre del servidor cache en el hosts
+    local hosts_file="/etc/hosts"
+    [ ! -f $hosts_file ] && echo "Error, no hay archivo hosts en éste equipo..." && return 1
+    if grep "servidor.vitalinux" $hosts_file &> /dev/null ; then
+        sed -i "s/.*servidor.vitalinux.*/${2} servidor.vitalinux/g" $hosts_file
+    else
+        echo "${2} servidor.vitalinux" >> $hosts_file
+    fi
+    if grep "servidor.vx" $hosts_file &> /dev/null ; then
+        sed -i "s/.*servidor.vx.*/${2} servidor.vx/g" $hosts_file
+    else
+        echo "${2} servidor.vx" >> $hosts_file
+    fi
+}
+
+# Exportamos las variables para saber cual es la IPCache Actual
+FILEVAR="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
+[ -f "${FILEVAR}" ] && . "${FILEVAR}"
+
+mod_ip_cache "${IPCACHE}" "${CACHE}"

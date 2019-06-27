@@ -4,62 +4,69 @@
 #Proyecto Software Libre DGA
 
 EJECUTOR=$(whoami)
+LOG="vx-regenerar-entorno-escritorio.log"
 
 function log_xsession(){
-#
-# Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
-# Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
-# 
-	while getopts 'o:' OPT; do
+    #
+    # Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
+    # Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
+    #
+    while getopts 'o:' OPT; do
         case ${OPT} in
             o) LOGFILE=${OPTARG};;
         esac
-	done
-
-	if [ "${LOGFILE}" ] ; then
-		if [ ! -d /var/log/vitalinux ]; then
-			mkdir -p /var/log/vitalinux
-		fi
-		LOGFILE="/var/log/vitalinux/${LOGFILE}"
-	else
-		LOGFILE="/tmp/logfile.regenerar-entorno-escritorio.log"
-	fi
-	exec 2>&1
-	exec > >(tee -i "${LOGFILE}")
+    done
+    
+    if [ "${LOGFILE}" ] ; then
+        DIRLOG="/var/log/vitalinux"
+        [ ! -d "${DIRLOG}" ] && mkdir -p "${DIRLOG}"
+        LOGFILE="${DIRLOG}/${LOGFILE}"
+    else
+        LOGFILE="/tmp/logfile.regenerar-entorno-escritorio.log"
+    fi
+    exec 2>&1
+    exec > >(tee -i "${LOGFILE}")
 }
 
-log_xsession -o vx-regenerar-entorno-escritorio.log
+log_xsession -o "${LOG}"
 
 if test "${EJECUTOR}" != "root" ; then
-	echo "Se requiren privilegios de \"root\" para Regenerar los Entornos de Escritorio de los usuarios ..."
-	exit 1
+    echo "Se requiren privilegios de \"root\" para Regenerar los Entornos de Escritorio de los usuarios ..."
+    exit 1
 fi
 
 echo "=> $(date) - Se va a Regenerar los Entornos de Escritorio de los usuarios del sistema ..."
 
 # 1) Comenzamos regenerando el contenido del Escritorio
 for USUARIO in $(vx-usuarios-graficos) ; do
-	
-	HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
-	BASE="/etc/skel/Escritorio/"
-	if test -d "${BASE}" ; then
-		for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
-			if test -d "${HOMEUSUARIO}/${DIR}" ; then
-				if su "${USUARIO}" \
-					-c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
-					--login &> /dev/null ; then
-					echo " --> OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
-				else
-					echo " --> ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
-				fi
-			fi
-		done
-	fi
-
+    
+    HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
+    BASE="/etc/skel/Escritorio/"
+    if test -d "${BASE}" ; then
+        for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
+            if test -d "${HOMEUSUARIO}/${DIR}" ; then
+                if su "${USUARIO}" \
+                -c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
+                --login &> /dev/null ; then
+                    echo " => OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                else
+                    echo " => ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                fi
+            fi
+        done
+    fi
+    
 done
 
 # 2) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
 vx-eliminar-ficheros-conf-personales
 
+# 3) Eliminamos los directorios .cache de los usuarios:
+for DIR in $(vx-home-usuarios-graficos) ; do
+    [ -d "${DIR}/.cache" ] && rm -Rf "${DIR}/.cache" && echo "=> Eliminado: ${DIR}/.cache"
+done
+
 # Mensaje de terminación:
 echo "=> Ya se ha terminado de regenerar el Entorno de Escritorio.  Comprobar que todo esta Ok!!"
+
+exit 0

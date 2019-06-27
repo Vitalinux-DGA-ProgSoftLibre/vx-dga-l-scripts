@@ -1,3 +1,18 @@
+vx-dga-l-scripts (3.2-23) unstable; urgency=low
+
+  * Modificamos el vx-modificar-ip-cache
+  * Creamos vx-modificar-ip-cache-cli para usarlo desde la línea de comandos
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 27 Jun 2019 00:10:00 +0200
+
+vx-dga-l-scripts (3.2-22) unstable; urgency=low
+
+  * En el script de regenerar entorno de Escritorio eleminamos .cache
+  * Del script vx-regenerar-directorios-usuarios-cli se elimina el Escritorio
+  * Se añade la función log_xsession al fichero de funciones vx-funcs-bash
+
+ -- Arturo Martín <amartinromero@gmail.com>  Fri, 31 May 2019 00:10:00 +0200
+
 vx-dga-l-scripts (3.2-21) unstable; urgency=low
 
   * Upgrade script PDIS: Driver y software de Interwrite soluciona problema de CPU

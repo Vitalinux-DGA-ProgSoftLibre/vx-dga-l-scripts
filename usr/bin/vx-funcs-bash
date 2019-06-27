@@ -1,227 +1,251 @@
 #!/bin/bash
 
+function log_xsession(){
+    #
+    # Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
+    # Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
+    #
+    # Ejemplo de llamada: LOG="vx-fichero.log" && log_xsession -o "${LOG}"
+    #
+    while getopts 'o:' OPT; do
+        case ${OPT} in
+            o) LOGFILE=${OPTARG};;
+        esac
+    done
+    
+    if [ "${LOGFILE}" ] ; then
+        DIRLOG="/var/log/vitalinux"
+        [ ! -d "${DIRLOG}" ] && mkdir -p "${DIRLOG}"
+        LOGFILE="${DIRLOG}/${LOGFILE}"
+    else
+        LOGFILE="/tmp/logfile.$(/usr/bin/vx-usuario-grafico).${RANDOM}.log"
+    fi
+    exec 2>&1
+    exec > >(tee -i "${LOGFILE}")
+}
+
 function vx-del_tags() {
-	# Elimina del texto que recibe las etiquetas tipo HTML, pango markup, etc.: <..> </..>
-	echo "${1}" | sed -e 's/<[^>]*>//g'
+    # Elimina del texto que recibe las etiquetas tipo HTML, pango markup, etc.: <..> </..>
+    echo "${1}" | sed -e 's/<[^>]*>//g'
 }
 
 function vx-mensaje_cli {
-	TITULO="$(vx-del_tags "${1}")"
-	TEXTO="$(vx-del_tags "${2}")"
-	echo -e "${TITULO}: ${TEXTO}"
+    TITULO="$(vx-del_tags "${1}")"
+    TEXTO="$(vx-del_tags "${2}")"
+    echo -e "${TITULO}: ${TEXTO}"
 }
 
 function vx-mensaje_gui {
-	yad --title "$1" \
-	--window-icon "vitalinux" \
-	--image "${3}" \
-	--center \
-	--text="  ${2}" --text-align="center" \
-	--button="${4}":0
+    yad --title "$1" \
+    --window-icon "vitalinux" \
+    --image "${3}" \
+    --center \
+    --text="  ${2}" --text-align="center" \
+    --button="${4}":0
 }
 
 function vx-detectar_gui() {
-	if xhost >& /dev/null ; then
-		# echo "Display existente"
-		return 0
-	else 
-		# echo "Display invalido"
-		return 1
-	fi
+    if xhost >& /dev/null ; then
+        # echo "Display existente"
+        return 0
+    else
+        # echo "Display invalido"
+        return 1
+    fi
 }
 
 function vx-mensaje() {
-	# Le pasamos: 1) un titulo, 2) Un mensaje y 3) un estado de salida
-	TITULO="${1}"
-	MENSAJE="${2}"
-	if vx-detectar_gui ; then
-		vx-mensaje_gui "${TITULO}" "${MENSAJE}" "${3:-"vitalinux"}" "${4:-"Continuar"}"
-	else
-		vx-mensaje_cli "${TITULO}" "${MENSAJE}"
-	fi
+    # Le pasamos: 1) un titulo, 2) Un mensaje y 3) un estado de salida
+    TITULO="${1}"
+    MENSAJE="${2}"
+    if vx-detectar_gui ; then
+        vx-mensaje_gui "${TITULO}" "${MENSAJE}" "${3:-"vitalinux"}" "${4:-"Continuar"}"
+    else
+        vx-mensaje_cli "${TITULO}" "${MENSAJE}"
+    fi
 }
 
 function vx-mensaje_y_salir() {
-	# Le pasamos: 1) un titulo, 2) Un mensaje y 3) un estado de salida
-	TITULO="${1}"
-	MENSAJE="${2}"
-  if vx-detectar_gui ; then
-		vx-mensaje_gui "${TITULO}" "${MENSAJE}" "${4:-"vitalinux"}" "${5:-"Continuar"}"
-	else
-		vx-mensaje_cli "${TITULO}" "${MENSAJE}"
-	fi
-	(( "${3}" >= 0 )) && exit "${3}"
+    # Le pasamos: 1) un titulo, 2) Un mensaje y 3) un estado de salida
+    TITULO="${1}"
+    MENSAJE="${2}"
+    if vx-detectar_gui ; then
+        vx-mensaje_gui "${TITULO}" "${MENSAJE}" "${4:-"vitalinux"}" "${5:-"Continuar"}"
+    else
+        vx-mensaje_cli "${TITULO}" "${MENSAJE}"
+    fi
+    (( "${3}" >= 0 )) && exit "${3}"
 }
 
 function vx-usuario_grafico() {
-	SEAT_ACTIVO="seat0"
-	SESION_ACTIVA=$(loginctl show-seat ${SEAT_ACTIVO} | grep 'ActiveSession' | cut -d'=' -f2)
-	loginctl list-sessions | grep "${SEAT_ACTIVO}" | grep "${SESION_ACTIVA}" | tr -s ' ' ' ' | cut -d' ' -f4
+    SEAT_ACTIVO="seat0"
+    SESION_ACTIVA=$(loginctl show-seat ${SEAT_ACTIVO} | grep 'ActiveSession' | cut -d'=' -f2)
+    loginctl list-sessions | grep "${SEAT_ACTIVO}" | grep "${SESION_ACTIVA}" | tr -s ' ' ' ' | cut -d' ' -f4
 }
 
 function vx-check_escritorio_congelado() {
-	if dpkg -l vx-dga-l-congelar-escritorio >& /dev/null ; then
-		return 0
-	else
-		return 1
-	fi
+    if dpkg -l vx-dga-l-congelar-escritorio >& /dev/null ; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 function vx-check_user_root() {
-	if [[ "$(whoami)" != "root" ]] ; then
-		MENSAJE="${1:-"Debes acceder con permisos de root para ejecutar este script ..."}"
-		vx-mensaje_y_salir "Problema de Acceso" "${MENSAJE}" "1" "error" "Salir"
-		return 1
-	else
-		return 0
-	fi
+    if [[ "$(whoami)" != "root" ]] ; then
+        MENSAJE="${1:-"Debes acceder con permisos de root para ejecutar este script ..."}"
+        vx-mensaje_y_salir "Problema de Acceso" "${MENSAJE}" "1" "error" "Salir"
+        return 1
+    else
+        return 0
+    fi
 }
 
 function vx-obtener_nombre_archivo() {
-	basename "${1%.${1##*.}}"
+    basename "${1%.${1##*.}}"
 }
 
 function vx-obtener_extension_archivo() {
-	echo "${1##*.}"
+    echo "${1##*.}"
 }
 
 function vx-check_write_access_right() {
-	# Devuelve un "0" si el USER tiene permisos de Escritura sobre el DIR:
-	USER="${1}"
-	DIR="${2}"
-
-	[[ "${USER}" == "root" ]] && echo "Eres el root con permisos de Escritura sobre ${DIR} ..." && return 0
-
-	# Use -L to get information about the target of a symlink,
-	# not the link itself, as pointed out in the comments
-	# INFO: permisos grupo_propietario propietario
-	INFO=( $(stat -L -c "%A %G %U" "${DIR}") ) # p.e. drwxrwxr-x grupo owner
-	PERM=${INFO[0]}
-	GROUP=${INFO[1]}
-	OWNER=${INFO[2]}
-
-	#ACCESS=no
-	# Comenzamos chequeando el permiso de escritura para todos los usuarios:
-	if [[ "${PERM:8:1}" == "w" ]] ; then
-		echo "Todos tienen permiso de escritura sobre ${DIR} ..."
-		return 0
-	# Seguimos comprobando los permisos del grupo y si el usuario pertenece al grupo:
-	elif [[ "${PERM:5:1}" == "w" ]] ; then
-		[[ "$(id -Gn "${USER}" | tr -s " " ":" | sed "s/.*/:&:/g")" =~ :${GROUP}: ]] && \
-			echo "El usuario ${USER} tiene permiso de escritura en ${DIR} por pertenecer al grupo propietario ${GROUP} ..." && \
-			return 0
-			#ACCESS=yes
-	# En última instancia comprobamos que seamos el propietario de la carpeta:
-	elif [[ "${PERM:2:1}" == "w" ]] ; then
-		[[ "${USER}" == "${OWNER}" ]] && \
-			echo "${USER} es el propietario de ${DIR} ..." && return 0
-			#ACCESS=yes
-	fi
-	echo "${USER} no tiene permisos de Escritura sobre ${DIR} ..."
-	return 1
+    # Devuelve un "0" si el USER tiene permisos de Escritura sobre el DIR:
+    USER="${1}"
+    DIR="${2}"
+    
+    [[ "${USER}" == "root" ]] && echo "Eres el root con permisos de Escritura sobre ${DIR} ..." && return 0
+    
+    # Use -L to get information about the target of a symlink,
+    # not the link itself, as pointed out in the comments
+    # INFO: permisos grupo_propietario propietario
+    INFO=( $(stat -L -c "%A %G %U" "${DIR}") ) # p.e. drwxrwxr-x grupo owner
+    PERM=${INFO[0]}
+    GROUP=${INFO[1]}
+    OWNER=${INFO[2]}
+    
+    #ACCESS=no
+    # Comenzamos chequeando el permiso de escritura para todos los usuarios:
+    if [[ "${PERM:8:1}" == "w" ]] ; then
+        echo "Todos tienen permiso de escritura sobre ${DIR} ..."
+        return 0
+        # Seguimos comprobando los permisos del grupo y si el usuario pertenece al grupo:
+        elif [[ "${PERM:5:1}" == "w" ]] ; then
+        [[ "$(id -Gn "${USER}" | tr -s " " ":" | sed "s/.*/:&:/g")" =~ :${GROUP}: ]] && \
+        echo "El usuario ${USER} tiene permiso de escritura en ${DIR} por pertenecer al grupo propietario ${GROUP} ..." && \
+        return 0
+        #ACCESS=yes
+        # En última instancia comprobamos que seamos el propietario de la carpeta:
+        elif [[ "${PERM:2:1}" == "w" ]] ; then
+        [[ "${USER}" == "${OWNER}" ]] && \
+        echo "${USER} es el propietario de ${DIR} ..." && return 0
+        #ACCESS=yes
+    fi
+    echo "${USER} no tiene permisos de Escritura sobre ${DIR} ..."
+    return 1
 }
 
 function vx-yad-question-yes-no() {
-	TITULO="${1:-"Vitalinux"}"
-	TEXTO="${2}"
-	IMAGEN="${3:-"Vitalinux"}"
-	BOTON1="${4:-"Ok"}"
-	BOTON2="${5:-"Cerrar"}"
-	yad --title "${TITULO}" \
-		--text "${TEXTO}" \
-		--text-align "center" \
-		--window-icon vitalinux \
-		--image "${IMAGEN}" \
-		--width "500" \
-		--height "300" \
-		--center \
-		--justify="center" \
-		--button "${BOTON1}":0 \
-		--button "${BOTON2}":1
-	return $?
+    TITULO="${1:-"Vitalinux"}"
+    TEXTO="${2}"
+    IMAGEN="${3:-"Vitalinux"}"
+    BOTON1="${4:-"Ok"}"
+    BOTON2="${5:-"Cerrar"}"
+    yad --title "${TITULO}" \
+    --text "${TEXTO}" \
+    --text-align "center" \
+    --window-icon vitalinux \
+    --image "${IMAGEN}" \
+    --width "500" \
+    --height "300" \
+    --center \
+    --justify="center" \
+    --button "${BOTON1}":0 \
+    --button "${BOTON2}":1
+    return $?
 }
 
 function vx-yad-file-select() {
-	TITULO="${1:-"Selecciona un Archivo o Directorio"}"
-	TEXTO="${2:-"  \n<b>Selecciona</b> el <span foreground='blue'><b>Archivo o Directorio</b></span> que desees ...\n"}"
-	IMAGEN="${3:-"vitalinux"}"
-	BOTON="${4:-"Seleccionar"}"
-	if RUTA=$(yad --title "${TITULO}" \
-		--window-icon vitalinux \
-		--image "${IMAGEN}" \
-		--file \
-		--width 700 --height 500 \
-		--center \
-		--text "${TEXTO}" \
-		--text-align "center" \
-		--button="${BOTON}":0 \
-		--button="Cancelar":1) ; then
-		echo "${RUTA}"
-		return 0
-	else
-		exit 1
-	fi
+    TITULO="${1:-"Selecciona un Archivo o Directorio"}"
+    TEXTO="${2:-"  \n<b>Selecciona</b> el <span foreground='blue'><b>Archivo o Directorio</b></span> que desees ...\n"}"
+    IMAGEN="${3:-"vitalinux"}"
+    BOTON="${4:-"Seleccionar"}"
+    if RUTA=$(yad --title "${TITULO}" \
+        --window-icon vitalinux \
+        --image "${IMAGEN}" \
+        --file \
+        --width 700 --height 500 \
+        --center \
+        --text "${TEXTO}" \
+        --text-align "center" \
+        --button="${BOTON}":0 \
+        --button="Cancelar":1) ; then
+        echo "${RUTA}"
+        return 0
+    else
+        exit 1
+    fi
 }
 
 function vx-lista_directorios_perfil() {
-	HOMEUSU="$(vx-home-usuario-grafico)"
-	## Obtenemos el directorio que hace de Escritorio en el usuario:
-	# DIRDESKTOP=$(xdg-user-dir DESKTOP)
-	if [ -f "${HOMEUSU}/.config/user-dirs.dirs" ] ; then
-		. "${HOMEUSU}/.config/user-dirs.dirs"
-	else
-		salir "Problema: El usuario no tiene Directorios básicos en su perfíl ..."
-		return 1
-	fi
-
-	DIRDESKTOP="${HOMEUSU}/$(basename "${XDG_DESKTOP_DIR}")"
-	#echo "=> DESKTOR DIR de $(vx-usuario-grafico): \"${DIRDESKTOP}\""
-	DIRDOCUMENTS="${HOMEUSU}/$(basename "${XDG_DOCUMENTS_DIR}")"
-	DIRDOWNLOAD="${HOMEUSU}/$(basename "${XDG_DOWNLOAD_DIR}")"
-	DIRMUSIC="${HOMEUSU}/$(basename "${XDG_MUSIC_DIR}")"
-	DIRPICTURES="${HOMEUSU}/$(basename "${XDG_PICTURES_DIR}")"
-	DIRVIDEOS="${HOMEUSU}/$(basename "${XDG_VIDEOS_DIR}")"
-	DIRTEMPLATES="${HOMEUSU}/$(basename "${XDG_TEMPLATES_DIR}")"
-	DIRPUBLICSHARE="${HOMEUSU}/$(basename "${XDG_PUBLICSHARE_DIR}")"
-	LISTA=( "${DIRDESKTOP}" \
-		"${DIRDOCUMENTS}" \
-		"${DIRDOWNLOAD}" \
-		"${DIRMUSIC}" \
-		"${DIRPICTURES}" \
-		"${DIRVIDEOS}" \
-		"${DIRTEMPLATES}" \
-		"${DIRPUBLICSHARE}" )
-	echo "${LISTA[@]}"
-	return 0
+    HOMEUSU="$(vx-home-usuario-grafico)"
+    ## Obtenemos el directorio que hace de Escritorio en el usuario:
+    # DIRDESKTOP=$(xdg-user-dir DESKTOP)
+    if [ -f "${HOMEUSU}/.config/user-dirs.dirs" ] ; then
+        . "${HOMEUSU}/.config/user-dirs.dirs"
+    else
+        salir "Problema: El usuario no tiene Directorios básicos en su perfíl ..."
+        return 1
+    fi
+    
+    DIRDESKTOP="${HOMEUSU}/$(basename "${XDG_DESKTOP_DIR}")"
+    #echo "=> DESKTOR DIR de $(vx-usuario-grafico): \"${DIRDESKTOP}\""
+    DIRDOCUMENTS="${HOMEUSU}/$(basename "${XDG_DOCUMENTS_DIR}")"
+    DIRDOWNLOAD="${HOMEUSU}/$(basename "${XDG_DOWNLOAD_DIR}")"
+    DIRMUSIC="${HOMEUSU}/$(basename "${XDG_MUSIC_DIR}")"
+    DIRPICTURES="${HOMEUSU}/$(basename "${XDG_PICTURES_DIR}")"
+    DIRVIDEOS="${HOMEUSU}/$(basename "${XDG_VIDEOS_DIR}")"
+    DIRTEMPLATES="${HOMEUSU}/$(basename "${XDG_TEMPLATES_DIR}")"
+    DIRPUBLICSHARE="${HOMEUSU}/$(basename "${XDG_PUBLICSHARE_DIR}")"
+    LISTA=( "${DIRDESKTOP}" \
+        "${DIRDOCUMENTS}" \
+        "${DIRDOWNLOAD}" \
+        "${DIRMUSIC}" \
+        "${DIRPICTURES}" \
+        "${DIRVIDEOS}" \
+        "${DIRTEMPLATES}" \
+    "${DIRPUBLICSHARE}" )
+    echo "${LISTA[@]}"
+    return 0
 }
 
 function vx-obtener_ruta_absoluta() {
-	# Comprobamos si la ruta es relativa o comienza por ~:
+    # Comprobamos si la ruta es relativa o comienza por ~:
     # [[ "hola que tal" =~ ^([^/]|~) ]] && echo ... || echo ...
     [[ "${1}" =~ ^[^/] ]] && RUTA="$(pwd)/${1}"
     [[ "${1}" =~ ^~ ]] && RUTA="${1//\~/$(vx-home-usuario-grafico)}"
     [[ "${1}" =~ ^/ ]] && RUTA="${1}"
     ! ( [ -d "${RUTA}" ] || [ -f "${RUTA}" ] ) && return 1
-	echo "${RUTA}"
-	return 0
+    echo "${RUTA}"
+    return 0
 }
 
 function vx-check_if_is_directory() {
-	# Comprueba si todos los parámetros pasados son directorios:
-	until [ -z "${1}" ] ; do
-		! [ -d "${1}" ] && return 1
-		shift
-	done
-	return 0
+    # Comprueba si todos los parámetros pasados son directorios:
+    until [ -z "${1}" ] ; do
+        ! [ -d "${1}" ] && return 1
+        shift
+    done
+    return 0
 }
 
 function vx-check_if_is_file() {
-	# Comprueba si todos los parámetros pasados son ficheros:
-	until [ -z "${1}" ] ; do
-		! [ -f "${1}" ] && return 1
-		shift
-	done
-	return 0
+    # Comprueba si todos los parámetros pasados son ficheros:
+    until [ -z "${1}" ] ; do
+        ! [ -f "${1}" ] && return 1
+        shift
+    done
+    return 0
 }
 
 "$@" 2> /dev/null
