@@ -1,7 +1,17 @@
+vx-dga-l-scripts (3.2-24) unstable; urgency=low
+
+  * Creamos el script vx-hostname-confvar-cli para configurar la variable de cambio de nombre
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 9 Jul 2019 00:10:00 +0200
+
 vx-dga-l-scripts (3.2-23) unstable; urgency=low
 
   * Modificamos el vx-modificar-ip-cache
   * Creamos vx-modificar-ip-cache-cli para usarlo desde la línea de comandos
+  * Se añade un script para modificar el usuario de inicio de sesión:
+  * vx-modificar-usu-inicio-sesion-cli
+  * Se elimina todo aquello que esta relacionado con la Wacom
+  * El calibrado de la PDI promethean de 16.04 no funciona. Se revierte a los anteriores 
 
  -- Arturo Martín <amartinromero@gmail.com>  Thu, 27 Jun 2019 00:10:00 +0200
 

@@ -1,0 +1,56 @@
+#!/bin/bash
+
+function checkusername() {
+    #  Un nombre de usuario:
+    #  1) Debe empezar por: [a-z] => ^[[:lower:]]
+    #  2) Le puede seguir [a-z], "-", ".", "_" (el "|" es una OR lógica) => ([[:lower:]]|[[:digit:]]|-|_|\.)
+    #  3) A priori no hay límite en la longitud del nombre de usuario
+    # Si hubiera límite de 16 carac: REGEXP="^[[:lower:]]([[:lower:]]|[[:digit:]]|-|_|\.){2,15}$"
+    #
+    REGEXP="^[[:lower:]]([[:lower:]]|[[:digit:]]|-|_|\.)*$"
+    [[ "${1}" =~ $REGEXP ]] && return 0 || return 1
+}
+
+function salir() {
+    echo "${1}"
+    exit ${2}
+}
+
+function configurar-usuario-inicio-automatico-lightdm {
+    echo "--> Se va a configurar como usuario de inicio de sesión a $1 ..."
+    USERDEFINITIVO="$1"
+    if test "$1" != "usuario-ldap" ; then
+        if grep "autologin-user" /etc/lightdm/lightdm.conf &> /dev/null ; then
+            sed --follow-symlinks -i "s/.*autologin-user=.*/autologin-user=$1/g" /etc/lightdm/lightdm.conf
+        else
+            echo "autologin-user=$1" >> /etc/lightdm/lightdm.conf
+        fi
+    else
+        # Si el usuario que va a iniciar sesión es de LDAP quitaremos el autologin y esconderemos usuarios locales
+        if grep autologin-user /etc/lightdm/lightdm.conf &> /dev/null ; then
+            sed --follow-symlinks -i "s/autologin-user=.*/#&/g" /etc/lightdm/lightdm.conf
+        fi
+        
+        if grep greeter-hide-users /etc/lightdm/lightdm.conf &> /dev/null ; then
+            if grep "#greeter-hide-users=" /etc/lightdm/lightdm.conf &> /dev/null ; then
+                sed --follow-symlinks -i "s/#greeter-hide-users.*/greeter-hide-users=true/g" /etc/lightdm/lightdm.conf
+            else
+                sed --follow-symlinks -i "s/greeter-hide-users.*/greeter-hide-users=true/g" /etc/lightdm/lightdm.conf
+            fi
+        else
+            echo "greeter-hide-users=true" >> /etc/lightdm/lightdm.conf
+        fi
+    fi
+}
+
+USER=$(whoami)
+[ "${USER}" != "root" ] && salir "Debes ser root para ejecutar este script" "1"
+[ -z "${1}" ] && salir "Debes pasar como parametro el usuario de inicio de sesión" "1"
+USU="${1}"
+checkusername "${USU}" || salir "El nombre de usuario indicado no es valido" "1"
+
+getent passwd "${USU}" &> /dev/null && \
+configurar-usuario-inicio-automatico-lightdm "${USU}" || \
+salir "El usuario ${USU} indicado no existe en el sistema" "1"
+
+salir "Se ha configurado ${USU} como usuario de inicio de sesión" "0"

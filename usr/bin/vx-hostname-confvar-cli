@@ -1,0 +1,26 @@
+#!/bin/bash
+
+function salir() {
+    echo "${1}"
+    exit "${2}"
+}
+
+USER=$(whoami)
+
+[[ "${USER}" != "root" || -z "${1}" ]] && \
+salir "=> Necesitas privilegios de \"root\" para poder lanzar este programa ..." "1"
+
+NAME="${1}"
+FICHCONF="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
+
+if vx-hostname-validar-cli "${NAME}" ; then
+    sed -i "/CAMBIARHOSTNAME.*/d" "${FICHCONF}"
+    sed -i '/Varibles utilizadas por los paquetes/a CAMBIARHOSTNAME=1' "${FICHCONF}"
+    sed -i "/NUEVOHOSTNAME.*/d" "${FICHCONF}"
+    sed -i "/Varibles utilizadas por los paquetes/a NUEVOHOSTNAME=${NAME}" "${FICHCONF}"
+    MENSAJE="=> El cambio de nombre de equipo \"${NAME}\" será efectivo al Reiniciar el equipo ..."
+    salir "${MENSAJE}" "0"
+else
+    MENSAJE="=> El nombre de equipo indicado \"${NAME}\" no es válido ..."
+    salir "${MENSAJE}" "1"
+fi

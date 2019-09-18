@@ -233,6 +233,7 @@ function descargar-software-pdi {
 		;;
 
 		"Promethean")
+<<COMMENT
 		if [ "$ARCHSO" = "64" ] ; then
 		  FILESPDI="/pdis/Promethean/xenial_last/promethean64_xenial/activaid_2.0.1~Ubuntu~1604_amd64.deb \
 		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire_2.14.67304-1.amd64_amd64.deb \
@@ -252,7 +253,7 @@ function descargar-software-pdi {
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activ-meta-es_2.0.0-71_i386.deb"
 		fi
-<<COMMENT
+COMMENT
 		if [ "$ARCHSO" = "64" ] ; then
 		  FILESPDI="/pdis/Promethean/promethean_64/activaid_5.14.21-0.deb \
 		  	/pdis/Promethean/promethean_64/activdriver_5.14.21-0.deb \
@@ -263,7 +264,6 @@ function descargar-software-pdi {
 		  	/pdis/Promethean/promethean_32/activinspire_2.4.66096-1.i386_i386.deb \
 		  	/pdis/Promethean/promethean_32/activtools_5.14.21-0.deb"
 		fi
-COMMENT
 		;;
 
 		"Smartboard")
@@ -417,9 +417,10 @@ function instalar-software-pdi {
 	;;
 
 	"Promethean")
+<<COMMENT
 		dpkg -i /opt/pkgs/pdis/activ*.deb
 		apt-get -f --assume-yes --force-yes install
-<<COMMENT
+COMMENT
 	if [ "$ARCHSO" = "64" ] ; then
 		#apt-get install dkms libssl0.9.8 gamin libgamin0 libxdo3 xdotool libxcb-xinerama0
 		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
@@ -433,7 +434,6 @@ function instalar-software-pdi {
 		dpkg -i /opt/pkgs/pdis/activinspire_2.4.66096-1.i386_i386.deb
 	fi
 	apt-get -f --assume-yes --force-yes install
-COMMENT
 	;;
 
 	"Smartboard")
