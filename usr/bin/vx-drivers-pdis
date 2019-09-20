@@ -228,10 +228,6 @@ function descargar-software-pdi {
 			[ "$MODELOIQ" = "" ] && return 1
 			
 			FILESPDI="/pdis/IQBoard/IQBoard_$ARCHSO/iqboard.deb /pdis/IQBoard/iqboard_driver/$MODELOIQ/x$ARCHSO/rsboardep.deb"
-				
-			;;
-		
-			esac
 			
 		;;
 
