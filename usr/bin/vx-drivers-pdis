@@ -75,7 +75,7 @@ function seleccionar-modelo-pdi {
 
 function comprobar-md5 {
 	ARCHIVO=$1
-	cd /opt/pkgs/pdis
+	cd /opt/pkgs/pdis || return 1
 	echo ""
 	if test -f ./"${ARCHIVO}" -a -f ./"${ARCHIVO}".md5 ; then
 		echo "Ya están descargados los archivos ${ARCHIVO} y ${ARCHIVO}.md5 ..."
@@ -214,22 +214,37 @@ function descargar-software-pdi {
 		;;
 
 		"IQBoard")
-		if [ "$ARCHSO" = "64" ] ; then
-		  FILESPDI="/pdis/IQBoard/IQBoard_64/iqboard.deb /pdis/IQBoard/IQBoard_64/rsboardep.deb"
-		else
-		  FILESPDI="/pdis/IQBoard/IQBoard_32/iqboard.deb /pdis/IQBoard/IQBoard_32/rsboardep.deb"
-		fi
+			# Selecccionar el modelo de iqboard...sino se seleccionará el de infrarrojos 6 o 10 puntos
+			MODELOIQ=$(yad --center --width 300 --title "Seleccionar PDI" \
+			--window-icon vitalinux \
+			--image pdi \
+			--button="Continuar":0 --button="Canelar":1 \
+			--entry \
+			--text "Selecciona Modelo de pizarra IQ :" \
+			--entry-text \
+			"Resistiva_S080_S082" "Electromagnetica_AP080_AP082_APD080_APD082" "Infrarrojos_RPD082" \
+			"Infrarrojos_6_10_toques_RPS082_RPT082" "Optica_T084_T082" "Optica_4_10_TQ082_TQ084_TN082_TN084"
+			)
+			[ "$MODELOIQ" = "" ] && return 1
+			
+			FILESPDI="/pdis/IQBoard/IQBoard_$ARCHSO/iqboard.deb /pdis/IQBoard/iqboard_driver/$MODELOIQ/x$ARCHSO/rsboardep.deb"
+				
+			;;
+		
+			esac
+			
 		;;
 
 		"Multiclass")
-		# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas
-		# En éste caso además se requiere instalación manual....
-		# FILESPDI="/pdis/multiCLASS/multiCLASSBoard.tar.gz"
-		if [ "$ARCHSO" = "64" ] ; then
-		  FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_64.deb"
-		else
-		  FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_32.deb"
-		fi
+			# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas
+			# En éste caso además se requiere instalación manual....
+			# FILESPDI="/pdis/multiCLASS/multiCLASSBoard.tar.gz"
+			FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_$ARCHSO.deb"
+			# if [ "$ARCHSO" = "64" ] ; then
+			#   FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_64.deb"
+			# else
+			#   FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_32.deb"
+			# fi
 		;;
 
 		"Promethean")
@@ -257,7 +272,11 @@ COMMENT
 		if [ "$ARCHSO" = "64" ] ; then
 		  FILESPDI="/pdis/Promethean/promethean_64/activaid_5.14.21-0.deb \
 		  	/pdis/Promethean/promethean_64/activdriver_5.14.21-0.deb \
-		  	/pdis/Promethean/promethean_64/activtools_5.14.21-0.deb"
+		  	/pdis/Promethean/promethean_64/activtools_5.14.21-0.deb \
+			/pdis/Promethean/xenial_last/promethean64_xenial/activinspire_2.14.67304-1.amd64_amd64.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-help-es_1.0.2-14_all.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activresources-core-es_1.0.1-147_all.deb \
+		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-32bitdependsfor64bit_2.14.67304-1.i386_i386.deb"
 		else
 		  FILESPDI="/pdis/Promethean/promethean_32/activaid_5.14.21-0.deb \
 		  	/pdis/Promethean/promethean_32/activdriver_5.14.21-0.deb \
@@ -333,7 +352,7 @@ COMMENT
 
 function instalar-software-pdi {
 
-	cd /opt/pkgs/pdis
+	cd /opt/pkgs/pdis || return 1
 	case $PDI in
 
 	"eBeam")
@@ -417,10 +436,10 @@ function instalar-software-pdi {
 	;;
 
 	"Promethean")
-<<COMMENT
+
 		dpkg -i /opt/pkgs/pdis/activ*.deb
 		apt-get -f --assume-yes --force-yes install
-COMMENT
+<<COMMENT
 	if [ "$ARCHSO" = "64" ] ; then
 		#apt-get install dkms libssl0.9.8 gamin libgamin0 libxdo3 xdotool libxcb-xinerama0
 		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
@@ -434,6 +453,7 @@ COMMENT
 		dpkg -i /opt/pkgs/pdis/activinspire_2.4.66096-1.i386_i386.deb
 	fi
 	apt-get -f --assume-yes --force-yes install
+COMMENT
 	;;
 
 	"Smartboard")
@@ -463,7 +483,7 @@ COMMENT
 		--justify="center" --text-align="center" \
 		--button="Continuar":0 --button="Cancelar":1 ;  then
 
-		cd /opt/pkgs/pdis
+		cd /opt/pkgs/pdis || return 1
 
 		# Descargamos el Open-Sankore
 		if [ "$ARCHSO" = "64" ] ; then
@@ -486,6 +506,16 @@ if test "$USER" != "root" ; then
 			--width="400" --height="100" \
 			--window-icon vitalinux \
 			--text "No tiene permiso para ejecutar el programa" \
+			--button="Continuar":1
+	exit 1
+fi
+
+if [ "$ARCHSO" != "32" ] && [ "$ARCHSO" != "64" ] ; then
+	yad --title "Instalación del Software de PDIs" \
+			--center --justify="center" --text-align="center" \
+			--width="400" --height="100" \
+			--window-icon vitalinux \
+			--text "Error a la hora de conocer arquitectura del sistema. No se puede continuar..." \
 			--button="Continuar":1
 	exit 1
 fi

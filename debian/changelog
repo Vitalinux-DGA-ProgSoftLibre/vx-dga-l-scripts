@@ -1,6 +1,8 @@
 vx-dga-l-scripts (3.2-24) unstable; urgency=low
 
   * Creamos el script vx-hostname-confvar-cli para configurar la variable de cambio de nombre
+  * El instalador de PDI Promethean para 64 bits incluye el softw de activinspire (xenial) para 64 bits
+  
 
  -- Arturo Martín <amartinromero@gmail.com>  Tue, 9 Jul 2019 00:10:00 +0200
 
