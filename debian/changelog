@@ -1,3 +1,10 @@
+vx-dga-l-scripts (4.0-1) unstable; urgency=low
+
+  * Nueva versión para 18.04
+  * Se eliminan dependencias no necesarias y scritps que no se usan (desmontar-usb)
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 26 Sep 2019 00:10:00 +0200
+
 vx-dga-l-scripts (3.2-24) unstable; urgency=low
 
   * Creamos el script vx-hostname-confvar-cli para configurar la variable de cambio de nombre
