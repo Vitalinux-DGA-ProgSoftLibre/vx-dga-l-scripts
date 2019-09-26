@@ -1,5 +1,0 @@
-./etc/default
-./etc/profile.d
-./etc/sudoers.d
-./usr/bin
-./usr/share
