@@ -1,3 +1,9 @@
+vx-dga-l-scripts (3.2-25) unstable; urgency=low
+
+  * Depuración script de vx-usuarios-gráficos
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 9 Jul 2019 00:10:00 +0200
+
 vx-dga-l-scripts (3.2-24) unstable; urgency=low
 
   * Creamos el script vx-hostname-confvar-cli para configurar la variable de cambio de nombre
