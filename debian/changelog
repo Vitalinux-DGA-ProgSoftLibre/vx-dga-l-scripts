@@ -1,8 +1,9 @@
 vx-dga-l-scripts (3.2-25) unstable; urgency=low
 
   * Depuración script de vx-usuarios-gráficos
+  * El instalador de software pdis incluye soporte para pizarras APPROX
 
- -- Arturo Martín <amartinromero@gmail.com>  Tue, 9 Jul 2019 00:10:00 +0200
+ -- Ignacio Sancho <sannacho@gmail.com>  Wed, 9 Oct 2019 00:10:00 +0200
 
 vx-dga-l-scripts (3.2-24) unstable; urgency=low
 

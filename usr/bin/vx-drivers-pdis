@@ -70,7 +70,7 @@ function seleccionar-modelo-pdi {
 		--entry \
 		--text "Selecciona tu PDI:" \
 		--entry-text \
-		"No driver" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard")
+		"No driver" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard" "Approx")
 }
 
 function comprobar-md5 {
@@ -186,7 +186,7 @@ function descargar-software-pdi {
 	if ! test -d /opt/pkgs/pdis ; then
 		mkdir -p /opt/pkgs/pdis
 	fi
-	cd /opt/pkgs/pdis
+	cd /opt/pkgs/pdis || return 1
 
 	case $PDI in
 
@@ -212,6 +212,11 @@ function descargar-software-pdi {
 		  FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.5.0.24 \
 		    /pdis/Interwrite/DeviceManager_Ubuntu_7.7.0.5"
 		;;
+		
+		"Approx")
+		  FILESPDI="/pdis/Approx/approx.deb \
+		    /pdis/Approx/libtiff4_3.9.7-3ubuntu1_i386.deb"
+		;;
 
 		"IQBoard")
 			# Selecccionar el modelo de iqboard...sino se seleccionará el de infrarrojos 6 o 10 puntos
@@ -232,9 +237,9 @@ function descargar-software-pdi {
 		;;
 
 		"Multiclass")
-			# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas
-			# En éste caso además se requiere instalación manual....
+			# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas ya no disponible por problemas
 			# FILESPDI="/pdis/multiCLASS/multiCLASSBoard.tar.gz"
+			# Nuevos
 			FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_$ARCHSO.deb"
 			# if [ "$ARCHSO" = "64" ] ; then
 			#   FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_64.deb"
@@ -244,27 +249,6 @@ function descargar-software-pdi {
 		;;
 
 		"Promethean")
-<<COMMENT
-		if [ "$ARCHSO" = "64" ] ; then
-		  FILESPDI="/pdis/Promethean/xenial_last/promethean64_xenial/activaid_2.0.1~Ubuntu~1604_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire_2.14.67304-1.amd64_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-help-es_1.0.2-14_all.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activresources-core-es_1.0.1-147_all.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activdriver_5.17.14-0~Ubuntu~1604_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-32bitdependsfor64bit_2.14.67304-1.i386_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activ-meta-es_2.0.0-71_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activtools_5.17.14-0~Ubuntu~1604_amd64.deb"
-		/pdis/Promethean/xenial_last/promethean32_xenial/
-		else
-		  FILESPDI="/pdis/Promethean/xenial_last/promethean32_xenial/activaid_2.0.1~Ubuntu~1604_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activhwr-es_1.0.1-79_all.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire-help-es_1.0.2-14_all.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activtools_5.17.14-0~Ubuntu~1604_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activdriver_5.17.14-0~Ubuntu~1604_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activ-meta-es_2.0.0-71_i386.deb"
-		fi
-COMMENT
 		if [ "$ARCHSO" = "64" ] ; then
 		  FILESPDI="/pdis/Promethean/promethean_64/activaid_5.14.21-0.deb \
 		  	/pdis/Promethean/promethean_64/activdriver_5.14.21-0.deb \
@@ -319,7 +303,6 @@ COMMENT
 				return 1
 			fi
 		fi
-
 		FILESPDI="/pdis/SmartBoard/smart_board/nwfermi-0.6.5.1_i386.deb \
 			/pdis/SmartBoard/smart_board/smart-activation_1.1.2066.1-1_i386.deb \
 			/pdis/SmartBoard/smart_board/smart-common_10.3.2171.1-1_i386.deb \
@@ -391,7 +374,19 @@ function instalar-software-pdi {
 		chmod +x DeviceManager_Ubuntu_7.7.0.5 && \
 		  ./DeviceManager_Ubuntu_7.7.0.5
 	;;
-
+	
+	"Approx")
+		[ -f approx.deb ] && \
+		 dpkg -i approx.deb
+		# La librería tiff4 no está disponible para trusty (solo la 5)
+		[ -f libtiff4_3.9.7-3ubuntu1_i386.deb ] && \
+		 dpkg -i libtiff4_3.9.7-3ubuntu1_i386.deb
+		apt-get -f --assume-yes --force-yes install
+		# Se instala la librería que necesita el calibrate:
+		apt-get --assume-yes --force-yes install libqtgui4:i386
+		
+	;;
+	
 	"IQBoard")
 	# Cosultar en /var/lib/dpkg/info/iqboard.deb.postinst que hay acciones que no se pueden realizar
 	if test -f ./iqboard.deb -a -f ./rsboardep.deb ; then
