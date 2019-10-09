@@ -5,4 +5,4 @@
 
 #lxsession
 
-kill -1 ${_LXSESSION_PID}
+kill ${_LXSESSION_PID}

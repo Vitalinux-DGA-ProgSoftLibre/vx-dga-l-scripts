@@ -1,5 +1,12 @@
 vx-dga-l-scripts (4.0-1) unstable; urgency=low
 
+  * Solucionado problema con cerrar sesión
+  * 
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 8 Oct 2019 12:10:00 +0200
+
+vx-dga-l-scripts (4.0-1) unstable; urgency=low
+
   * Nueva versión para 18.04
   * Se eliminan dependencias no necesarias y scritps que no se usan (desmontar-usb)
 

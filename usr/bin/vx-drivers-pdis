@@ -200,20 +200,25 @@ function descargar-software-pdi {
 				--center --justify="center" --text-align="center" --button="gtk-ok":0
 			return 1
 		fi
-		FILESPDI="/pdis/eBeam/scrapbook-selfextracting"
+		## Test
+		FILESPDI="/pdis/eBeam/scrapbook-selfextracting.1604.32"
 		;;
 
 		"Hitachi") 
-		
+		## Test
 		FILESPDI="/pdis/HITACHI/StarBoardSoftware_9.62_i586.deb"
 		;;
 
 		"Interwrite")
-		  FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.5.0.24 \
+		# Revisar versiones
+		# Test
+		FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.5.0.24 \
 		    /pdis/Interwrite/DeviceManager_Ubuntu_7.7.0.5"
 		;;
 
 		"IQBoard")
+		## Descargar versiones para 18 de los Drivers, si o si :-(
+		## Test. Existe un modelo de software superior
 			# Selecccionar el modelo de iqboard...sino se seleccionará el de infrarrojos 6 o 10 puntos
 			MODELOIQ=$(yad --center --width 300 --title "Seleccionar PDI" \
 			--window-icon vitalinux \
@@ -232,6 +237,7 @@ function descargar-software-pdi {
 		;;
 
 		"Multiclass")
+		## Test. Parece que hay una nueva versión -> de la 7.0.0.0 a la 7.0.0.5
 			# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas
 			# En éste caso además se requiere instalación manual....
 			# FILESPDI="/pdis/multiCLASS/multiCLASSBoard.tar.gz"
@@ -352,9 +358,9 @@ function instalar-software-pdi {
 	case $PDI in
 
 	"eBeam")
-	if test -f ./scrapbook-selfextracting ; then
-		chmod +x /opt/pkgs/pdis/scrapbook-selfextracting
-		/opt/pkgs/pdis/scrapbook-selfextracting
+	if test -f ./scrapbook-selfextracting.1604.32 ; then
+		chmod +x /opt/pkgs/pdis/scrapbook-selfextracting.1604.32
+		/opt/pkgs/pdis/scrapbook-selfextracting.1604.32
 	fi
 	;;
 
