@@ -54,7 +54,7 @@ done
 GATEWAY=$(route -n | grep UG | tr -s " " " " | cut -d" " -f2)
 echo "  =>  Puerta de Enlace: <b><tt><span foreground='blue'>$GATEWAY</span></tt></b>" >> /tmp/info-tarjetas-red
 
-DNS="$(nmcli dev list | grep ^IP4.DNS | tr -s " " " " | cut -d" " -f2 | tr -s "\n" " ")"
+DNS="$(nmcli device show | grep ^IP4.DNS | tr -s " " " " | cut -d" " -f2 | tr -s "\n" " ")"
 echo "  =>  DNSs: <b><tt><span foreground='blue'>${DNS}</span></tt></b>" >> /tmp/info-tarjetas-red
 
 # IPCACHE

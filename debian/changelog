@@ -1,7 +1,8 @@
-vx-dga-l-scripts (4.0-1) unstable; urgency=low
+vx-dga-l-scripts (4.0-2) unstable; urgency=low
 
   * Solucionado problema con cerrar sesión
-  * 
+  * En el script de vx-usuarios-graficos solo se listan los que tienen un directorio HOME creado
+  * Repasado comando nmcli del script vx-informacion-red para la versión 18.04
 
  -- Ignacio Sancho <sannacho@gmail.com>  Tue, 8 Oct 2019 12:10:00 +0200
 
