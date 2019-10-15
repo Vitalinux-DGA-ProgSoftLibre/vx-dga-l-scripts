@@ -18,6 +18,8 @@ function obtener_usuario_propietario_home()
         [[ ! -z "${USUARIO}" ]] && \
         ( echo "${USUARIO}" && exit 0 ) || \
         exit 1
+    else
+        exit 1
     fi
 }
 

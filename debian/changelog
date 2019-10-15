@@ -4,6 +4,7 @@ vx-dga-l-scripts (4.0-2) unstable; urgency=low
   * En el script de vx-usuarios-graficos solo se listan los que tienen un directorio HOME creado
   * Repasado comando nmcli del script vx-informacion-red para la versión 18.04
   * Reescribimos el script vx-usuario-grafico para que admita tres posibles comportamientos
+  * Reescribimos vx-home-usuarios-graficos para que mediante el parametro --all pase la lista de todos ususario:home
 
  -- Ignacio Sancho <sannacho@gmail.com>  Tue, 8 Oct 2019 12:10:00 +0200
 

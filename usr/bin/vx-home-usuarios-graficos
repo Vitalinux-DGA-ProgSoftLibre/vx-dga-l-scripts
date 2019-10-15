@@ -1,23 +1,39 @@
 #!/bin/bash
 
 if test -z "${1}" ; then
-	# Nos permite saber la lista de los HOME de los USUARIOS con una shell válida:
-	if getent passwd \
-		| awk -F ":" \
-			'{if ( $3 > 999 \
+    # Nos permite saber la lista de los HOME de los USUARIOS con una shell válida:
+    if getent passwd \
+    | awk -F ":" \
+    '{if ( $3 > 999 \
 					&& $7~/\/bin\/.*/ \
 					&& $7 != "/bin/false" \
 					&& $7 != "/bin/sbin/nologin" ) \
-						{print $6}}' ; then
-		exit 0
-	else
-		exit 1
-	fi
+    {print $6}}' ; then
+        exit 0
+    else
+        exit 1
+    fi
+    
+    elif [[ "${1}" == "--all" ]] ; then
+    # Nos permite saber la lista de parejas usuario:HOME de todos los USUARIOS con una shell válida:
+    if getent passwd \
+    | awk -F ":" \
+    '{if ( $3 > 999 \
+					&& $7~/\/bin\/.*/ \
+					&& $7 != "/bin/false" \
+					&& $7 != "/bin/sbin/nologin" ) \
+    {print $1":"$6}}' ; then
+        exit 0
+    else
+        exit 1
+    fi
+    
 else
-	# Si se le pasa como parámetro el nombre de un usuario se le indica su HOME:
-	if getent passwd "${1}" | awk -F ":" '{print $6}' ; then
-		exit 0
-	else
-		exit 1
-	fi
+    # Si se le pasa como parámetro el nombre de un usuario se le indica su HOME:
+    if id "${1}" >& /dev/null && \
+    getent passwd "${1}" | awk -F ":" '{print $6}' ; then
+        exit 0
+    else
+        exit 1
+    fi
 fi
