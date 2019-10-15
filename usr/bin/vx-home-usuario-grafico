@@ -1,17 +1,34 @@
 #!/bin/bash
 
 function obtener_home_usuario() {
-  # Comprobamos que el usario existe y devolvemos su HOME:
-  if id "${1}" >& /dev/null && \
+    # Comprobamos que el usario existe y devolvemos su HOME:
+    if id "${1}" >& /dev/null && \
     getent passwd "${1}" | awk -F ":" '{print $6}' ; then
-		exit 0
-	else
-		exit 1
-	fi
+        exit 0
+    else
+        exit 1
+    fi
 }
 
-# Recibe como parámetro el usuario a conocer su HOME
-# En caso contrario se informará del home del usuario gráfico actual
-[ -z "${1}" ] && \
-  obtener_home_usuario "$(vx-usuario-grafico)" || \
-  obtener_home_usuario "${1}"
+function obtener_usuario_propietario_home()
+{
+    # Comprobamos que el directorio es válido y se corresponde con el de un usuario gráfico
+    if [[ -d "${1}" ]] ; then
+        USUARIO="$(getent passwd | grep "${1}" | cut -d":" -f1)"
+        [[ ! -z "${USUARIO}" ]] && \
+        ( echo "${USUARIO}" && exit 0 ) || \
+        exit 1
+    fi
+}
+
+# Puede recibir como parámero:
+# A) Un usuario gráfico y se le devuelve su HOME
+# B) Un HOME de un usuario gráfico y se le devuleve su usuario propietario
+# En caso contrario se informará del HOME del usuario gráfico actual
+if [[ -z "${1}" ]] ; then
+    obtener_home_usuario "$(vx-usuario-grafico)"
+    elif [[ "${1}" =~ /  ]] ; then
+    obtener_usuario_propietario_home "${1}"
+else
+    obtener_home_usuario "${1}"
+fi
