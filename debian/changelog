@@ -1,5 +1,6 @@
 vx-dga-l-scripts (3.2-26) unstable; urgency=low
 
+  * Se añade la dependencia con gnome-screenshot para poder hacer capturas de pantalla
   * Reescribiendo los scripts vx-home-usuario-grafico y vx-home-usuarios-graficos para mejorar su funcionalidad
 
  -- Arturo Martín <amartinromero@gmail.com>  Tue, 9 Jul 2019 00:10:00 +0200
