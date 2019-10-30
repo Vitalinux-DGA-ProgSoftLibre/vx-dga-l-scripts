@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Obtenemos la lista de los parámetros recibidos: %F son la lista de todas las rutas absolutas de los archivos seleccionados
+NUMPARAM=$#
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+if (( ${#} < 1 )) ; then
+    TITULO="Error en la Llamada al Programa"
+    TEXTO="Debes Introducir al menos un parámetro: la ruta de un archivo swf"
+    vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
+fi
+
+# Creamos una lista con los parámetros recibidos $@.  El primer parametro es el ${PARAM[0]} ...  ${PARAM[*]} sería todos
+# Los parametros recibidos son las rutas absolutas de los archivos swf a embeber en un HTML:
+declare -a PARAM
+PARAM=($@)
+RESULTADO=""
+#yad --text "Se han seleccionado $# archivos y sus rutas son $*"
+
+# Extraemos el primer parametro recibido: el directorio base del primer archivo (%d)
+DIRECTORIOBASE="$(dirname "$1")"
+PLANTILLA="/usr/share/vitalinux/swfs/plantilla-embeber-swf.htm"
+ICONO="/usr/share/vitalinux/swfs/vitalinux.ico"
+
+# Detectamos si hay entorno gráfico o no para mostrar los resultados de una forma u otra:
+vx-detectar_gui && DETECGUI=0 || DETECGUI=1
+
+INCREMENTO=$(echo 100/$NUMPARAM | bc)
+CONTADOR=0
+NARCHIVO=1
+
+(
+    echo "#Va a empezar a embeberse los archivos SWF indicados ..."
+    until [ -z "$1" ]
+    do
+        NOMBREARCHIVO="$(vx-obtener_nombre_archivo_con_extension "${1}")"
+        NOMBREARCHIVO_SINEXT="$(vx-obtener_nombre_archivo "${1}")"
+        echo "#Embebiendo Archivo SWF $NARCHIVO de $NUMPARAM: $NOMBREARCHIVO"
+        if cat "${PLANTILLA}" | \
+        sed -e "s/TITULO/${NOMBREARCHIVO_SINEXT}/g" -e "s/archivo.swf/${NOMBREARCHIVO}/g" > "${DIRECTORIOBASE}/${NOMBREARCHIVO_SINEXT}.html" ; then
+            RESULTADO="$RESULTADO\n$NOMBREARCHIVO => ${NOMBREARCHIVO_SINEXT}.html"
+        fi
+        [ ! -f "${DIRECTORIOBASE}/vitalinux.ico" ] && cp "${ICONO}" "${DIRECTORIOBASE}"
+        
+        CONTADOR=$(expr $CONTADOR + $INCREMENTO)
+        NARCHIVO=$(expr $NARCHIVO + 1)
+        echo $CONTADOR
+        shift
+    done
+    echo "#Ok!!! Ya se ha terminado de embeber los Archivos SWF.  \nComo Resultado: $RESULTADO"
+    echo "100"
+    ) | ( (( DETECGUI == 0 )) && yad --title "Generando HTML para embeber SWF:" \
+    --window-icon vitalinux \
+    --image vx-ficheros-swf \
+    --width 660 \
+    --center \
+--progress --percentage=0 --button="Cerrar":0 || column )
+
+exit 0

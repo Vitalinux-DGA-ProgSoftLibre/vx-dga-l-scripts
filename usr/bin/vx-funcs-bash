@@ -150,7 +150,13 @@ function vx-check_user_root() {
     fi
 }
 
+function vx-obtener_nombre_archivo_con_extension() {
+    # Equivalente a: echo ${1} | awk -F "/" '{print $NF}'
+    basename "${1}"
+}
+
 function vx-obtener_nombre_archivo() {
+    # Equivalente a:  basename -s .$(echo "${1}" | awk -F'.' '{ print $NF }') "${1}"
     basename "${1%.${1##*.}}"
 }
 
