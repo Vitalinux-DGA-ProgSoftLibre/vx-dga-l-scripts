@@ -1,5 +1,7 @@
 vx-dga-l-scripts (4.0-2) unstable; urgency=low
 
+  * Se añade la dependencia con pngnq para poder comprimir imágenes PNGs
+  * Se añade la dependencia con gnome-screenshot para poder hacer capturas de pantalla
   * Solucionado problema con cerrar sesión
   * En el script de vx-usuarios-graficos solo se listan los que tienen un directorio HOME creado
   * Repasado comando nmcli del script vx-informacion-red para la versión 18.04

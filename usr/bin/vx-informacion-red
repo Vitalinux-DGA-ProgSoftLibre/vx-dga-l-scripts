@@ -22,8 +22,12 @@ echo -e "Información asociada al equipo Vitalinux: CID (<b><tt><span foreground
 DISTRO=$(lsb_release -a 2> /dev/null | grep "Description:" | tr -s " " " " | cut -d":" -f2)
 ARQUIDISTRO=$(getconf LONG_BIT)
 echo -e "Versión Ubuntu: <b><tt><span foreground='blue'>${DISTRO} (${ARQUIDISTRO}-bits)</span></tt></b>" >> /tmp/info-tarjetas-red
-ARQUIHARDWARE="$(lscpu | grep 'CPUs' | cut -d':' -f2)"
+# Para saber las arquitecturas soportadas rescatamos la segunda línea de la salida de lscpu:
+#ARQUIHARDWARE="$(lscpu | grep 'CPUs' | cut -d':' -f2)"
+ARQUIHARDWARE="$(vx-trim "$(lscpu | awk 'NR==2' | cut -d':' -f2)")"
 echo -e "Arquitecturas de Vitalinux soportadas por el Hardware: <b><tt><span foreground='blue'>${ARQUIHARDWARE}</span></tt></b>" >> /tmp/info-tarjetas-red
+VEROPENGL="$(glxinfo | grep "OpenGL version" | awk -F":" '{ print $2 }')"
+echo -e "Versión de OpenGL: <b><tt><span foreground='blue'>${VEROPENGL}</span></tt></b>"
 
 FICH="/tmp/migasfree.tags"
 if test -f "${FICH}" ; then
