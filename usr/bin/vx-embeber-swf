@@ -51,7 +51,7 @@ NARCHIVO=1
     done
     echo "#Ok!!! Ya se ha terminado de embeber los Archivos SWF.  \nComo Resultado: $RESULTADO"
     echo "100"
-    ) | ( (( DETECGUI == 0 )) && vx-detectar_gui yad --title "Herramienta de compresión de archivos MP3: Calidad $CALIDAD Kbps" \
+    ) | ( (( DETECGUI == 0 )) && yad --title "Generando HTML para embeber SWF:" \
     --window-icon vitalinux \
     --image vx-ficheros-swf \
     --width 660 \
