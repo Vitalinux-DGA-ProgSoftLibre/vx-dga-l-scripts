@@ -1,5 +1,8 @@
 vx-dga-l-scripts (4.0-2) unstable; urgency=low
 
+  * Añadidas nuevas funciones en vx-funcs-bash para colorear, trim, etc.
+  * Añadida la info de la versión de openGL en el script de información
+  * Añadidos varios nuevos scripts para redondear imagenes, extraer imagenes de un PDF, etc.
   * Se añade la dependencia con pngnq para poder comprimir imágenes PNGs
   * Se añade la dependencia con gnome-screenshot para poder hacer capturas de pantalla
   * Solucionado problema con cerrar sesión
@@ -8,7 +11,7 @@ vx-dga-l-scripts (4.0-2) unstable; urgency=low
   * Reescribimos el script vx-usuario-grafico para que admita tres posibles comportamientos
   * Reescribimos vx-home-usuarios-graficos para que mediante el parametro --all pase la lista de todos ususario:home
 
- -- Ignacio Sancho <sannacho@gmail.com>  Tue, 8 Oct 2019 12:10:00 +0200
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 29 Oct 2019 00:10:00 +0200
 
 vx-dga-l-scripts (4.0-1) unstable; urgency=low
 
