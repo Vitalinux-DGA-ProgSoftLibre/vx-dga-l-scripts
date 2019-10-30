@@ -1,5 +1,54 @@
 #!/bin/bash
 
+function vx-trim() {
+    # Elimina los espacios al comienzo y final del texto pasado como parámetro
+    local TEXTO="$*"
+    # Elimina los espacios al comienzo - remove leading whitespace characters
+    TEXTO="${TEXTO#"${TEXTO%%[![:space:]]*}"}"
+    # Elimina los espacios al final - remove trailing whitespace characters
+    TEXTO="${TEXTO%"${TEXTO##*[![:space:]]}"}"
+    echo -n "$TEXTO"
+}
+
+function vx-colorear_command_output() {
+    case "${1}" in
+        "rojo" ) COLOR=31 ;;
+        "verde" ) COLOR=32 ;;
+        "azul" ) COLOR=34 ;;
+    esac
+    shift
+    eval ${@} | xargs -i echo -e "\e[${COLOR}m\e[1m{}\e[0m"
+}
+
+function vx-colorear_echo() {
+    case "${1}" in
+        "rojo" ) COLOR=31 ;;
+        "verde" ) COLOR=32 ;;
+        "azul" ) COLOR=34 ;;
+    esac
+    echo -e "\e[${COLOR}m\e[1m${2}\e[0m"
+}
+
+function vx-colorear_command_output_rojo() {
+    eval ${@} | xargs -i echo -e "\e[31m\e[1m{}\e[0m"
+}
+
+function vx-colorear_command_output_verde() {
+    eval ${@} | xargs -i echo -e "\e[32m\e[1m{}\e[0m"
+}
+
+function vx-colorear_command_output_azul() {
+    eval ${@} | xargs -i echo -e "\e[34m\e[1m{}\e[0m"
+}
+
+function vx-colorear_echo_rojo_negrita() {
+    echo -e "\e[31m\e[1m${1}\e[0m"
+}
+
+function vx-colorear_echo_azul_negrita() {
+    echo -e "\e[34m\e[1m${1}\e[0m"
+}
+
 function log_xsession(){
     #
     # Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp

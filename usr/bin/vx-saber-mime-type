@@ -1,0 +1,10 @@
+#!/bin/bash
+function uso()
+{
+    echo "=> Debes pasar como parámetro el archivo del que conocer su mime-type ..."
+}
+[ -z "${1}" ] && uso && exit 1
+until [ -z "${1}" ] ; do
+    file --mime-type -b "${1}"
+    shift
+done

@@ -1,0 +1,19 @@
+#!/bin/bash
+if ! test -z "${1}" && ! test -z "${2}" ; then
+	echo "Ok! Buscaremos \"${1}\" y lo reemplazaremos por \"${2}\" en todo fichero a partir del directorio actual..."
+	echo "Contiamos ... Todo correcto? [s/n]"
+	read RESPUESTA
+	if test "${RESPUESTA}" == "s" ; then
+		echo "## Lista de archivos donde se hará la sustitución: "
+		grep -R "${1}" * | cut -d: -f1
+		grep -R "${1}" * | cut -d: -f1 | xargs -i sed -i "s/${1}/${2}/g" {}
+		#grep -R "${1}" * | cut -d: -f1 | tee -a /tmp/vx-reemplazados | xargs -i sed -i "s/${1}/${2}/g" {}
+		#cat /tmp/vx-reemplazados
+	fi
+else
+	#test "${#}" -lt 2 ; then
+	#clear
+	echo "## Se necesitan dos parametros: patron-inicial patron-final"
+	echo "## ej. vx-reemplazar-patron-por-otro-patron \"vx-dga-l-desktop-wallpaper-craorba\" \"vx-dga-l-desktop-wallpaper-hermanos-argensola\""
+	exit 1
+fi

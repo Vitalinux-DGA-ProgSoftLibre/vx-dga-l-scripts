@@ -1,0 +1,29 @@
+#!/bin/bash
+
+function uso() {
+    MENSAJE="Tienes que pasar como parametro un directorio donde buscar PDFs o archivos PDFs de las que extraer imagenes ..."
+	echo "=> ${MENSAJE}"
+	exit 1
+}
+
+[ -z "${1}" ] && uso && exit 1
+
+CONTADOR=0
+until [ -z "${1}" ] ; do
+	if [ -d "${1}" ] ; then
+		echo "=> Inspeccionado el directorio ${1} ..."
+		for FICH in ./*.[pP][dD][fF] ; do
+			echo "=> Mirando el fichero ${FICH}"
+			TIPOMIME="$(file --mime-type -b "${FICH}")"
+			if [[ "${TIPOMIME}" == "application/pdf" ]] ; then
+				pdfimages -j "${FICH}" resultado-pdfimages-${CONTADOR}
+				((CONTADOR++))
+			fi
+		done
+	fi
+	if [[ "$(file --mime-type -b "${1}")" == "application/pdf" ]] ; then
+		pdfimages -j "${1}" resultado-pdfimages-${CONTADOR}
+		((CONTADOR++))
+	fi
+	shift
+done

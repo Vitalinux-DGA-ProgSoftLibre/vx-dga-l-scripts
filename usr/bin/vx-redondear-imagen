@@ -1,0 +1,22 @@
+#!/bin/bash
+function uso()
+{
+    echo "=> Debes pasar como parámetro la imagen a redondear ..."
+}
+[ -z "${1}" ] && uso && exit 1
+IMAGEN="${1}"
+ANCHO="$(identify -format '%w' "${IMAGEN}")"
+RADIO_ANCHO="$(bc <<< ${ANCHO}/2)"
+ALTO="$(identify -format '%h' "${IMAGEN}")"
+RADIO_ALTO="$(bc <<< ${ALTO}/2)"
+(( RADIO_ANCHO > RADIO_ALTO )) && RADIO="${RADIO_ALTO}" || RADIO="${RADIO_ANCHO}"
+NOMBRE_ARCHIVO="$(vx-nombre-fichero "${IMAGEN}")"
+BASE="$(dirname "${IMAGEN}")"
+[[ -z "${BASE}" ]] && BASE="."
+convert "${IMAGEN}" \
+-alpha on \
+-background none \
+\( +clone -channel a -evaluate multiply 0 +channel \
+-fill white -draw "ellipse ${RADIO_ANCHO},${RADIO_ALTO} ${RADIO},${RADIO} 0,360" \) \
+-compose DstIn -composite \
+"${BASE}/${NOMBRE_ARCHIVO}-round.png"
