@@ -1,5 +1,14 @@
-vx-dga-l-scripts (3.2-26) unstable; urgency=low
+vx-dga-l-scripts (4.0-2) unstable; urgency=low
 
+  * Añadidas nuevas funciones en vx-funcs-bash para colorear, trim, etc.
+  * Añadida la info de la versión de openGL en el script de información
+  * Añadidos varios nuevos scripts para redondear imagenes, extraer imagenes de un PDF, etc.
+  * Se añade la dependencia con pngnq para poder comprimir imágenes PNGs
+  * Solucionado problema con cerrar sesión
+  * En el script de vx-usuarios-graficos solo se listan los que tienen un directorio HOME creado
+  * Repasado comando nmcli del script vx-informacion-red para la versión 18.04
+  * Reescribimos el script vx-usuario-grafico para que admita tres posibles comportamientos
+  * Reescribimos vx-home-usuarios-graficos para que mediante el parametro --all pase la lista de todos ususario:home
   * Se añade la dependencia con gnome-screenshot para poder hacer capturas de pantalla
   * Reescribiendo los scripts vx-home-usuario-grafico y vx-home-usuarios-graficos para mejorar su funcionalidad
 
