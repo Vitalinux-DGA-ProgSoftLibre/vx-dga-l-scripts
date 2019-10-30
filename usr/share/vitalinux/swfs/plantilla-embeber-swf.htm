@@ -1,0 +1,44 @@
+<HTML>
+
+<HEAD>
+    <meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+    <TITLE>TITULO</TITLE>
+    <LINK REL="shortcut icon" HREF="vitalinux.ico">
+    <style type="text/css">
+        body {
+            background-color: #d8d2ca;
+            margin: 0px;
+            padding: 0px;
+        }
+    </style>
+    <script>
+        function cerrarVentana() {
+            window.parent.postMessage({
+                type: 'close'
+            }, '*');
+        }
+    </script>
+</HEAD>
+
+<BODY>
+    <DIV align="center">
+        <!-- URL's used in the movie-->
+        <!-- text used in the movie-->
+        <OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+            codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0" WIDTH="1024"
+            HEIGHT="100%" id="menu" ALIGN="">
+            <PARAM NAME=movie VALUE="archivo.swf">
+            <PARAM NAME=menu VALUE=false>
+            <PARAM NAME=quality VALUE=high>
+            <PARAM NAME=bgcolor VALUE=#FFFFFF>
+            <PARAM NAME=AllowScriptAccess VALUE=always>
+
+            <EMBED src="archivo.swf" menu=false quality=high bgcolor=#FFFFFF AllowScriptAccess=always WIDTH="1024"
+                HEIGHT="100%" NAME="menu" ALIGN="" TYPE="application/x-shockwave-flash"
+                PLUGINSPAGE="http://www.macromedia.com/go/getflashplayer">
+            </EMBED>
+        </OBJECT>
+    </DIV>
+</BODY>
+
+</HTML>

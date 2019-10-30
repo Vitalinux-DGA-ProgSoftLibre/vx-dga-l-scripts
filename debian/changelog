@@ -1,5 +1,6 @@
 vx-dga-l-scripts (4.0-2) unstable; urgency=low
 
+  * Se añade un script para embeber archivos SWFs en un documento HTML
   * Añadidas nuevas funciones en vx-funcs-bash para colorear, trim, etc.
   * Añadida la info de la versión de openGL en el script de información
   * Añadidos varios nuevos scripts para redondear imagenes, extraer imagenes de un PDF, etc.
