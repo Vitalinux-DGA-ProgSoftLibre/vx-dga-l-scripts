@@ -12,7 +12,7 @@ vx-dga-l-scripts (4.0-2) unstable; urgency=low
   * Reescribimos vx-home-usuarios-graficos para que mediante el parametro --all pase la lista de todos ususario:home
   * Se añade la dependencia con gnome-screenshot para poder hacer capturas de pantalla
 
- -- Arturo Martín <amartinromero@gmail.com>  Tue, 9 Jul 2019 00:10:00 +0200
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 29 Oct 2019 00:10:00 +0200
 
 vx-dga-l-scripts (3.2-25) unstable; urgency=low
 
