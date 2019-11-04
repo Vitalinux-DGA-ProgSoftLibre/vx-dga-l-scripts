@@ -1,0 +1,41 @@
+#!/bin/bash
+
+function uso() {
+    echo "=> Debes pasar al menos un parámetro, el fichero o directorio a copiar a todos los usuarios"
+    echo "=> Puedes pasar también como primer parámetro la opción mute para no mostrar mensajes de salida"
+    echo "=> En el caso de que el destino sea diferente al HOME de los usuarios se indicará cono los 2 primeros parámetros"
+    echo "=> Se copiaran a destino tantos ficheros como resto de parámetros haya ..."
+    echo "=> Ej. vx-copy-file-to-graphic-users mute /etc/skel/fichero_a_copiar"
+    echo "=> Ej. vx-copy-file-to-graphic-users --destino .config/mi_destino /etc/skel/fichero_a_copiar otro"
+    echo "=> Ej. vx-copy-file-to-graphic-users mute --destino .config/mi_destino /etc/skel/fichero_a_copiar otro"
+}
+
+[ -z "${1}" ] && uso && exit 1
+
+# Comprobamos si se desea anular los mensajes informativos de salida:
+MUTE=0
+[[ "${1}" == "mute" ]] && MUTE=1 && shift
+
+# Comprobamos si el destino es un subdirectorio dentro del HOME del usuario:
+DESTINO=""
+[[ "${1}" == "--destino" ]] && DESTINO="${2}" && shift 2
+
+# Copiamos los ficheros indicados como parámetros:
+until [ -z "${1}" ] ; do
+    # Comprobamos que la ruta se corresponde con un fichero o directorio:
+    ! ( [ -f "${1}" ] || [ -d "${1}" ] ) && shift && break
+    for USU in $(vx-usuarios-graficos) ; do
+        HOMEUSU="$(vx-home-usuario-grafico "${USU}")"
+        [ ! -d "${HOMEUSU}" ] && break
+        [ ! -d "${HOMEUSU}/${DESTINO}" ] && mkdir -p "${HOMEUSU}/${DESTINO}"
+        cp -R "${1}" "${HOMEUSU}/${DESTINO}" && \
+        (( MUTE == 0 )) && echo "=> Se ha copiado ${1} a ${HOMEUSU}"
+        GRUPO="profesor"
+        getent group "${USU}" &> /dev/null && GRUPO="${USU}"
+        chown -R "${USU}"."${GRUPO}" "${HOMEUSU}/${DESTINO}" && \
+        (( MUTE == 0 )) && echo "=> Se ha ajustado el propietario de ${HOMEUSU}/${DESTINO} a ${USU}:${GRUPO}"
+    done
+    shift
+done
+
+exit 0
