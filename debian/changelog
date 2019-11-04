@@ -1,3 +1,12 @@
+vx-dga-l-scripts (4.0-3) unstable; urgency=low
+
+  * Se añade el script vx-copy-file-to-graphic-users para copiar ficheros o directorios a todos los usuarios
+  * Se modifica la función vx-lista_directorios_perfil para poder saber un directorio en concreto
+  * Se modifica el script vx-usuario-grafico para que con la opción --all muestre todos los que tengan sesión iniciada
+  * Se modifica el script vx-usuario-grafico para que al pasar un HOME informe del usuario correspondiente
+
+ -- Arturo Martín <amartinromero@gmail.com>  Mon, 4 Nov 2019 00:10:00 +0200
+
 vx-dga-l-scripts (4.0-2) unstable; urgency=low
 
   * Se añade un script para embeber archivos SWFs en un documento HTML

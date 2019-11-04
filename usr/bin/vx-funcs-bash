@@ -270,7 +270,18 @@ function vx-lista_directorios_perfil() {
         "${DIRVIDEOS}" \
         "${DIRTEMPLATES}" \
     "${DIRPUBLICSHARE}" )
-    echo "${LISTA[@]}"
+    case "${1}" in
+        "Escritorio" ) echo "${DIRDESKTOP}" ;;
+        "Documentos" ) echo "${DIRDOCUMENTS}" ;;
+        "Descargas" ) echo "${DIRDOWNLOAD}" ;;
+        "Musica" ) echo "${DIRMUSIC}" ;;
+        "Imagenes" ) echo "${DIRPICTURES}" ;;
+        "Videos" ) echo "${DIRVIDEOS}" ;;
+        "Plantillas" ) echo "${DIRTEMPLATES}" ;;
+        "Publico" ) echo "${DIRPUBLICSHARE}" ;;
+        * ) echo "${LISTA[@]}" ;;
+    esac
+    
     return 0
 }
 
