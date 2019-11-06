@@ -48,15 +48,17 @@ echo -e "</span></tt></b>" >> /tmp/info-tarjetas-red
 
 echo -e "Información del direccionamiento IP:" >> /tmp/info-tarjetas-red
 for TARJETA in $(nmcli -t -f device dev | grep -v "lo") ; do
-    IP=$(vx-trim $(nmcli dev show enp0s3 | grep IP4.ADDRESS | cut -d":" -f2))
-    MAC=$(vx-trim $(nmcli dev show enp0s3 | grep IP4.ADDRESS | cut -d":" -f2))
+    IP=$(vx-trim $(nmcli dev show "${TARJETA}" | grep IP4.ADDRESS | cut -d":" -f2))
+    MAC=$(vx-trim $(nmcli dev show "${TARJETA}" | grep GENERAL.HWADDR | awk -F": " '{ print $2 }'))
     if test "$IP" != "" -a "$MAC" != "" ; then
-        echo "  =>  Interfaz <b><tt><span foreground='blue'>$TARJETA</span></tt></b>: " >> /tmp/info-tarjetas-red
-        echo "\t\tIP -> <b><tt><span foreground='blue'>$IP</span></tt></b> " >> /tmp/info-tarjetas-red
-        echo "\t\tMAC -> <b><tt><span foreground='blue'>$MAC</span></tt></b>" >> /tmp/info-tarjetas-red
-        echo "" >> /tmp/info-tarjetas-red
+        INFODEV="  =>  Interfaz <b><tt><span foreground='blue'>$TARJETA</span></tt></b>: "
+        INFODEV="${INFODEV}<b><tt><span foreground='blue'>$IP</span></tt></b> [IP] - "
+        INFODEV="${INFODEV}<b><tt><span foreground='blue'>$MAC</span></tt></b> [MAC]"
+        echo "${INFODEV}" >> /tmp/info-tarjetas-red
     fi
 done
+
+echo "" >> /tmp/info-tarjetas-red
 
 GATEWAY=$(route -n | grep UG | tr -s " " " " | cut -d" " -f2)
 echo "  =>  Puerta de Enlace: <b><tt><span foreground='blue'>$GATEWAY</span></tt></b>" >> /tmp/info-tarjetas-red
