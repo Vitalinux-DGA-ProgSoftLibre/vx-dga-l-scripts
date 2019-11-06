@@ -2,6 +2,7 @@ vx-dga-l-scripts (4.0-4) unstable; urgency=low
 
   * Se prescinde de ifconfig para conocer la IP y MAC de las interfaces de red
   * Se hace uso de nmcli para indicar la IP y MAC en el script de vx-informacion-red
+  * Se añade información del kernel en vx-informacion-red
 
  -- Arturo Martín <amartinromero@gmail.com>  Tue, 5 Nov 2019 00:10:00 +0200
 
