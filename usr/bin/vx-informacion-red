@@ -3,6 +3,9 @@
 # Exportamos las variables para saber cual es la IPCache Actual
 . /etc/default/vx-dga-variables/vx-dga-variables-general.conf
 
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
 echo "" > /tmp/info-tarjetas-red
 
 # CID:
@@ -44,9 +47,9 @@ fi
 echo -e "</span></tt></b>" >> /tmp/info-tarjetas-red
 
 echo -e "Información del direccionamiento IP:" >> /tmp/info-tarjetas-red
-for TARJETA in $(ifconfig | grep ^[a-z] | cut -d" " -f1) ; do
-    MAC=$(ifconfig $TARJETA | grep HW | tr -s " " " " | cut -d" " -f5)
-    IP=$(ifconfig $TARJETA | grep inet: | tr -s " " " " | cut -d" " -f3 | cut -d":" -f2)
+for TARJETA in $(nmcli -t -f device dev | grep -v "lo") ; do
+    IP=$(vx-trim $(nmcli dev show enp0s3 | grep IP4.ADDRESS | cut -d":" -f2))
+    MAC=$(vx-trim $(nmcli dev show enp0s3 | grep IP4.ADDRESS | cut -d":" -f2))
     if test "$IP" != "" -a "$MAC" != "" ; then
         echo "  =>  Interfaz <b><tt><span foreground='blue'>$TARJETA</span></tt></b>: " >> /tmp/info-tarjetas-red
         echo "\t\tIP -> <b><tt><span foreground='blue'>$IP</span></tt></b> " >> /tmp/info-tarjetas-red
