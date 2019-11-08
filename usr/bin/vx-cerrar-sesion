@@ -1,8 +1,8 @@
 #!/bin/bash
 
+# No es funcional, ya que luego no se reactivan los bus
 #USERGRAFICO=$(vx-usuario-grafico)
 #killall -u "$USERGRAFICO"
 
-#lxsession
-
-kill -9 -1
+logger -it vitalinux "Se cierra la sesión de usuario a petición del mismo"
+pgrep lxsession | xargs kill
