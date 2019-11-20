@@ -49,7 +49,7 @@ function vx-colorear_echo_azul_negrita() {
     echo -e "\e[34m\e[1m${1}\e[0m"
 }
 
-function log_xsession(){
+function vx-log_xsession(){
     #
     # Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
     # Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero

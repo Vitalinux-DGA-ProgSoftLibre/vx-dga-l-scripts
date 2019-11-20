@@ -93,15 +93,20 @@ for IMPRESORA in "${LISTAIMPRESORAS[@]}" ; do
     (( CONTADOR++ ))
 done
 
-yad --title "Información de Parámetros de Red" \
---center \
---image preferences-system-network \
---width 700 --height 450 \
---fixed \
---window-icon Vitalinux \
---text \
-"$(cat /tmp/info-tarjetas-red) \n" \
---button="Cerrar Ventana":0
+if vx-detectar_gui && [[ -z "${1}" ]] ; then
+    yad --title "Información de Parámetros de Red" \
+    --center \
+    --image preferences-system-network \
+    --width 700 --height 450 \
+    --fixed \
+    --window-icon Vitalinux \
+    --text \
+    "$(cat /tmp/info-tarjetas-red) \n" \
+    --button="Cerrar Ventana":0
+else
+    # Mostramos la información prescindiendo del etiquetado de formato:
+    sed -e 's/<[^>]*>//g' /tmp/info-tarjetas-red
+fi
 
 # route -n | grep -v ^Tabla | yad --title "Información de Parámetros de Red" \
 # --center \
