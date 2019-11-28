@@ -33,6 +33,9 @@ ARQUIHARDWARE="$(vx-trim "$(lscpu | awk 'NR==2' | cut -d':' -f2)")"
 echo -e "Arquitecturas de Vitalinux soportadas por el Hardware: <b><tt><span foreground='blue'>${ARQUIHARDWARE}</span></tt></b>" >> /tmp/info-tarjetas-red
 VEROPENGL="$(glxinfo | grep "OpenGL version" | awk -F":" '{ print $2 }')"
 echo -e "Versión de OpenGL: <b><tt><span foreground='blue'>${VEROPENGL}</span></tt></b>" >> /tmp/info-tarjetas-red
+# Información sobre el tipo de BIOS del equipo: BIOS Legacy o UEFI
+[[ -d "/sys/firmware/efi" ]] && TIPOBIOS="BIOS UEFI" || TIPOBIOS="BIOS Legacy"
+echo -e "Tipo de BIOS: <b><tt><span foreground='blue'>${TIPOBIOS}</span></tt></b>" >> /tmp/info-tarjetas-red
 
 FICH="/tmp/migasfree.tags"
 if test -f "${FICH}" ; then

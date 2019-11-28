@@ -1,3 +1,9 @@
+vx-dga-l-scripts (4.0-6) unstable; urgency=low
+
+  * Añadimos información del tipo de bios EFI o Legacy
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 5 Nov 2019 00:10:00 +0200
+
 vx-dga-l-scripts (4.0-5) unstable; urgency=low
 
   * Se modifica el nombre de la función log_xsession por vx-log_xsession
