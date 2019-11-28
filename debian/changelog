@@ -1,3 +1,9 @@
+vx-dga-l-scripts (4.0-4) unstable; urgency=low
+
+  * Se añade la información del tipo de BIOS
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 28 Nov 2019 00:10:00 +0200
+
 vx-dga-l-scripts (4.0-3) unstable; urgency=low
 
   * Se añade el script vx-copy-file-to-graphic-users para copiar ficheros o directorios a todos los usuarios

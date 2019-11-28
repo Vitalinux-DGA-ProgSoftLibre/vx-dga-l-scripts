@@ -3,6 +3,9 @@
 # Exportamos las variables para saber cual es la IPCache Actual
 . /etc/default/vx-dga-variables/vx-dga-variables-general.conf
 
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
 echo "" > /tmp/info-tarjetas-red
 
 # CID:
@@ -29,6 +32,9 @@ echo -e "Arquitecturas de Vitalinux soportadas por el Hardware: <b><tt><span for
 # Mostramos la versión de OpenGL:
 VEROPENGL="$(glxinfo | grep "OpenGL version" | awk -F":" '{ print $2 }')"
 echo -e "Versión de OpenGL: <b><tt><span foreground='blue'>${VEROPENGL}</span></tt></b>" >> /tmp/info-tarjetas-red
+# Información sobre el tipo de BIOS del equipo: BIOS Legacy o UEFI
+[[ -d "/sys/firmware/efi" ]] && TIPOBIOS="BIOS UEFI" || TIPOBIOS="BIOS Legacy"
+echo -e "Tipo de BIOS: <b><tt><span foreground='blue'>${TIPOBIOS}</span></tt></b>" >> /tmp/info-tarjetas-red
 
 FICH="/tmp/migasfree.tags"
 if test -f "${FICH}" ; then
