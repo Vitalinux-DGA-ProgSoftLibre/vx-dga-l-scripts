@@ -1,0 +1,21 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Reboot PC
+Name[en]=Reboot PC
+Name[es]=Reiniar Equipo
+Name[es_ES]=Reiniar Equipo
+
+Comment=Reboot PC
+Comment[en]=Reboot PC
+Comment[es]=Reiniar Equipo
+Comment[es_ES]=Reiniar Equipo
+
+Icon=system-reboot
+
+Exec=/usr/bin/vx-reiniciar-equipo
+Terminal=false
+Type=Application
+StartupNotify=true
+Hidden=false
+Categories=GestionApagado;

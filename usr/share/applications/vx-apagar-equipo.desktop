@@ -1,0 +1,21 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=ShutDown PC
+Name[en]=ShutDown PC
+Name[es]=Apagar Equipo
+Name[es_ES]=Apagar Equipo
+
+Comment=ShutDown PC
+Comment[en]=ShutDown PC
+Comment[es]=Apagar Equipo
+Comment[es_ES]=Apagar Equipo
+
+Icon=system-shutdown
+
+Exec=/usr/bin/vx-apagar-equipo
+Terminal=false
+Type=Application
+StartupNotify=true
+Hidden=false
+Categories=GestionApagado;

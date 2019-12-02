@@ -1,6 +1,7 @@
 vx-dga-l-scripts (4.0-6) unstable; urgency=low
 
   * Añadimos información del tipo de bios EFI o Legacy
+  * Añadimos los lanzadores de apagado y reinicio al hacer uso de Albert en lugar de synapse
 
  -- Arturo Martín <amartinromero@gmail.com>  Tue, 5 Nov 2019 00:10:00 +0200
 
