@@ -3,13 +3,13 @@ Encoding=UTF-8
 
 Name=Reboot PC
 Name[en]=Reboot PC
-Name[es]=Reiniar Equipo
-Name[es_ES]=Reiniar Equipo
+Name[es]=Reiniciar Equipo
+Name[es_ES]=Reiniciar Equipo
 
 Comment=Reboot PC
 Comment[en]=Reboot PC
-Comment[es]=Reiniar Equipo
-Comment[es_ES]=Reiniar Equipo
+Comment[es]=Reiniciar Equipo
+Comment[es_ES]=Reiniciar Equipo
 
 Icon=system-reboot
 

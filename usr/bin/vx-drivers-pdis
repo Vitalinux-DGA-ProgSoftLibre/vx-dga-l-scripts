@@ -206,11 +206,21 @@ function descargar-software-pdi {
 
 		"Hitachi") 
 		## Test
+		yad --title "Instalación de Software de la PDI $PDI" \
+				--text " Las pizarras Hitachi no tienen drivers actualizados. Se recomienda usar Vitalinux 1.0 (32 o 64 bits) \n Sin embargo se intentará instalar dicho software..."\
+				--window-icon vitalinux \
+				--image pdi \
+				--width="400" --height="100" \
+				--center --justify="center" --text-align="center" \
+				--button="gtk-ok":0 \
+				--button="Salir":1
+			if [ "$?" != "0" ]; then
+				return 1
+			fi
 		FILESPDI="/pdis/HITACHI/StarBoardSoftware_9.62_i586.deb"
 		;;
 
 		"Interwrite")
-		# Revisar versiones
 		# Test
 		FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.5.0.24 \
 		    /pdis/Interwrite/DeviceManager_Ubuntu_7.7.0.5"
@@ -237,10 +247,7 @@ function descargar-software-pdi {
 		;;
 
 		"Multiclass")
-		## Test. Parece que hay una nueva versión -> de la 7.0.0.0 a la 7.0.0.5
-			# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas
-			# En éste caso además se requiere instalación manual....
-			# FILESPDI="/pdis/multiCLASS/multiCLASSBoard.tar.gz"
+		## Test.
 			FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_$ARCHSO.deb"
 			# if [ "$ARCHSO" = "64" ] ; then
 			#   FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_64.deb"
@@ -250,17 +257,15 @@ function descargar-software-pdi {
 		;;
 
 		"Promethean")
-<<COMMENT
 		if [ "$ARCHSO" = "64" ] ; then
-		  FILESPDI="/pdis/Promethean/xenial_last/promethean64_xenial/activaid_2.0.1~Ubuntu~1604_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire_2.14.67304-1.amd64_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-help-es_1.0.2-14_all.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activresources-core-es_1.0.1-147_all.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activdriver_5.17.14-0~Ubuntu~1604_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-32bitdependsfor64bit_2.14.67304-1.i386_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activ-meta-es_2.0.0-71_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activtools_5.17.14-0~Ubuntu~1604_amd64.deb"
-		/pdis/Promethean/xenial_last/promethean32_xenial/
+		  FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activaid_2.0.1~Ubuntu~1804_amd64.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activdriver_5.18.12-0~Ubuntu~1804_amd64.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activinspire_2.17.68075-1.amd64_amd64.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activinspire-32bitdependsfor64bit_2.17.68075-1.i386_i386.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activinspire-help-es_1.0.2-14_all.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activ-meta-es_2.0.0-71_amd64.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activresources-core-es_1.0.1-147_all.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activtools_5.18.12-0~Ubuntu~1804_amd64.deb"
 		else
 		  FILESPDI="/pdis/Promethean/xenial_last/promethean32_xenial/activaid_2.0.1~Ubuntu~1604_i386.deb \
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activhwr-es_1.0.1-79_all.deb \
@@ -269,21 +274,6 @@ function descargar-software-pdi {
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activdriver_5.17.14-0~Ubuntu~1604_i386.deb \
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activ-meta-es_2.0.0-71_i386.deb"
-		fi
-COMMENT
-		if [ "$ARCHSO" = "64" ] ; then
-		  FILESPDI="/pdis/Promethean/promethean_64/activaid_5.14.21-0.deb \
-		  	/pdis/Promethean/promethean_64/activdriver_5.14.21-0.deb \
-		  	/pdis/Promethean/promethean_64/activtools_5.14.21-0.deb \
-			/pdis/Promethean/xenial_last/promethean64_xenial/activinspire_2.14.67304-1.amd64_amd64.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-help-es_1.0.2-14_all.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activresources-core-es_1.0.1-147_all.deb \
-		    /pdis/Promethean/xenial_last/promethean64_xenial/activinspire-32bitdependsfor64bit_2.14.67304-1.i386_i386.deb"
-		else
-		  FILESPDI="/pdis/Promethean/promethean_32/activaid_5.14.21-0.deb \
-		  	/pdis/Promethean/promethean_32/activdriver_5.14.21-0.deb \
-		  	/pdis/Promethean/promethean_32/activinspire_2.4.66096-1.i386_i386.deb \
-		  	/pdis/Promethean/promethean_32/activtools_5.14.21-0.deb"
 		fi
 		;;
 
@@ -441,21 +431,6 @@ function instalar-software-pdi {
 
 		dpkg -i /opt/pkgs/pdis/activ*.deb
 		apt-get -f --assume-yes --force-yes install
-<<COMMENT
-	if [ "$ARCHSO" = "64" ] ; then
-		#apt-get install dkms libssl0.9.8 gamin libgamin0 libxdo3 xdotool libxcb-xinerama0
-		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
-		dpkg -i /opt/pkgs/pdis/activdriver_5.14.21-0.deb
-		dpkg -i /opt/pkgs/pdis/activtools_5.14.21-0.deb
-	else
-		#apt-get install dkms libssl0.9.8 gamin libgamin0 libxdo3 xdotool libxcb-xinerama0
-		dpkg -i /opt/pkgs/pdis/activaid_5.14.21-0.deb
-		dpkg -i /opt/pkgs/pdis/activdriver_5.14.21-0.deb
-		dpkg -i /opt/pkgs/pdis/activtools_5.14.21-0.deb
-		dpkg -i /opt/pkgs/pdis/activinspire_2.4.66096-1.i386_i386.deb
-	fi
-	apt-get -f --assume-yes --force-yes install
-COMMENT
 	;;
 
 	"Smartboard")
@@ -541,7 +516,7 @@ seleccionar-modelo-pdi && descargar-software-pdi && instalar-software-pdi
 
 
 yad --title "Instalación de Software de la PDI $PDI" \
-	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Si no ha detectado errores debería estar todo configurado... "\
+	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Si no se han detectado errores o cancelado la operación debería estar todo configurado... "\
 	--window-icon vitalinux \
 	--image pdi \
 	--width="400" --height="100" \

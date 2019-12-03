@@ -1,3 +1,10 @@
+vx-dga-l-scripts (4.0-8) unstable; urgency=low
+
+  * Desktop de reiniciar - castellano
+  * Primera actualización de scripts pdis (falta revisar)
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 3 Dec 2019 22:10:00 +0200
+
 vx-dga-l-scripts (4.0-7) unstable; urgency=low
 
   * Adecuamos la información de salida del script de vx-informacion-red
