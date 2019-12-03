@@ -1,3 +1,10 @@
+vx-dga-l-scripts (4.0-7) unstable; urgency=low
+
+  * Adecuamos la información de salida del script de vx-informacion-red
+  * Sincronizamos Albert al regenerar el entorno de escritorio o directorios del perfil
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 5 Nov 2019 00:10:00 +0200
+
 vx-dga-l-scripts (4.0-6) unstable; urgency=low
 
   * Añadimos información del tipo de bios EFI o Legacy

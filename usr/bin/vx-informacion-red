@@ -63,24 +63,24 @@ for TARJETA in $(nmcli -t -f device dev | grep -v "lo") ; do
     fi
 done
 
-echo "" >> /tmp/info-tarjetas-red
-
 GATEWAY=$(route -n | grep UG | tr -s " " " " | cut -d" " -f2)
 echo "  =>  Puerta de Enlace: <b><tt><span foreground='blue'>$GATEWAY</span></tt></b>" >> /tmp/info-tarjetas-red
 
 DNS="$(nmcli device show | grep ^IP4.DNS | tr -s " " " " | cut -d" " -f2 | tr -s "\n" " ")"
 echo "  =>  DNSs: <b><tt><span foreground='blue'>${DNS}</span></tt></b>" >> /tmp/info-tarjetas-red
 
+IPPUBLICA=$(wget http://ipinfo.io/ip -qO - 2> /dev/null)
+echo "  =>  IP Pública Router: <b><tt><span foreground='blue'>$IPPUBLICA</span></tt></b>" >> /tmp/info-tarjetas-red
+
+echo "" >> /tmp/info-tarjetas-red
+
 # IPCACHE
-echo "  =>  Dirección IP del Servidor Caché: <b><tt><span foreground='blue'>$IPCACHE</span></tt></b>" >> /tmp/info-tarjetas-red
+echo "  =>  Servidor Caché: <b><tt><span foreground='blue'>$IPCACHE</span></tt></b>" >> /tmp/info-tarjetas-red
 
 if [[ -f /etc/migasfree.conf ]] && ( grep ^Server /etc/migasfree.conf &> /dev/null ) ; then
     SERVIDORMIGASFREE="$(grep "^Server" /etc/migasfree.conf | cut -d'=' -f2)"
     echo "  =>  Servidor Migasfree: <b><tt><span foreground='blue'>$SERVIDORMIGASFREE</span></tt></b>" >> /tmp/info-tarjetas-red
 fi
-
-IPPUBLICA=$(wget http://ipinfo.io/ip -qO - 2> /dev/null)
-echo "  =>  Dirección IP Pública Router: <b><tt><span foreground='blue'>$IPPUBLICA</span></tt></b>" >> /tmp/info-tarjetas-red
 
 echo "" >> /tmp/info-tarjetas-red
 

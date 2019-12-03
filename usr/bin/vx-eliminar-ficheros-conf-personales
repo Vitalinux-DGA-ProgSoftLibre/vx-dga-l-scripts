@@ -18,6 +18,7 @@
 ~/.config/lxpanel/default/panels/panel
 ~/.config/libfm/libfm.conf
 ~/.config/lxterminal/lxterminal.conf
+~/.config/albert
 
 # Se eliminan todos, a excepción del desktop-items-0.conf que crea los elementos virtuales
 # del Escritorio: papelera, Documentos, etc.
@@ -27,48 +28,61 @@ INFO
 ERRORES=0
 USER="$(whoami)"
 if test "${USER}" == "root" ; then
-	for USUARIO in $(vx-usuarios-graficos) ; do
-
-		HOMEUSU="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
-		for DIR in ".config/openbox" \
-			".config/lxsession" \
-			".config/pcmanfm" \
-			".config/lxpanel" \
-			".config/libfm" \
-			".config/lxterminal" ; do
-			if test -d "${HOMEUSU}/${DIR}" ; then
-				if ! rm -Rf "${HOMEUSU}/${DIR}" ; then
-					ERRORES=1
-					echo "ERROR: No se ha podido eliminar ${HOMEUSU}/${DIR} ..."
-				else
-					echo "OK: Se ha eliminado ${HOMEUSU}/${DIR} ..."
-				fi
-			fi
-		done
-
-		# Copiamos desde el skel los archivos de configuración que no se autogeneran al iniciar sesión gráfica:
-		## ~/.config/pcmanfm/lubuntu/desktop-items-0.conf
-		## ~/.config/lxpanel/Lubuntu/panels/panel
-		## ~/.config/lxpanel/default/panels/panel
-		for DIR in ".config/pcmanfm" \
-			".config/lxpanel" ; do
-				if ! su "${USUARIO}" \
-					-c 'rsync -ahv /etc/skel/'${DIR}' '${HOMEUSU}'/.config' \
-					--login &> /dev/null ; then
-					ERRORES=1
-					echo "ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSU} ..."
-				else
-					echo "OK: copiado /etc/skel/${DIR} en ${HOMEUSU} ..."
-				fi
-		done
-		
-	done
-	#if test "${ERRORES}" -eq 0 ; then
-	#	exit 0
-	#else
-	#	exit 1
-	#fi
+    for USUARIO in $(vx-usuarios-graficos) ; do
+        
+        HOMEUSU="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
+        for DIR in ".config/openbox" \
+        ".config/lxsession" \
+        ".config/pcmanfm" \
+        ".config/lxpanel" \
+        ".config/libfm" \
+        ".config/lxterminal" ; do
+            if test -d "${HOMEUSU}/${DIR}" ; then
+                if ! rm -Rf "${HOMEUSU}/${DIR}" ; then
+                    ERRORES=1
+                    echo "ERROR: No se ha podido eliminar ${HOMEUSU}/${DIR} ..."
+                else
+                    echo "OK: Se ha eliminado ${HOMEUSU}/${DIR} ..."
+                fi
+            fi
+        done
+        
+        # Copiamos desde el skel los archivos de configuración que no se autogeneran al iniciar sesión gráfica:
+        ## ~/.config/pcmanfm/lubuntu/desktop-items-0.conf
+        ## ~/.config/lxpanel/Lubuntu/panels/panel
+        ## ~/.config/lxpanel/default/panels/panel
+        for DIR in ".config/pcmanfm" \
+        ".config/lxpanel" ; do
+            if ! su "${USUARIO}" \
+            -c 'rsync -ahv /etc/skel/'${DIR}' '${HOMEUSU}'/.config' \
+            --login &> /dev/null ; then
+                ERRORES=1
+                echo "ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSU} ..."
+            else
+                echo "OK: copiado /etc/skel/${DIR} en ${HOMEUSU} ..."
+            fi
+        done
+        
+        # Sincronizamos Albert Launcher:
+        if [ -d "/etc/skel/.config/albert" ] ; then
+            if ! su "${USUARIO}" -c 'rsync -ahv --delete --exclude core.db /etc/skel/.config/albert ${HOMEUSU}/.config' \
+            --login &> /dev/null ; then
+                ERRORES=1
+                echo "ERROR: Problema al copiar Albert en ${HOMEUSU} ..."
+            else
+                echo "OK: copiado Albert en ${HOMEUSU} ..."
+            fi
+        else
+            echo "Warning: No hay configuración de Albert Launcher"
+        fi
+        
+    done
+    #if test "${ERRORES}" -eq 0 ; then
+    #	exit 0
+    #else
+    #	exit 1
+    #fi
 else
-	echo "=> Problema: Debes usuario \"root\" para poder ejecutar este script ..."
-	exit 1
+    echo "=> Problema: Debes usuario \"root\" para poder ejecutar este script ..."
+    exit 1
 fi
