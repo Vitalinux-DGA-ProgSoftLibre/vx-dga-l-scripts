@@ -1,6 +1,7 @@
 vx-dga-l-scripts (5.0-1) unstable; urgency=low
 
-  * Script PDI actualizado
+  * Script PDI actualizado. OpenBoard de momento sin candidato
+  * Sol error en ficheros conf personales
 
  -- Ignacio Sancho <sannacho@gmail.com>  Wed, 4 Dec 2019 00:10:00 +0200
 

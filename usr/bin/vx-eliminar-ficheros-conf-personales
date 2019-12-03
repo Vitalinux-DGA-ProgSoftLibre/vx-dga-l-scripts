@@ -65,7 +65,8 @@ if test "${USER}" == "root" ; then
         
         # Sincronizamos Albert Launcher:
         if [ -d "/etc/skel/.config/albert" ] ; then
-            if ! su "${USUARIO}" -c 'rsync -ahv --delete --exclude core.db /etc/skel/.config/albert ${HOMEUSU}/.config' \
+            if ! su "${USUARIO}" \
+            -c 'rsync -ahv --delete --exclude core.db /etc/skel/.config/albert '${HOMEUSU}'/.config' \
             --login &> /dev/null ; then
                 ERRORES=1
                 echo "ERROR: Problema al copiar Albert en ${HOMEUSU} ..."
