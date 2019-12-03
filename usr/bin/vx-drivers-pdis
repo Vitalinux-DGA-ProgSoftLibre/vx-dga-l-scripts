@@ -201,7 +201,7 @@ function descargar-software-pdi {
 			return 1
 		fi
 		## Test
-		FILESPDI="/pdis/eBeam/scrapbook-selfextracting.1604.32"
+		FILESPDI="/pdis/eBeam/eBeam-Interact_3.6-0_bionic_amd64.deb"
 		;;
 
 		"Hitachi") 
@@ -227,7 +227,6 @@ function descargar-software-pdi {
 		;;
 
 		"IQBoard")
-		## Descargar versiones para 18 de los Drivers, si o si :-(
 		## Test. Existe un modelo de software superior
 			# Selecccionar el modelo de iqboard...sino se seleccionará el de infrarrojos 6 o 10 puntos
 			MODELOIQ=$(yad --center --width 300 --title "Seleccionar PDI" \
@@ -242,7 +241,7 @@ function descargar-software-pdi {
 			)
 			[ "$MODELOIQ" = "" ] && return 1
 			
-			FILESPDI="/pdis/IQBoard/IQBoard_$ARCHSO/iqboard.deb /pdis/IQBoard/iqboard_driver/$MODELOIQ/x$ARCHSO/rsboardep.deb"
+			FILESPDI="/pdis/IQBoard/IQBoard_$ARCHSO/iqboard.deb /pdis/IQBoard/iqboard_driver_bionic/$MODELOIQ/x$ARCHSO/rsboardep.deb"
 			
 		;;
 
@@ -257,6 +256,7 @@ function descargar-software-pdi {
 		;;
 
 		"Promethean")
+		# Faltan 32 bits...de momento no se publica dicha versión
 		if [ "$ARCHSO" = "64" ] ; then
 		  FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activaid_2.0.1~Ubuntu~1804_amd64.deb \
 			/pdis/Promethean/bionic/promethean64_bionic/activdriver_5.18.12-0~Ubuntu~1804_amd64.deb \
@@ -299,11 +299,17 @@ function descargar-software-pdi {
 				--window-icon vitalinux \
 				--image pdi \
 				--width="400" --height="100" \
-				--center --justify="center" --text-align="center" --button="gtk-ok":0
-		elif [ "$SB480" = "1" ]  ; then
-			# Si es de 32 bits y es la 480, ofrecemos la instalación desatendida....
+				--center --justify="center" --text-align="center" \
+				--button="Continuar instalación":0 \
+				--button="Cancelar":1 \
+
+			if [ "$?" != "0" ]; then
+				return 1
+			fi
+		else
+			# No sabemos si funcionará
 			yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Su PDI parece ser una SmartBoard 480....si lo desea puede solictar la instalación desatendida en éste equipo a través de soporte "\
+				--text " Su PDI parece ser una SmartBoard 480...pero no sabemos si la versión publicada sea compatible con Ubuntu bionic. Si tiene problemas contacte con Soporte Vitalinux "\
 				--window-icon vitalinux \
 				--image pdi \
 				--width="400" --height="100" \
@@ -348,10 +354,9 @@ function instalar-software-pdi {
 	case $PDI in
 
 	"eBeam")
-	if test -f ./scrapbook-selfextracting.1604.32 ; then
-		chmod +x /opt/pkgs/pdis/scrapbook-selfextracting.1604.32
-		/opt/pkgs/pdis/scrapbook-selfextracting.1604.32
-	fi
+		apt-get --assume-yes --force-yes install libusb-dev yasm libvpx. libx264. kazam onboard libboost-all-dev libboost-thread-dev
+		dpkg -i eBeam-Interact_3.6-0_bionic_amd64.deb
+		apt-get -f --assume-yes --force-yes install
 	;;
 
 	"Hitachi")
@@ -516,7 +521,7 @@ seleccionar-modelo-pdi && descargar-software-pdi && instalar-software-pdi
 
 
 yad --title "Instalación de Software de la PDI $PDI" \
-	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Si no se han detectado errores o cancelado la operación debería estar todo configurado... "\
+	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Si no se han detectado errores o se ha cancelado la operación, debería estar todo configurado... "\
 	--window-icon vitalinux \
 	--image pdi \
 	--width="400" --height="100" \
