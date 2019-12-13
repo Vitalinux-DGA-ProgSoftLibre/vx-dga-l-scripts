@@ -1,42 +1,42 @@
 #!/bin/bash
 USER=$(whoami)
 
-function aviso_reiniciar {
-	NOMBRE="${1}"
-	TEXTO="<b>¡¡Aviso!!</b> El nombre indicado para el equipo <b>\"${NOMBRE}\"</b> es válido.  Este <b>se asignará la próxima vez que reinicies el equipo</b> ...\n"
-	echo -e "=> El nombre deseado para el equipo \"${NOMBRE}\" se asignará al reiniciar el equipo ..."
-	yad --title "Cambio de Nombre del Equipo" \
-		--window-icon vitalinux \
-		--image vitalinux \
-		--info \
-		--text "${TEXTO}" \
-		--width="500" --height="100" \
-		--center \
-		--justify="center" \
-		--text-align="center" \
-		--buttons-layout center \
-		--button="<b>Entendido</b>":0
+function aviso_cambio {
+    NOMBRE="${1}"
+    TEXTO="<b>¡¡Perfecto!!</b> Tu equipo ya tiene asignado el nombre <b>\"${NOMBRE}\"</b>.\n"
+    echo -e "=> ¡¡Perfecto!! El nombre deseado para el equipo \"${NOMBRE}\" ya ha sido asignado ..."
+    yad --title "Cambio de Nombre del Equipo" \
+    --window-icon vitalinux \
+    --image vitalinux \
+    --info \
+    --text "${TEXTO}" \
+    --width="500" --height="100" \
+    --center \
+    --justify="center" \
+    --text-align="center" \
+    --buttons-layout center \
+    --button="<b>Entendido</b>":0
 }
 
 if test "${USER}" != "root" ; then
-	yad --title "Cambio de Nombre del Equipo" \
-		--text "No tienes privilegios para \n <b>Cambiar el Nombre del Equipo</b>" \
-		--window-icon vitalinux \
-		--image vitalinux \
-		--width="350" --height="100" \
-		--center \
-		--justify="center" \
-		--text-align="center" \
-		--buttons-layout center \
-		--button="Cerrar":1
-	exit 1
+    yad --title "Cambio de Nombre del Equipo" \
+    --text "No tienes privilegios para \n <b>Cambiar el Nombre del Equipo</b>" \
+    --window-icon vitalinux \
+    --image vitalinux \
+    --width="350" --height="100" \
+    --center \
+    --justify="center" \
+    --text-align="center" \
+    --buttons-layout center \
+    --button="Cerrar":1
+    exit 1
 fi
 
 NAMEHOST=$(hostname) ## Nombre del actual nombre del equipos
 
 FICHCONF="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 if test -f "${FICHCONF}" ; then
-	. /etc/default/vx-dga-variables/vx-dga-variables-general.conf
+    . /etc/default/vx-dga-variables/vx-dga-variables-general.conf
 fi
 
 
@@ -45,46 +45,56 @@ TEXTO="${TEXTO}\n\n ¿Quieres cambiar el nombre del Equipo?"
 TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
 TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
 TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!"
-TEXTO="${TEXTO}\n\n¡¡El cambio de Nombre requerirá <b>Reiniciar el Equipo</b>!!\n\n"
+#TEXTO="${TEXTO}\n\n¡¡El cambio de Nombre requerirá <b>Reiniciar el Equipo</b>!!\n\n"
 
 SALTAR=0
 
 while test "${SALTAR}" -eq 0 ; do
-
-	if RESULTADO=$(yad --title "Nombre del Equipo" \
-		--width="700" --height="500" \
-		--center \
-		--justify="center" \
-		--text-align="fill" \
-		--text "${TEXTO}" \
-	   	--window-icon vitalinux \
-	   	--image vitalinux \
-	   	--form --field "Nuevo Nombre para el Equipo: ":CBE "${NAMEHOST}" \
-	   	--buttons-layout center \
-		--button="<b>Modificar Nombre</b>":0 \
-		--button="Saltar":1) ; then
-
-		NAME="$(echo "${RESULTADO}" | cut -d'|' -f1)"
-		
-		if ! test -z "${NAME}" ; then
-			if vx-hostname-validar-cli "${NAME}" ; then
-				SALTAR=1
-				sed -i "/CAMBIARHOSTNAME.*/d" "${FICHCONF}"
-				sed -i '/Varibles utilizadas por los paquetes/a CAMBIARHOSTNAME=1' "${FICHCONF}"
-				sed -i "/NUEVOHOSTNAME.*/d" "${FICHCONF}"
-				sed -i "/Varibles utilizadas por los paquetes/a NUEVOHOSTNAME=${NAME}" "${FICHCONF}"
-				aviso_reiniciar "${NAME}"
-			else
-				TEXTO="\n¡¡Repasa el nombre indicado para el Equipo!!"
-				TEXTO="${TEXTO}\n => Nuevo nombre indicado: \"<b>${NAME}</b>\" ¡¡No es correcto!!"
-				TEXTO="${TEXTO}\n\nEl nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\""
-				TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
-				TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
-				TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!"
-				TEXTO="${TEXTO}\n\n¡¡El cambio de Nombre requerirá <b>Reiniciar el Equipo</b>!!\n\n"
-			fi
-		fi
-	else
-			SALTAR=1
-	fi
+    
+    if RESULTADO=$(yad --title "Nombre del Equipo" \
+        --fixed \
+        --center \
+        --justify="center" \
+        --text-align="fill" \
+        --text "${TEXTO}" \
+        --window-icon vitalinux \
+        --image vitalinux \
+        --form --field "Nuevo Nombre para el Equipo: ":CBE "${NAMEHOST}" \
+        --buttons-layout center \
+        --button="<b>Modificar Nombre</b>":0 \
+        --button="Saltar":1) ; then
+        
+        NAME="$(echo "${RESULTADO}" | cut -d'|' -f1)"
+        
+        if ! test -z "${NAME}" ; then
+            if vx-hostname-validar-cli "${NAME}" ; then
+                if vx-hostname-cli "${NAME}" ; then
+                    SALTAR=1
+                    # El script vx-hostname-cli ya reinicia el conky
+                    #USU="$(vx-usuario-grafico)"
+                    #[ -f /usr/bin/inicio-conky ] && \
+                    #su "${USU}" -c "/usr/bin/inicio-conky" --login
+                    # vx-reiniciar-widget
+                    #aviso_cambio "${NAME}"
+                else
+                    TEXTO="\n¡¡Problemas al asignar el nombre al Equipo!! Inténtalo de nuevo ..."
+                    TEXTO="${TEXTO}\n\nEl nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\""
+                    TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
+                    TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
+                    TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!"
+                fi
+            else
+                TEXTO="\n¡¡Repasa el nombre indicado para el Equipo!!"
+                TEXTO="${TEXTO}\n => Nuevo nombre indicado: \"<b>${NAME}</b>\" ¡¡No es correcto!!"
+                TEXTO="${TEXTO}\n\nEl nombre de su equipo actual es: \"<b>${NAMEHOST}</b>\""
+                TEXTO="${TEXTO}\n\n(1) Puedes usar cualquier carater alfanumérico"
+                TEXTO="${TEXTO}\n(2) Puedes usar puntos y guiones como separadores"
+                TEXTO="${TEXTO}\n(3) ¡¡<b>No uses espacios en blanco</b>!!"
+            fi
+        fi
+    else
+        SALTAR=1
+        exit 1
+    fi
 done
+exit 0

@@ -1,3 +1,12 @@
+vx-dga-l-scripts (5.0-2) unstable; urgency=low
+
+  * Se modifican los scripts de cambio de nombre de equipo: vx-hostname y vx-hostname-cli
+  * Añadimos scripts útiles para la configuración y personalización de centro:
+  * vx-programar-apagado-automatico
+  * Se añade vx-reinicar-widget para reiniciar el Widget Conky desde un script
+
+ -- Arturo Martín <amartinromero@gmail.com>  Fri, 13 Dec 2019 00:10:00 +0200
+
 vx-dga-l-scripts (5.0-1) unstable; urgency=low
 
   * Script PDI actualizado. OpenBoard de momento sin candidato

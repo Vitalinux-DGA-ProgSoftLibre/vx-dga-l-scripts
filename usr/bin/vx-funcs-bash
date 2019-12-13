@@ -54,7 +54,7 @@ function vx-log_xsession(){
     # Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
     # Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
     #
-    # Ejemplo de llamada: LOG="vx-fichero.log" && log_xsession -o "${LOG}"
+    # Ejemplo de llamada: LOG="vx-fichero.log" && vx-log_xsession -o "${LOG}"
     #
     while getopts 'o:' OPT; do
         case ${OPT} in
@@ -85,12 +85,15 @@ function vx-mensaje_cli {
 }
 
 function vx-mensaje_gui {
-    yad --title "$1" \
+    yad --title "${1}" \
     --window-icon "vitalinux" \
     --image "${3}" \
     --center \
-    --text="  ${2}" --text-align="center" \
-    --button="${4}":0
+    --text="  ${2}" \
+    --text-align="center" \
+    --buttons-layout center \
+    --fixed \
+    --button="<b>${4}</b>":0
 }
 
 function vx-detectar_gui() {

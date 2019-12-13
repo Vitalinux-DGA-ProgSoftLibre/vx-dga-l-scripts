@@ -1,104 +1,107 @@
 #!/bin/bash
+# Versiones: [arturo@2019-12-12]
 # Se le pasa como primer parámetro el nombre de equipo a asignar
 
-USER=$(whoami)
-
-if test "${USER}" != "root" ; then
-	echo "=> Necesitas privilegios de \"root\" para poder lanzar este programa ..."
+if test "$(whoami)" != "root" ; then
+    echo "=> Necesitas privilegios de \"root\" para poder lanzar este programa ..."
+    exit 1
 fi
 
 function cambiar_nombre_equipo {
-	# Cambiamos el "hostname" del equipo: hostnamectl adecuará el formato del nombre a lo que el sistema acepta
-	## sed --follow-symlinks -i "s/${NAMEHOST}/${NAME}/g" "/etc/hostname"
-	if hostnamectl set-hostname "${1}" ; then
-		echo "=> Se ha asignado el nombre ${1} al equipo: /etc/hostname"
-	fi
-	NEW_NAME_EQUIPO="$(hostname)"
-
-	# Aseguramos la resolución del nuevo nombre de equipo:
-	## sed --follow-symlinks -i "s/${NAMEHOST}/${NAME}/g" "/etc/hosts"
-	if grep "127.0.1.1" /etc/hosts &> /dev/null ; then
-		if ! ( grep "127.0.1.1" /etc/hosts | grep "${NEW_NAME_EQUIPO}" &> /dev/null ) ; then
-			if sed --follow-symlinks -i "s/\(127\.0\.1\.1\)\(.*\)/\1\t${NEW_NAME_EQUIPO}/g" "/etc/hosts" ; then
-				echo "=> Se ha modificado el archivo /etc/hosts para su resolución de nombre ..."
-			fi
-		fi
-	else
-		echo -e "127.0.1.1\t${NEW_NAME_EQUIPO}" >> "/etc/hosts"
-	fi
-
-	# Se eliminan los rastros de nwjs asociados al nombre del equipo anterior que pudieran haber:
-	for USUARIO in $(vx-usuarios-graficos) ; do
-		HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
-		echo "=> Se va a eliminar el rastro de nwjs de Migasfree del usuario ${USUARIO} ..."
-		rm -Rf "${HOMEUSUARIO}"/.config/Migasfree*
-		rm -Rf "${HOMEUSUARIO}"/.cache/Migasfree*
-	done
+    # Informamos al usuario de que sería conveniente reiniciar el Equipo ante el cambio:
+    echo "=> Se va ha producir el cambio de nombre de equipo y es conveniente reinicar el equipo ..."
+    TITULO="Cambio de Nombre de Equipo"
+    TEXTO="<b>¡¡Perfecto!!</b> Va a asignarse el nombre <b>\"${1}\"</b> al Equipo.\n"
+    TEXTO+="Lo podrás advertir en el <b>Widget del Escritorio</b>.\n"
+    TEXTO+="¡¡Es conviente <b>Reiniciar el Equipo</b> para evitar comportamientos anómalos!!"
+    vx-mensaje "${TITULO}" "${TEXTO}"
+    
+    # Cambiamos el "hostname" del equipo: hostnamectl adecuará el formato del nombre a lo que el sistema acepta
+    ## sed --follow-symlinks -i "s/${NAMEHOST}/${NAME}/g" "/etc/hostname"
+    if hostnamectl set-hostname "${1}" ; then
+        echo "=> Se ha asignado el nombre ${1} al equipo: /etc/hostname"
+    else
+        echo "=> ¡¡Problemas al asignar el nombre ${1} al equipo: /etc/hostname!!"
+        exit 1
+    fi
+    NEW_NAME_EQUIPO="$(hostname)"
+    
+    # Aseguramos la resolución del nuevo nombre de equipo:
+    ## sed --follow-symlinks -i "s/${NAMEHOST}/${NAME}/g" "/etc/hosts"
+    if grep "127.0.1.1" /etc/hosts &> /dev/null ; then
+        if ! ( grep "127.0.1.1" /etc/hosts | grep "${NEW_NAME_EQUIPO}" &> /dev/null ) ; then
+            if sed --follow-symlinks -i "s/\(127\.0\.1\.1\)\(.*\)/\1\t${NEW_NAME_EQUIPO}/g" "/etc/hosts" ; then
+                echo "=> Se ha modificado el archivo /etc/hosts para su resolución de nombre ..."
+            fi
+        fi
+    else
+        echo -e "127.0.1.1\t${NEW_NAME_EQUIPO}" >> "/etc/hosts"
+        echo "=> Se ha añadido a /etc/hosts: 127.0.1.1 ${NEW_NAME_EQUIPO}"
+    fi
+    
+    # Se eliminan los rastros de nwjs asociados al nombre del equipo anterior que pudieran haber:
+    for USUARIO in $(vx-usuarios-graficos) ; do
+        HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
+        for DIR in "Migasfree" "vue-vx-postinstall" ; do
+            echo "=> Se va a eliminar el rastro de nwjs de ${DIR} del usuario ${USUARIO} ..."
+            rm -Rf "${HOMEUSUARIO}"/.config/${DIR}*
+            rm -Rf "${HOMEUSUARIO}"/.cache/${DIR}*
+        done
+    done
+    
+    # Reiniciamos el Widget en caso de estar en un entorno gráfico:
+    [ -f "/usr/bin/vx-reiniciar-widget" ] && \
+    vx-reiniciar-widget &> /dev/null && \
+    echo "=> Se ha reiniciado el Widget del Escritorio" || \
+    echo "=> Problemas para reiniciar el Widget del Escritorio"
+    
 }
 
-function log_xsession(){
-#
-# Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
-# Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
-# 
-	while getopts 'o:' OPT; do
-        case ${OPT} in
-            o) LOGFILE=${OPTARG};;
-        esac
-	done
-
-	if [ "${LOGFILE}" ] ; then
-		if [ ! -d /var/log/vitalinux ]; then
-			mkdir -p /var/log/vitalinux
-		fi
-		LOGFILE="/var/log/vitalinux/${LOGFILE}"
-	else
-		LOGFILE="/tmp/logfile.cambiar-hostname.log"
-	fi
-	
-	exec 2>&1
-	exec > >(tee -i "${LOGFILE}" )
-	
-}
-
-log_xsession -o vx-cambiar-hostname.log
-
-echo "$(date) - Cambio de Nombre del Equipo"
-
-if test "${USER}" != "root" ; then
-	echo "=> Necesitas privilegios de \"root\" para poder lanzar este programa ..."
-fi
+# 0) Preparamos la auditoria de la configuración de centro:
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+[[ "$(LC_ALL=C type -t "vx-log_xsession")" == "function" ]] && \
+FICHLOG="vx-hostname-cli.log" && \
+vx-log_xsession -o "${FICHLOG}" && \
+echo "## $(date) - Auditoria para el cambio de nombre de equipo: ${FICHLOG}"
 
 if test -f /etc/default/vx-dga-variables/vx-dga-variables-general.conf ; then
-	. /etc/default/vx-dga-variables/vx-dga-variables-general.conf
+    . /etc/default/vx-dga-variables/vx-dga-variables-general.conf
 fi
 
 NAME="${1}"
-NAMEHOST=$(hostname) ## Nombre del actual nombre del equipos
+NAMEHOST="$(hostname)" ## Nombre del actual nombre del equipos
+
+[[ "${NAME}" == "${NAMEHOST}" ]] && \
+echo "=> No hay cambios en el nombre de Equipo. El nombre actual es: \"${NAMEHOST}\"" && \
+exit 0
 
 echo "=> El nombre actual del Equipo es: \"${NAMEHOST}\""
-	
+
 IFSANT="${IFS}"
 IFS="."
 NARR=(${NAME})
 ST=1
 if ! test -z "${NAME}" ; then
-	for i in "${!NARR[@]}"; do 
-		[ ${#NARR[$i]} -gt 63 ] && { ST=0; break; };
-	done
-	if [ ${#NAME} -le 253 ] && [ ${#NARR[@]} -le 4 ] && [[ ! "${NAME}" =~ [^[:alnum:].-] ]] && [ ${ST} -eq 1 ] ; then
-		IFS="${IFSANT}"
-		echo "=> El nombre deseado para el Equipo es, \"${NAME}\", es un nombre válido ..."
-		echo "=> Pasaremos a asignar dicho nombre al equipo ..."		
-		cambiar_nombre_equipo "${NAME}"
-		echo "=> Es necesario reiniciar el equipo para que surtan efecto los cambios ..."
-		exit 0
-	else
-		IFS="${IFSANT}"
-		echo "=> El nombre deseado para el Equipo es, \"${NAME}\", es ¡¡inválido!! ..."
-		exit 1
-	fi
+    for i in "${!NARR[@]}"; do
+        [ ${#NARR[$i]} -gt 63 ] && { ST=0; break; };
+    done
+    if [ ${#NAME} -le 253 ] && [ ${#NARR[@]} -le 4 ] && [[ ! "${NAME}" =~ [^[:alnum:].-] ]] && [ ${ST} -eq 1 ] ; then
+        IFS="${IFSANT}"
+        echo "=> El nombre deseado para el Equipo es, \"${NAME}\", es un nombre válido ..."
+        echo "=> Pasaremos a asignar dicho nombre al equipo ..."
+        cambiar_nombre_equipo "${NAME}"
+        # echo "=> Es necesario reiniciar el equipo para que surtan efecto los cambios ..."
+    else
+        IFS="${IFSANT}"
+        # Informamos al usuario de que sería conveniente reiniciar el Equipo ante el cambio:
+        echo "=> El nombre deseado para el Equipo <b>\"${NAME}\"</b> es ¡¡inválido!! ..."
+        TITULO="Cambio de Nombre de Equipo"
+        TEXTO="<b>¡¡Error!!</b> El nombre deseado para el Equipo <b>\"${NAME}\"</b> es ¡¡inválido!!\n"
+        TEXTO+="Puedes volver a intentarlo con otro nombre ..."
+        vx-mensaje "${TITULO}" "${TEXTO}"
+        exit 1
+    fi
 fi
 
-		
-
+exit 0

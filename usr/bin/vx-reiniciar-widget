@@ -1,0 +1,31 @@
+#!/bin/bash
+# Versiones: [arturo@2019-12-12]
+
+mensaje() {
+    echo "=> $(date) - ${1}"
+}
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+if [ -f "${FICHFUNCS}" ] ; then
+    . "${FICHFUNCS}"
+else
+    MENSAJE="Error!! No estan disponibles las funciones: ${FICHFUNCS}"
+    mensaje "${MENSAJE}"
+    exit 1
+fi
+
+MENSAJE="Error!! El Widget Conky de Vitalinux no esta instalado ..."
+[ ! -f "/usr/bin/inicio-conky" ] && mensaje "${MENSAJE}" && exit 1
+
+if [[ "$(whoami)" == "$(vx-usuario-grafico)" ]] ; then
+    vx-detectar_gui && inicio-conky
+    elif [[ "$(whoami)" == "root" ]] ; then
+    su "$(vx-usuario-grafico)" -c "vx-funcs-bash vx-detectar_gui" --login && \
+    su "$(vx-usuario-grafico)" -c "/usr/bin/inicio-conky" --login
+else
+    MENSAJE="No se detecta GUI o hay un problema para reinicar el Widget ..."
+    mensaje "${MENSAJE}"
+    exit 1
+fi
+
+exit 0
