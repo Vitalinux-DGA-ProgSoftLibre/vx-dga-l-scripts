@@ -1,0 +1,81 @@
+#!/bin/bash
+# Versiones: [arturo@2019-12-16]
+
+uso() {
+    echo "¡¡Importante!! Para configurar las paginas de inicio de navegadores:
+    1) Debes ser usuario \"root\"
+    2) Debes pasar como primer parámetro el navegador a personalizar: firefox|chrome
+    3) Como segundo parámetro debe pasarse las páginas de inicio a personalizar
+    Ej. vx-set-paginicio-navegadores firefox '\"https://www.google.es|https://aplicaciones.aragon.es/sigaddweb/login\"'
+    Ej. vx-set-paginicio-navegadores chrome '\"https://www.google.es\",\"https://aplicaciones.aragon.es/sigaddweb/login\"'
+    ¡¡Nota!! Pueden configurarse ambos pasandose parámetros por pares (4 parámetros)
+    Ej. vx-set-paginicio-navegadores \\
+        firefox '\"https://www.google.es|https://aplicaciones.aragon.es/sigaddweb/login\"' \\
+        chrome '\"https://www.google.es\",\"https://aplicaciones.aragon.es/sigaddweb/login\"'
+    "
+    exit 1
+}
+
+[[ "$(whoami)" != "root" ]] && uso
+# Deben pasarse al menos dos parámetros, por pares:
+(( ${#} % 2 )) && uso
+
+FICHCONF="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
+[ -f "${FICHCONF}" ] && . "${FICHCONF}"
+
+FICHCONFCHROME="/etc/opt/chrome/policies/managed/vx-paginicio-chrome.json"
+FICHCONFFIREFOX="/usr/lib/firefox/browser/defaults/preferences/vx-paginicio-firefox.js"
+
+#NUEVAPAGINICIOG='"https://www.google.es","https://aplicaciones.aragon.es/sigaddweb/login"'
+#NUEVAPAGINICIOF='"https://www.google.es|https://aplicaciones.aragon.es/sigaddweb/login"'
+
+until [[ -z "${1}" || -z "${2}" ]] ; do
+    NAV="${1}"
+    case "${NAV}" in
+        "firefox" )
+            NUEVAPAGINICIOF="${2}"
+            # Configuración de páginas de inicio de Firefox:
+            echo "=> Configuración de páginas de inicio de Firefox: ${NUEVAPAGINICIOF}"
+            if [ -f "${FICHCONFFIREFOX}" ] ; then
+                # ¡¡Nota!! Al usar el caracter "|" firefox para separar paginas de inicio da
+                # problemas con la opción "-E" del grep, al hacer incorrectamente la regex
+                # Por tanto, el grep no lleva "-E":
+                if ! grep -q "${NUEVAPAGINICIOF}" "${FICHCONFFIREFOX}" ; then
+                    sed --follow-symlinks -i "s#^pref(\"browser.startup.homepage\",.*#pref(\"browser.startup.homepage\", ${NUEVAPAGINICIOF}, locked);#g" "${FICHCONFFIREFOX}" && \
+                    echo "=> Ok!! Configuradas en Firefox!!" || \
+                    {
+                        echo "=> Eror!! Problemas para configurar Firefox!!" && exit 1 ;
+                    }
+                    
+                else
+                    echo "=> Ya estaban configuradas las Pag Inicio en Firefox!!"
+                fi
+            else
+                echo "=> Error!! No existe el fichero de configuración de Firefox"
+                exit 1
+            fi
+        ;;
+        "chrome" )
+            NUEVAPAGINICIOG="${2}"
+            # Configuración de páginas de inicio de Google Chrome:
+            echo "=> Configuración de páginas de inicio de Google Chrome: ${NUEVAPAGINICIOG}"
+            if [ -f "${FICHCONFCHROME}" ] ; then
+                if ! grep -qE "${NUEVAPAGINICIOG}" "${FICHCONFCHROME}" ; then
+                    sed --follow-symlinks -i "s#\[.*\]#\[${NUEVAPAGINICIOG}\]#g" "${FICHCONFCHROME}" && \
+                    echo "=> Ok!! Configuradas en Google Chrome!!" || \
+                    echo "=> Error!! Problemas para configurar Google Chrome"
+                else
+                    echo "=> Ya estaban configuradas las Pag Inicio en Chrome!!"
+                fi
+            else
+                echo "=> Error!! No existe el fichero de configuración de Chrome"
+                exit 1
+            fi
+        ;;
+        * ) uso
+        ;;
+    esac
+    shift 2
+done
+
+exit 0

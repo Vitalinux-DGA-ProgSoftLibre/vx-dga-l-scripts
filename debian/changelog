@@ -1,3 +1,19 @@
+vx-dga-l-scripts (5.0-3) unstable; urgency=low
+
+  * Se añaden un conjunto de funciones para la gestión de usuarios: vx-funcs-users
+  * Añadimos funciones a vx-funcs-bash para títulos de salida en log y colorear textos
+  * Ajustamos el script: * vx-modificar-usu-inicio-sesion-cli
+  * Ajustamos el script vx-regenerar-entorno-escritorio-cli para evitar problemas con .cache
+  * Se añade un script para asignar páginas de inicio de navegadores: vx-set-paginicio-navegadores
+  * Se añade un script para gestionar las extensiones de chrome: vx-chrome-extensiones
+  * Se añade un script para gestionar las extensiones de firefox: vx-firefox-extensiones
+  * Se adapta el script de configuración de impresoras: vx-conf-impresoras
+  * Se añade el script vx-lanzadores-desktop para crear lanzadores desktop
+  * Se a adaptado el script de reniciar red a 18.04 con systemctl: vx-reiniciared
+  * Se añade el script vx-gdebi-desatendido para instalar varios paquetes locales en un mismo comando
+
+ -- Arturo Martín <amartinromero@gmail.com>  Mon, 16 Dec 2019 00:10:00 +0200
+
 vx-dga-l-scripts (5.0-2) unstable; urgency=low
 
   * Se modifican los scripts de cambio de nombre de equipo: vx-hostname y vx-hostname-cli

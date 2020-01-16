@@ -1,0 +1,209 @@
+#!/bin/bash
+# Versiones: [arturo@2019-12-16]
+
+mensaje() {
+    echo -e "=> $(date): ${1}"
+}
+
+uso() {
+    MENSAJE="Debes pasar dos o más parámetros al script:"
+    MENSAJE+="\n1) --install|--remove"
+    MENSAJE+="\n2,3,...) Extensiones a instalar o desinstalar"
+    MENSAJE+="\nEj. vx-firefox-extensiones --install EPUBREADER"
+    MENSAJE+="\nEj. vx-firefox-extensiones --install epubreader-2.0.7-fx.xpi ublock_origin-1.18.14-an+fx.xpi"
+    mensaje "${MENSAJE}"
+}
+
+function instalarExtensionFirefox() {
+    
+    EXT_TYPE="global"
+    #EXT_URL="http://migasfree.educa.aragon.es/extensiones-firefox/epubreader-1.5.0.12-fx+sm.xpi"
+    EXT_URL="/usr/share/vitalinux/firefox-extensions/${1}"
+    PATH_GLOBAL_FIREFOX="/usr/lib/firefox-addons/distribution/extensions"
+    
+    [ ! -f "${EXT_URL}" ] && \
+    echo "=> ¡¡Error!! No encontramos ${EXT_URL}" && return 1
+    
+    ##
+    # Hay extensiones que no tienen los datos correctamente formados en manifest.json
+    # Comprobar antes de instalar pues si se puede sacar el nombre (del  manifest) o hay que ponerlo a mano
+    # La extensión de epubreader se "fuerza" por poner la última
+    if [ "$1" == "office_online_officework_para_xls_doc_y_ppt-1.2.0-an+fx.xpi" ]; then
+        [ ! -f "${PATH_GLOBAL_FIREFOX}/{ba5a4d10-1c03-4db9-b7ca-c9cc255e26e8}.xpi" ] && \
+        {
+            cp "${EXT_URL}" "${PATH_GLOBAL_FIREFOX}/{ba5a4d10-1c03-4db9-b7ca-c9cc255e26e8}.xpi" && \
+            echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} se ha instalado ..." ;
+        } || \
+        echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} ya esta instalada ..."
+        return 0
+    fi
+    if [ "$1" == "epubreader-2.0.7-fx.xpi" ]; then
+        [ ! -f "${PATH_GLOBAL_FIREFOX}/{5384767E-00D9-40E9-B72F-9CC39D655D6F}.xpi" ] && \
+        {
+            cp "${EXT_URL}" "${PATH_GLOBAL_FIREFOX}/{5384767E-00D9-40E9-B72F-9CC39D655D6F}.xpi" && \
+            echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} se ha instalado ..." ;
+        } || \
+        echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} ya esta instalada ..."
+        return 0
+    fi
+    
+    ##
+    
+    cd /tmp
+    ## download extension
+    rm -f addon.xpi
+    #wget -O addon.xpi "${EXT_URL}"
+    cp "${EXT_URL}" /tmp/addon.xpi
+    
+    ## get extension UID from install.rdf
+    EXT_UID=$(unzip -p addon.xpi manifest.json | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["'applications'"]["'gecko'"]["'id'"]')
+    # if .xpi file could not be read, exit
+    if [ "${EXT_UID}" = "" ] ; then
+        echo "=> Error!! No puede localizarse el UID de firefox-extension: ${1}"
+        return 1
+    fi
+    
+    # check if extension not already installed
+    if [ -f "${PATH_GLOBAL_FIREFOX}/${EXT_UID}.xpi" ] ; then
+        echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} ya esta instalada ..."
+        return 0
+    fi
+    
+    # installation of global extension
+    # copy .xpi to global extension path
+    sudo cp -f addon.xpi "${PATH_GLOBAL_FIREFOX}/${EXT_UID}.xpi" && \
+    echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} se ha instalado ..."
+    # extract extension to global extension path
+    ##sudo unzip addon.xpi -d "${PATH_GLOBAL_FIREFOX}/${EXT_UID}"
+    # else, installation of extension for current user
+    # end message
+    ##echo "${EXT_TYPE} extension ${EXT_UID} installed"
+    rm -f addon.xpi
+    return 0
+    
+}
+
+function quitarExtensionFirefox() {
+    
+    EXT_TYPE="global"
+    #EXT_URL="http://migasfree.educa.aragon.es/extensiones-firefox/epubreader-1.5.0.12-fx+sm.xpi"
+    EXT_URL="/usr/share/vitalinux/firefox-extensions/${1}"
+    PATH_GLOBAL_FIREFOX="/usr/lib/firefox-addons/distribution/extensions"
+    
+    ##
+    # Hay extensiones que no tienen los datos correctamente formados en manifest.json
+    # Comprobar antes de instalar pues si se puede sacar el nombre (del  manifest) o hay que ponerlo a mano
+    # La extensión de epubreader se "fuerza" por poner la última
+    if [[ "$1" == "office_online_officework_para_xls_doc_y_ppt-1.2.0-an+fx.xpi" ]]; then
+        [ -f "${PATH_GLOBAL_FIREFOX}/{ba5a4d10-1c03-4db9-b7ca-c9cc255e26e8}.xpi" ] && \
+        rm -f "${PATH_GLOBAL_FIREFOX}/{ba5a4d10-1c03-4db9-b7ca-c9cc255e26e8}.xpi" && \
+        echo "=> Se ha eliminado la extensión de Firefox: ${1}"
+        return 0
+    fi
+    if [[ "$1" == "epubreader-2.0.7-fx.xpi" && \
+        -f "${PATH_GLOBAL_FIREFOX}/{5384767E-00D9-40E9-B72F-9CC39D655D6F}.xpi" ]]; then
+        rm -f "${PATH_GLOBAL_FIREFOX}/{5384767E-00D9-40E9-B72F-9CC39D655D6F}.xpi" && \
+        echo "=> Se ha eliminado la extensión de Firefox: ${1}"
+        return 0
+    fi
+    
+    ##
+    
+    cd /tmp
+    ## download extension
+    rm -f addon.xpi
+    #wget -O addon.xpi "${EXT_URL}"
+    cp "${EXT_URL}" /tmp/addon.xpi
+    
+    ## get extension UID from install.rdf
+    EXT_UID=$(unzip -p addon.xpi manifest.json | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["'applications'"]["'gecko'"]["'id'"]')
+    # if .xpi file could not be read, exit
+    if [ "${EXT_UID}" = "" ] ; then
+        echo "=> Problemas con ${1}, no se puede estraer su UID correctamente ..."
+        return 1
+    fi
+    
+    # Comprobamos que la extensión ya esta instalada
+    if [ -f "${PATH_GLOBAL_FIREFOX}/${EXT_UID}.xpi" ] ; then
+        rm -f "${PATH_GLOBAL_FIREFOX}/${EXT_UID}.xpi"
+        echo "=> La extensión ${EXT_TYPE} de Firefox \"${1}\" ${EXT_UID} se ha desinstalado"
+        return 0
+    fi
+    
+    echo "=> La Problemas para desinstalar la extensión ${1} de Firefox"
+    return 1
+}
+
+MENSAJE="Debes ser el Root para configurar las extensiones de Firefox ..."
+[[ "$(whoami)" != "root" ]] && echo "${MENSAJE}" && exit 1
+
+# Comprobamos que el número de parámetros pasados es al menos 2:
+(( ${#} < 2 )) && uso && exit 1
+
+PATH_GLOBAL_FIREFOX="/usr/lib/firefox-addons/distribution/extensions"
+#PATH_GLOBAL_FIREFOX="/usr/lib/firefox-addons/extensions"
+if ! test -d ${PATH_GLOBAL_FIREFOX} ;  then
+    mkdir -p ${PATH_GLOBAL_FIREFOX} && chmod +rx ${PATH_GLOBAL_FIREFOX}
+fi
+
+# Declaramos las extensiones disponibles en el paquete vx-dga-l-navegadores-extensiones-firefox:
+OFFICEONLINE="office_online_officework_para_xls_doc_y_ppt-1.2.0-an+fx.xpi"
+ADDBLOCKPLUS="adblock_plus-3.5-an+fx.xpi"
+VIDEODOWNLOADHELPER="video_downloadhelper-7.3.5-an+fx.xpi"
+EPUBREADER="epubreader-2.0.7-fx.xpi"
+EDITTHISIMAGE="edit_this_image-2.0.1-an+fx.xpi"
+UBLOCK="ublock_origin-1.18.14-an+fx.xpi"
+
+EXTENSIONES_DISPONIBLES=("OFFICEONLINE"
+    "ADDBLOCKPLUS"
+    "VIDEODOWNLOADHELPER"
+    "EPUBREADER"
+    "EDITTHISIMAGE"
+"UBLOCK")
+
+OPCION="${1}"
+! [[ "${OPCION}" =~ --install|--remove ]] && uso && exit 1
+shift
+
+BASEDIR="/usr/share/vitalinux/firefox-extensions"
+
+# Definimos dos variables para detectar posibles errores:
+FALLOINS=0
+FALLODES=0
+until [ -z "${1}" ] ; do
+    EXTENSION=""
+    
+    [[ "${1##*.}" == "xpi" ]] && [ -f "${BASEDIR}/${1}" ] && \
+    EXTENSION="${1}"
+    
+    [[ " ${EXTENSIONES_DISPONIBLES[@]} " =~ " ${1} " ]]  && \
+    [ -f "/usr/share/vitalinux/firefox-extensions/${!1}" ] && \
+    EXTENSION="${!1}"
+    
+    MENSAJE="La extensión ${EXTENSION} no esta disponible ..."
+    [ -z "${EXTENSION}" ] && mensaje "${MENSAJE}" && exit 1
+    
+    case "${OPCION}" in
+        "--install" )
+            if ! instalarExtensionFirefox "${EXTENSION}" ; then
+                FALLOINS=1
+            fi
+        ;;
+        "--remove" )
+            if ! quitarExtensionFirefox "${EXTENSION}" ; then
+                FALLODES=1
+            fi
+        ;;
+    esac
+    shift
+done
+
+(( ${FALLOINS} == 1 )) && \
+echo "=> ¡¡Error!! La isntalación de alguna extensión de firefox ha dada problemas" && \
+exit 1
+
+(( ${FALLODES} == 1 )) && \
+echo "=> ¡¡Error!! La desisntalación de alguna extensión de firefox ha dada problemas" && \
+exit 1
+
+exit 0

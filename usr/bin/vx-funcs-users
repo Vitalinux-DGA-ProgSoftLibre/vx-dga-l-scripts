@@ -1,0 +1,362 @@
+#!/bin/bash
+
+FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
+[ -f "${FICHVARS}" ] && . "${FICHVARS}"
+
+USUARIOGRAFICO="$(vx-usuario-grafico)"
+
+function vx-help-funcs-users() {
+    FICHFUNCS="/usr/bin/vx-funcs-users"
+    for FUNCION in $(sed -n "s/^function \(.*\)().*/\1/gp" "${FICHFUNCS}") ; do
+        [[ "${1}" != "--help" ]] && echo "${FUNCION} --help" && continue
+        [[ "${FUNCION}" != "vx-help-funcs-users" ]] && \
+        echo ":== Función ${FUNCION} ==:" && \
+        "${FUNCION}" --help
+    done
+}
+
+function vx-resetear_usuarios() {
+    AYUDA="# Función: Elimina todos los usuarios a excepción de los usuarios pasados por parametro"
+    AYUDA+="\n# Uso: vx-resetear_usuarios [usu1] [usu2] ..."
+    AYUDA+="\n# Uso: vx-resetear_usuarios profesor dga"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    LISTA_USUARIOS_A_CONSERVAR=(${*})
+    USUARIOS_A_BORRAR=($(vx-usuarios-graficos))
+    # echo "Todos usuarios gráficos actuales: ${USUARIOS_A_BORRAR[@]}"
+    # echo "Usuarios a conservar: ${LISTA_USUARIOS_A_CONSERVAR[@]}"
+    
+    # Para eliminar elementos de un array: https://stackoverflow.com/questions/16860877/remove-an-element-from-a-bash-array
+    # Si sólo deseamos eliminar uno: array=( "${array[@]/$delete}" ) #Quotes when working with strings
+    for INDICE in ${!USUARIOS_A_BORRAR[@]} ; do
+        for USU in ${LISTA_USUARIOS_A_CONSERVAR[@]} ; do
+            # Quitamos del array los usuarios que queremos conservar:
+            # USUARIOS_A_BORRAR=("${USUARIOS_A_BORRAR[@]/$USU}")
+            if test "${USU}" == "${USUARIOS_A_BORRAR[INDICE]}" ; then
+                # echo "Quitamos a ${USUARIOS_A_BORRAR[INDICE]}"
+                unset 'USUARIOS_A_BORRAR[INDICE]'
+            fi
+        done
+    done
+    
+    #echo "Listado resultante de usuarios a borrar: ${USUARIOS_A_BORRAR[@]}"
+    
+    for USU in ${USUARIOS_A_BORRAR[@]} ; do
+        if test "${USU}" != "$USUARIOGRAFICO" ; then
+            /usr/sbin/userdel -rf "${USU}"
+        fi
+    done
+}
+
+function vx-grupo_primario() {
+    AYUDA="# Función: Asocia a un usuario un grupo primario de pertenencia"
+    AYUDA+="\n# Uso: vx-grupo_primario [usuario] [grupo] ... ..."
+    AYUDA+="\n# Uso: vx-grupo_primario profesories sudo alumno1A alumno"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    # $1: Primer parametro es el usuario
+    # $2: Segundo parametro, grupo primario de pertenencia
+    
+    # Creamos por si acaso el grupo alumno (no vaya a estar borrado)
+    ! ( getent group 1200 > /dev/null 2>&1 ) && \
+    ( /usr/sbin/groupadd -g 1200 alumno > /dev/null 2>&1 )
+    # Creamos por si acaso el grupo profesor (no vaya a estar borrado)
+    ! ( getent group 1100 > /dev/null 2>&1 ) && \
+    ( /usr/sbin/groupadd -g 1100 profesor > /dev/null 2>&1 )
+    
+    (( $(getent group profesor | cut -d ":" -f 3) != 1100 )) && groupmod -g 1100 profesor
+    (( $(getent group alumno | cut -d ":" -f 3) != 1200 )) && groupmod -g 1200 alumno
+    
+    [ -z "${1}" ] && return 1
+    
+    until test -z "${1}" ; do
+        # Comprobamos que el usuario a asignarle un grupo existe:
+        ! ( getent passwd "${1}" > /dev/null 2>&1 ) && return 1
+        # Creamos el grupo primario en caso de no existir:
+        ! ( getent group "${2}" > /dev/null 2>&1 ) && /usr/sbin/groupadd "${2}"
+        # Asignamos al usuario como grupo primario el grupo indicado:
+        /usr/sbin/usermod -g "${2}" "${1}"
+        shift 2
+    done
+    
+}
+
+function vx-anadir_a_grupos_secundarios() {
+    AYUDA="# Función: Añade un usuario a un conjunto de grupos secundarios"
+    AYUDA+="\n# Uso: vx-anadir_a_grupos_secundarios [usuario] [grupo1] [grupo2] ... ..."
+    AYUDA+="\n# Uso: vx-anadir_a_grupos_secundarios profesories sudo sambafs ..."
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    # Añade un usuario a un conjunto de grupos secundarios
+    # $1: usuario
+    # $2,3,4,...: grupos a los que añadir
+    [ -z "${1}" ] && return 1
+    # Comprobamos que el usuario a asignarle un grupo existe:
+    ! ( getent passwd "${1}" > /dev/null 2>&1 ) && return 1
+    USU="${1}"
+    shift
+    until test -z "${1}" ; do
+        # Creamos el grupo en caso de no existir:
+        ! ( getent group "${1}" > /dev/null 2>&1 ) && /usr/sbin/groupadd "${1}"
+        # Asignamos al usuario como grupo primario el grupo indicado:
+        /usr/sbin/usermod -aG "${1}" "${USU}"
+        shift
+    done
+}
+
+function vx-imponer_grupos() {
+    AYUDA="# Función: Impone, no añade, a un usuario un conjunto de grupos secundarios"
+    AYUDA+="\n# Uso: vx-imponer_grupos [usuario] [grupo1] [grupo2] ... ..."
+    AYUDA+="\n# Uso: vx-imponer_grupos profesories sudo sambafs ..."
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    # Impone los grupos indicados al usuario
+    # $1: usuario
+    # $2,3,4,...: grupos
+    [ -z "${1}" ] && return 1
+    # Comprobamos que el usuario a asignarle un grupo existe:
+    ! ( getent passwd "${1}" > /dev/null 2>&1 ) && return 1
+    USU="${1}"
+    shift
+    GRUPOS=$(echo "${@}" | tr -s " " ",")
+    until test -z "${1}" ; do
+        # Creamos el grupo en caso de no existir:
+        ! ( getent group "${1}" > /dev/null 2>&1 ) && /usr/sbin/groupadd "${1}"
+        # Asignamos al usuario como grupo primario el grupo indicado:
+    done
+    /usr/sbin/usermod -G "${GRUPOS}" "${USU}"
+}
+
+function vx-modificar_password() {
+    AYUDA="# Función: Modifica la password del usuario indicado"
+    AYUDA+="# Si la longitud de la password es mayor a 80 caracteres se entiende que ya viene encriptada"
+    AYUDA+="\n# Uso: vx-modificar_password [usu1] [pass1] [usu2] [pass2] ..."
+    AYUDA+="\n# Uso: vx-modificar_password profe pass1 ..."
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    # Modifica la password del usuario indicado
+    # $1: usuario
+    # $2: nueva password
+    # [[ -z "${1}" || -z "${2}" ]] && return 1
+    (( ${#} % 2 )) && \
+    echo -e "=> Error: vx-modificar_passwords requiere parametros pares. Se han recibido ${#} parametros. \nEstos son: ${@}" && return 1
+    
+    until [[ -z "${1}" || -z "${2}" ]] ; do
+        # Comprobamos que el usuario existe para modificarle la password:
+        if ( getent passwd "${1}" > /dev/null 2>&1 ) ; then
+            (( ${#2} > 80 )) && PASS="${2}" || PASS="$(mkpasswd -s -m sha-512 "${2}")"
+            usermod -p "${PASS}" "${1}"
+        fi
+        shift 2
+    done
+    return 0
+}
+
+function vx-anadir_a_grupo() {
+    AYUDA="# Función: Añade un usuario a un grupo secundario"
+    AYUDA+="\n# Uso: vx-anadir_a_grupo [usu1] [gru1] [usu2] [gru2] ..."
+    AYUDA+="\n# Uso: vx-anadir_a_grupo profe sudo ..."
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    # Añade un usuario a un grupo secundario
+    # $1: usuario
+    # $2: grupo al que añadir
+    # [ -z "${1}" ] && return 1
+    
+    until [[ -z "${1}" || -z "${2}" ]] ; do
+        # Comprobamos que el usuario a asignarle un grupo existe:
+        ! ( getent passwd "${1}" > /dev/null 2>&1 ) && return 1
+        # Creamos el grupo en caso de no existir:
+        ! ( getent group "${2}" > /dev/null 2>&1 ) && /usr/sbin/groupadd "${2}"
+        # Asignamos al usuario como grupo primario el grupo indicado:
+        /usr/sbin/usermod -aG "${2}" "${1}"
+        shift 2
+    done
+    
+}
+
+function vx-usuario_inicio_auto() {
+    AYUDA="# Función: Indica el usuario con el que iniciará automáticamente el equipo"
+    AYUDA+="\n# Uso: vx-usuario_inicio_auto alumno"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    [ -z "${1}" ] && return 1
+    # Comprobamos que el usuario existe:
+    ! ( getent passwd "${1}" > /dev/null 2>&1 ) && return 1
+    
+    FICHERO="/etc/lightdm/lightdm.conf"
+    USUARIO="${1}"
+    if test -f "${FICHERO}" ; then
+        if grep "autologin-user=" "${FICHERO}" > /dev/null 2>&1 ; then
+            sed -i "s/autologin-user=.*/autologin-user=${USUARIO}/g" "${FICHERO}"
+        else
+            echo "autologin-user=${USUARIO}" >> "${FICHERO}"
+        fi
+    fi
+}
+
+function vx-usuario_inicio_deshabilitado() {
+    AYUDA="# Función: Deshabilita el inicio de sesión automático"
+    AYUDA+="\n# Uso: vx-usuario_inicio_deshabilitado"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    FICHERO="/etc/lightdm/lightdm.conf"
+    if grep autologin-user "${FICHERO}" > /dev/null 2> /dev/null ; then
+        sed -i "s/^autologin-user=.*/autologin-user=SIN-INICIO-AUTOMATICO/g" "${FICHERO}"
+    fi
+}
+
+function vx-nopasswdlogin() {
+    AYUDA="# Función: Permite que se pueda iniciar sesión con un usuario sin password"
+    AYUDA+="\n# Uso: vx-nopasswdlogin alumno profesor dga ..."
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    [ -z "${1}" ] && return 1
+    
+    until test -z "${1}" ; do
+        USUARIO="${1}"
+        # Comprobamos que el usuario existe:
+        ( getent passwd "${USUARIO}" > /dev/null 2>&1 ) && \
+        /usr/sbin/usermod -aG "nopasswdlogin" "${USUARIO}"
+        shift
+    done
+}
+
+function vx-crear_usuario_uid_gid() {
+    AYUDA="# Función: Crea un usuario con un uid y gid concretos"
+    AYUDA+="\n# Uso: vx-crear_usuario_uid_gid [usu] [pass] [uid] [grupo] [gid]"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    # Ejemplo de llamada a la función:
+    # Crear_Usuario "TEC-1" "faraday" "1301" "profesor" "1100" \
+    # "TEC-2" "ampere" "1302" "profesor" "1100"
+    # La variable FICH global indicará el fichero LOG de salida
+    until (( ${#} < 5 )) ; do
+        USUARIO="${1}"
+        PASSWORD="${2}"
+        USERID="${3}"
+        GPRIMARIO="${4}"
+        GRUPOID="${5}"
+        # echo "Se va a crear el usuario ${USUARIO} con password ${PASSWORD}"
+        if ! ( getent passwd "${USUARIO}" > /dev/null 2> /dev/null ) ; then
+            if /usr/sbin/useradd -m -d "/home/${USUARIO}" \
+            -s /bin/bash -c "Usuari@ ${USUARIO}" \
+            -u "${USERID}" \
+            -p "$(printf "${PASSWORD}" | mkpasswd -s -m sha-512)" "${USUARIO}" > /dev/null 2>&1 ; then
+                echo "$(date) - Se ha creado el usuario ${USUARIO}"
+            fi
+        fi
+        # Comprobamos la existencia del usuario en el grupo propuesto:
+        if ! (getent group "${GPRIMARIO}" > /dev/null 2> /dev/null ) ; then
+            groupadd -g "${GRUPOID}" "${GPRIMARIO}" > /dev/null 2>&1
+        fi
+        if ! ( id "${USUARIO}" | grep -q "${GPRIMARIO}" ) && \
+        /usr/sbin/usermod -aG "${GPRIMARIO}" "${USUARIO}" > /dev/null 2>&1 ; then
+            echo "$(date) - Se ha añadido al usuario ${USUARIO} al grupo ${GPRIMARIO} ..."
+        fi
+        # En el caso de ser un servidor Caché crearemos el usuario de Samba:
+        if ( migasfree-tags -g | grep -q "CHE-" ) ; then
+            if  ! ( pdbedit -Lw | grep -q "${USUARIO}" ) ; then
+                (echo "${PASSWORD}"; echo "${PASSWORD}") | smbpasswd -as "${USUARIO}" > /dev/null 2>&1
+            fi
+        fi
+        
+        shift 5
+    done
+}
+
+function vx-crear_usuario() {
+    AYUDA="# Función: Crea un usuario"
+    AYUDA+="\n# Uso: vx-crear_usuario [usu] [pass]"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    until [[ -z "${1}" || -z "${2}" ]] ; do
+        #echo "Creando usuario: $1"
+        NUEVOUSUARIO="${1}"
+        NUEVAPASS="${2}"
+        if ! ( getent passwd "${NUEVOUSUARIO}" > /dev/null 2>&1 ) && \
+        /usr/sbin/useradd -m -d "/home/$NUEVOUSUARIO" \
+        -s /bin/bash -c "Usuari@ ${NUEVOUSUARIO}" \
+        -p "$(echo -n "${NUEVAPASS}" | mkpasswd -s -m sha-512)" "${NUEVOUSUARIO}" ; then
+            echo "$(date) - Se ha creado el usuario ${NUEVOUSUARIO}"
+        fi
+        shift 2
+    done
+}
+
+function vx-crear_usuario_ex_idioma() {
+    AYUDA="# Función: Crea un usuario con perfil en otro idioma al español"
+    AYUDA+="\n# Uso: vx-crear_usuario_ex_idioma [usu] [pass] [Language] [FormatLocale]"
+    AYUDA+="\n# Uso: vx-crear_usuario_ex_idioma alum1A mipass en en_GB.UTF-8"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    until (( ${#} < 4 )) ; do
+        LOG="/var/log/vitalinux/falla-crear-usuarios-ingles-${1}.log"
+        NUEVOUSUARIO="${1}"
+        NUEVAPASS="${2}"
+        # Creamos la cuenta de usuario:
+        if ! ( getent passwd "${NUEVOUSUARIO}" > /dev/null 2>&1 ) && \
+        /usr/sbin/useradd \
+        -m -d "/home/${NUEVOUSUARIO}" \
+        -s /bin/bash \
+        -c "User ${NUEVOUSUARIO}" \
+        -p "$(echo -n "${NUEVAPASS}" | mkpasswd -s -m sha-512)" "${NUEVOUSUARIO}" \
+        &>> "${LOG}" ; then
+            echo "$(date) - Se ha creado el usuario con perfil de inglés: $NUEVOUSUARIO"
+            # Establecer el idioma elegido por defecto del lightdm:
+      cat > "/var/lib/AccountsService/users/${NUEVOUSUARIO}" <<EOF
+[User]
+#Language=en
+Language=${3}
+#FormatsLocale=en_GB.UTF-8
+FormatsLocale=${4}
+XSession=Lubuntu
+SystemAccount=false
+EOF
+            # Establecer el idioma elegido en el PAM environment:
+      cat > "/home/${NUEVOUSUARIO}/.pam_environment" <<EOF
+LANGUAGE=${3}
+LANG=${4}
+LC_TIME=${4}
+EOF
+            # Ajustamos el propietario del pam_environment:
+            chown "${NUEVOUSUARIO}".sudo "/home/${NUEVOUSUARIO}/.pam_environment"
+        fi
+        # Desplazamos 2 posiciones los parámetros para coger el siguiente usu/pass:
+        shift 2
+    done
+}
+
+function vx-borrar_usuario() {
+    AYUDA="# Función: Elimina usuarios a excepción del usuario gráfico"
+    AYUDA+="\n# Uso: vx-borrar_usuario [usu1] [usu2] ..."
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    [ -z "${1}" ] && return 1
+    
+    USUARIOGRAFICO="$(vx-usuario-grafico)"
+    USUARIOS="$*"
+    for USUARIO in ${USUARIOS} ; do
+        if test "${USUARIOGRAFICO}" != "${USUARIO}" ; then
+            ( getent passwd "${USUARIO}" > /dev/null 2>&1 ) && \
+            /usr/sbin/userdel -fr "${USUARIO}"
+        fi
+    done
+}
+
+
+
+"$@" 2> /dev/null
