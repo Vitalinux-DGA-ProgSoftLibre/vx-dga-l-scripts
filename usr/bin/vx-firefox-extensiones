@@ -71,8 +71,14 @@ function instalarExtensionFirefox() {
     
     # installation of global extension
     # copy .xpi to global extension path
-    sudo cp -f addon.xpi "${PATH_GLOBAL_FIREFOX}/${EXT_UID}.xpi" && \
-    echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} se ha instalado ..."
+    FICHEXTENSION="${PATH_GLOBAL_FIREFOX}/${EXT_UID}.xpi"
+    if [[ ! -f "${FICHEXTENSION}" ]] ; then
+        sudo cp -f addon.xpi "${PATH_GLOBAL_FIREFOX}/${EXT_UID}.xpi" && \
+        echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} se ha instalado ..."
+    else
+        echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} ya esta instalada ..."
+    fi
+    
     # extract extension to global extension path
     ##sudo unzip addon.xpi -d "${PATH_GLOBAL_FIREFOX}/${EXT_UID}"
     # else, installation of extension for current user
