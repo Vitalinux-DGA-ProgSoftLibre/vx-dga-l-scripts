@@ -152,26 +152,35 @@ if ! test -d ${PATH_GLOBAL_FIREFOX} ;  then
     mkdir -p ${PATH_GLOBAL_FIREFOX} && chmod +rx ${PATH_GLOBAL_FIREFOX}
 fi
 
-# Declaramos las extensiones disponibles en el paquete vx-dga-l-navegadores-extensiones-firefox:
-OFFICEONLINE="office_online_officework_para_xls_doc_y_ppt-1.2.0-an+fx.xpi"
-ADDBLOCKPLUS="adblock_plus-3.5-an+fx.xpi"
-VIDEODOWNLOADHELPER="video_downloadhelper-7.3.5-an+fx.xpi"
-EPUBREADER="epubreader-2.0.7-fx.xpi"
-EDITTHISIMAGE="edit_this_image-2.0.1-an+fx.xpi"
-UBLOCK="ublock_origin-1.18.14-an+fx.xpi"
+# Obtenemos las extensiones disponibles en el paquete vx-dga-l-navegadores-extensiones-firefox:
 
-EXTENSIONES_DISPONIBLES=("OFFICEONLINE"
-    "ADDBLOCKPLUS"
-    "VIDEODOWNLOADHELPER"
-    "EPUBREADER"
-    "EDITTHISIMAGE"
-"UBLOCK")
+# OFFICEONLINE="office_online_officework_para_xls_doc_y_ppt-1.2.0-an+fx.xpi"
+# ADDBLOCKPLUS="adblock_plus-3.5-an+fx.xpi"
+# VIDEODOWNLOADHELPER="video_downloadhelper-7.3.5-an+fx.xpi"
+# EPUBREADER="epubreader-2.0.7-fx.xpi"
+# EDITTHISIMAGE="edit_this_image-2.0.1-an+fx.xpi"
+# UBLOCK="ublock_origin-1.18.14-an+fx.xpi"
+
+# EXTENSIONES_DISPONIBLES=("OFFICEONLINE"
+#     "ADDBLOCKPLUS"
+#     "VIDEODOWNLOADHELPER"
+#     "EPUBREADER"
+#     "EDITTHISIMAGE"
+# "UBLOCK")
 
 OPCION="${1}"
 ! [[ "${OPCION}" =~ --install|--remove ]] && uso && exit 1
 shift
 
 BASEDIR="/usr/share/vitalinux/firefox-extensions"
+FICH_LISTA_EXTENSIONES="${BASEDIR}/firefox-extensiones-listado"
+[ -f "${FICH_LISTA_EXTENSIONES}" ] && . "${FICH_LISTA_EXTENSIONES}"
+EXTENSIONES_DISPONIBLES=()
+for LINEA in $(sed -n "/^[^#].*=/p" "${FICH_LISTA_EXTENSIONES}") ; do
+    EXT="$(echo $LINEA | cut -d"=" -f1)"
+    EXTENSIONES_DISPONIBLES+=("$EXT")
+done
+# echo "La lista completa es: ${LISTA[@]}" ; echo "El primero: ${LISTA[0]}"
 
 # Definimos dos variables para detectar posibles errores:
 FALLOINS=0

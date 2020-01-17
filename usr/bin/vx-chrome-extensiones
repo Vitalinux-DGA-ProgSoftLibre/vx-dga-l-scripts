@@ -28,27 +28,34 @@ DIREXTENSIONS="/opt/google/chrome/extensions"
 [ ! -d "$DIREXTENSIONS" ] && mkdir -p "$DIREXTENSIONS" && chmod +rx "$DIREXTENSIONS"
 
 # Declaramos las extensiones disponibles en el paquete
-SCREENCASTIFY="mmeijimgabbpbgpdklnllpncmdofkcpn.json"
-OFFICEONLINE="ndjpnladcallmjemlbaebfadecfhkepb.json"
-COPIARPEGAROFFICEONLINE="ifbmcpbgkhlpfcodhjhdbllhiaomkdej.json"
-ADDBLOCKPLUS="cfhdojbkjhnklbpkdaibdccddilifddb.json"
-VIDEODOWNLOADHELPER="lmjnegcaeklhafolokijcfjliaokphfk.json"
-S2BOT4SCRATCH="pllkalmkifgmanfoghenhgafbcpbicdj.json"
-ZERONOISECLASSRROOM="pgpkohbgbjmihckldcacljomfkkaogjd.json"
-UBLOCK="cjpalhdlnbpafiamejdnhcphjbkeiagm.json"
-BITBLOQ="ddpdpmibfdhifigignfdiggfbcmfblfj.json"
-# App y Extension de Arc Welder que permite testear Apps de Android:
-ARCWELDER="emfinbmielocnlhgmfkkmkngdoccbadn.json"
-APKWELDING="pkmbjddkmnknjdhfjiekjoniilcjkfpo.json"
+
+# SCREENCASTIFY="mmeijimgabbpbgpdklnllpncmdofkcpn.json"
+# OFFICEONLINE="ndjpnladcallmjemlbaebfadecfhkepb.json"
+# COPIARPEGAROFFICEONLINE="ifbmcpbgkhlpfcodhjhdbllhiaomkdej.json"
+# ADDBLOCKPLUS="cfhdojbkjhnklbpkdaibdccddilifddb.json"
+# VIDEODOWNLOADHELPER="lmjnegcaeklhafolokijcfjliaokphfk.json"
+# S2BOT4SCRATCH="pllkalmkifgmanfoghenhgafbcpbicdj.json"
+# ZERONOISECLASSRROOM="pgpkohbgbjmihckldcacljomfkkaogjd.json"
+# UBLOCK="cjpalhdlnbpafiamejdnhcphjbkeiagm.json"
+# BITBLOQ="ddpdpmibfdhifigignfdiggfbcmfblfj.json"
+# # App y Extension de Arc Welder que permite testear Apps de Android:
+# ARCWELDER="emfinbmielocnlhgmfkkmkngdoccbadn.json"
+# APKWELDING="pkmbjddkmnknjdhfjiekjoniilcjkfpo.json"
+
+FICH_LISTA_EXTENSIONES="${DIRBASE}/chrome-extensiones-listado"
+[ -f "${FICH_LISTA_EXTENSIONES}" ] && . "${FICH_LISTA_EXTENSIONES}"
 
 until [ -z "${1}" ] ; do
     EXTENSION=""
     
-    [[ "${1##*.}" == "json" ]] && \
-    EXTENSION="${1}"
-    
-    [[ "${!1##*.}" == "json" ]] && \
-    EXTENSION="${!1}"
+    if [[ "${1##*.}" == "json" ]] ; then
+        EXTENSION="${1}"
+        elif [[ "${!1##*.}" == "json" ]] ; then
+        EXTENSION="${!1}"
+    else
+        echo "=> Error!! La chrome-extension indicada no es instalable: \"${1}\""
+        exit 1
+    fi
     
     case "${OPCION}" in
         "--install" )
