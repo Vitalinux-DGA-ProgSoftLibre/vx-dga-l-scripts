@@ -1,0 +1,38 @@
+#!/bin/bash
+
+salir() {
+    echo "¡¡Problema, Importante!!
+    => Debes pasar como 1 parametro: apt o gdebi
+    => El resto de parámetros; paquete DEB a instalar vía apt|gdebi
+    => ¡¡Comprueba que todos los parametros son paquetes DEB!!
+    => Debes ser root para lanzar este script (p.e. vía sudo)
+    => Ej. vx-gdebi-desatendido apt ./vx-dga-l-paquete1.deb ./vx-dga-l-paquete2.deb
+    => Ej. vx-gdebi-desatendido gdebi ./vx-dga-l-paquete1.deb ./vx-dga-l-paquete2.deb
+    "
+    exit 1
+}
+
+[[ -z "${1}" || "${USER}" != "root" ]] && salir
+if [[ "${1}" == "apt" || "${1}" == "gdebi" ]] ; then
+    COMANDO="${1}"
+    shift
+    for PAQUETE in "${@}" ; do
+        echo "=> Chequeando paquete: ${PAQUETE}"
+        [[ "$(file --mime-type -b "${PAQUETE}")" == "application/vnd.debian.binary-package" ]] && \
+        echo "=> Ok: ${PAQUETE}"
+        continue
+        echo "=> Problema: ${PAQUETE}"
+        salir
+    done
+    case "${COMANDO}" in
+        "apt" ) apt -y install "${@}" ;;
+        "gdebi" )
+            until [[ -z "${1}" ]] ; do
+                echo "s" | gdebi "${1}"
+                shift
+            done
+        ;;
+    esac
+else
+    salir
+fi

@@ -12,14 +12,14 @@ function checkusername() {
 }
 
 function salir() {
-    echo "${1}"
+    echo "=> ${1}"
     exit ${2}
 }
 
 function configurar-usuario-inicio-automatico-lightdm {
-    echo "--> Se va a configurar como usuario de inicio de sesión a $1 ..."
-    USERDEFINITIVO="$1"
-    if test "$1" != "usuario-ldap" ; then
+    echo "=> Se va a configurar como usuario de inicio de sesión: ${1}"
+    USERDEFINITIVO="${1}"
+    if test "${1}" != "usuario-ldap" ; then
         if grep "autologin-user" /etc/lightdm/lightdm.conf &> /dev/null ; then
             sed --follow-symlinks -i "s/.*autologin-user=.*/autologin-user=$1/g" /etc/lightdm/lightdm.conf
         else
@@ -51,6 +51,6 @@ checkusername "${USU}" || salir "El nombre de usuario indicado no es valido" "1"
 
 getent passwd "${USU}" &> /dev/null && \
 configurar-usuario-inicio-automatico-lightdm "${USU}" || \
-salir "El usuario ${USU} indicado no existe en el sistema" "1"
+salir "El usuario \"${USU}\" indicado no existe en el sistema" "1"
 
-salir "Se ha configurado ${USU} como usuario de inicio de sesión" "0"
+salir "Se ha configurado \"${USU}\" como usuario de inicio de sesión" "0"

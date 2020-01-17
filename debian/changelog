@@ -1,3 +1,19 @@
+vx-dga-l-scripts (4.1-1) unstable; urgency=low
+
+  * Preparamos los scripts para dar soporte al paquete de configuración de centro
+  * Se añaden un conjunto de funciones para la gestión de usuarios: vx-funcs-users
+  * Añadimos funciones a vx-funcs-bash para títulos de salida en log y colorear textos
+  * Ajustamos el script: vx-modificar-usu-inicio-sesion-cli
+  * Ajustamos el script vx-regenerar-entorno-escritorio-cli para evitar problemas con .cache
+  * Se añade un script para asignar páginas de inicio de navegadores: vx-set-paginicio-navegadores
+  * Se añade un script para gestionar las extensiones de chrome: vx-chrome-extensiones
+  * Se añade un script para gestionar las extensiones de firefox: vx-firefox-extensiones
+  * Se adapta el script de configuración de impresoras: vx-conf-impresoras
+  * Se añade el script vx-lanzadores-desktop para crear lanzadores desktop
+  * Se añade el script vx-gdebi-desatendido para instalar varios paquetes locales en un mismo comando
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 16 Jan 2020 00:10:00 +0200
+
 vx-dga-l-scripts (4.0-4) unstable; urgency=low
 
   * Se añade la información del tipo de BIOS

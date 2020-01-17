@@ -61,10 +61,20 @@ done
 # 2) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
 vx-eliminar-ficheros-conf-personales
 
-# 3) Eliminamos los directorios .cache de los usuarios:
+# 3) Eliminamos el contenido de los directorios .cache de los usuarios:
 for DIR in $(vx-home-usuarios-graficos) ; do
-    [ -d "${DIR}/.cache" ] && rm -Rf "${DIR}/.cache" && echo "=> Eliminado: ${DIR}/.cache"
+    if [ -d "${DIR}/.cache" ] ; then
+        rm -Rf "${DIR}/.cache"/* && echo "=> Eliminado: ${DIR}/.cache/*"
+    else
+        mkdir -p "${DIR}/.cache"
+    fi
+    USUARIO="$(vx-usuario-grafico ${DIR})"
+    chown -R "${USUARIO}".sudo "${DIR}/.cache"
 done
+
+# 4) Devolvemos el Greeter a su configuración original eliminando las personalizaciones del usuario:
+FICHGREETER="/etc/lightdm/lightdm-gtk-greeter.conf"
+[ -f "${FICHGREETER}" ] && rm -f "${FICHGREETER}"
 
 # Mensaje de terminación:
 echo "=> Ya se ha terminado de regenerar el Entorno de Escritorio.  Comprobar que todo esta Ok!!"
