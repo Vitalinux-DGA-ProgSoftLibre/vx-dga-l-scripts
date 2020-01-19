@@ -1,3 +1,9 @@
+vx-dga-l-scripts (4.1-2) unstable; urgency=low
+
+  * Se añade #includedir /usr/share/vitalinux/sudoers.d para gestionar permisos de sudo en vx
+
+ -- Arturo Martín <amartinromero@gmail.com>  Sun, 19 Jan 2020 00:10:00 +0200
+
 vx-dga-l-scripts (4.1-1) unstable; urgency=low
 
   * Preparamos los scripts para dar soporte al paquete de configuración de centro
