@@ -175,6 +175,7 @@ shift
 BASEDIR="/usr/share/vitalinux/firefox-extensions"
 FICH_LISTA_EXTENSIONES="${BASEDIR}/firefox-extensiones-listado"
 [ -f "${FICH_LISTA_EXTENSIONES}" ] && . "${FICH_LISTA_EXTENSIONES}"
+# Generamos una lista con los nombres de todas las extensiones disponibles:
 EXTENSIONES_DISPONIBLES=()
 for LINEA in $(sed -n "/^[^#].*=/p" "${FICH_LISTA_EXTENSIONES}") ; do
     EXT="$(echo $LINEA | cut -d"=" -f1)"
