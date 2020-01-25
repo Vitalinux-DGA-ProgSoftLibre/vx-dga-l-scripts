@@ -20,19 +20,24 @@ set -e
 
 case "$1" in
     configure)
-
-    if test -f "/usr/bin/obtener-resolucion-pantalla" ; then
-        chmod 755 "/usr/bin/obtener-resolucion-pantalla"
-    fi
-
-	chmod 755 /usr/bin/vx-*
-	
-	chmod u+s /usr/bin/pkexec
+        
+        if test -f "/usr/bin/obtener-resolucion-pantalla" ; then
+            chmod 755 "/usr/bin/obtener-resolucion-pantalla"
+        fi
+        
+        chmod 755 /usr/bin/vx-*
+        
+        chmod u+s /usr/bin/pkexec
+        
+        FICHGREETERORI="/etc/alternatives/lightdm-gtk-greeter-config-derivative"
+        FICHGREETERDES="/etc/lightdm/lightdm-gtk-greeter.conf"
+        [ ! -h "${FICHGREETERDES}" ] && \
+        ln -s "${FICHGREETERORI}" "${FICHGREETERDES}"
     ;;
-
+    
     abort-upgrade|abort-remove|abort-deconfigure)
     ;;
-
+    
     *)
         echo "postinst called with unknown argument \`$1'" >&2
         exit 1
