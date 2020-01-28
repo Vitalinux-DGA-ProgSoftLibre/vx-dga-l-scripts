@@ -259,13 +259,13 @@ function descargar-software-pdi {
 		# Faltan 32 bits...de momento no se publica dicha versión
 		if [ "$ARCHSO" = "64" ] ; then
 		  FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activaid_2.0.1~Ubuntu~1804_amd64.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activdriver_5.18.12-0~Ubuntu~1804_amd64.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activinspire_2.17.68075-1.amd64_amd64.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activinspire-32bitdependsfor64bit_2.17.68075-1.i386_i386.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activdriver_5.18.18-0~Ubuntu~1804_amd64.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activinspire_2.18.68238-1.amd64_amd64.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activinspire-32bitdependsfor64bit_2.18.68238-1.i386_i386.deb \
 			/pdis/Promethean/bionic/promethean64_bionic/activinspire-help-es_1.0.2-14_all.deb \
 			/pdis/Promethean/bionic/promethean64_bionic/activ-meta-es_2.0.0-71_amd64.deb \
 			/pdis/Promethean/bionic/promethean64_bionic/activresources-core-es_1.0.1-147_all.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activtools_5.18.12-0~Ubuntu~1804_amd64.deb"
+			/pdis/Promethean/bionic/promethean64_bionic/activtools_5.18.18-0~Ubuntu~1804_amd64.deb"
 		else
 		  FILESPDI="/pdis/Promethean/xenial_last/promethean32_xenial/activaid_2.0.1~Ubuntu~1604_i386.deb \
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activhwr-es_1.0.1-79_all.deb \
@@ -458,28 +458,29 @@ function instalar-software-pdi {
 
 	# Por último instalamos el open-boad/open-sankore
 	# De momento no se puede, la última versión disponible (xenial), tiene problemas de dependencias...:-(
-	# if yad --center --title "Drivers PDIs" --question \
-	# 	--window-icon vitalinux \
-	# 	--image pdi \
-	# 	--text "   Deseas (se recomienda) instalar <b>Open-Board(64bits recomendado)/Open-Sankore</b>   " \
-	# 	--width="350" --center \
-	# 	--justify="center" --text-align="center" \
-	# 	--button="Continuar":0 --button="Cancelar":1 ;  then
+	if yad --center --title "Drivers PDIs" --question \
+		--window-icon vitalinux \
+		--image pdi \
+		--text "   Deseas (se recomienda) instalar <b>Open-Board( llamado antes Open-Sankore)</b>   " \
+		--width="350" --center \
+		--justify="center" --text-align="center" \
+		--button="Continuar":0 --button="Cancelar":1 ;  then
 
-	# 	cd /opt/pkgs/pdis || return 1
+		cd /opt/pkgs/pdis || return 1
 
-	# 	# Descargamos el Open-Sankore
-	# 	if [ "$ARCHSO" = "64" ] ; then
-	# 		comprobar-archivos "/pdis/openboard_ubuntu_14.04_1.3.4_amd64.deb"
-	# 		dpkg -i /opt/pkgs/pdis/openboard_ubuntu_14.04_1.3.4_amd64.deb
-	# 		apt-get -f --assume-yes --force-yes install
-	# 	else
-	# 		comprobar-archivos "/pdis/Open-Sankore_2.5.1_i386.deb"
-	# 		dpkg -i /opt/pkgs/pdis/Open-Sankore_2.5.1_i386.deb
-	# 		apt-get -f --assume-yes --force-yes install
-	# 	fi
+		# Descargamos el OpenBoard....parece que necesita lo primero instalar (no es capaz de hacerlo con el -f install) el siguiente paquete:
+	    apt-get --assume-yes install libqt5multimedia5-plugins libqt5script5 || return 1
+		if [ "$ARCHSO" = "64" ] ; then
+			comprobar-archivos "/pdis/openboard_ubuntu_18.04_1.5.3_amd64.deb"
+			dpkg -i /opt/pkgs/pdis/openboard_ubuntu_18.04_1.5.3_amd64.deb
+			apt-get -f --assume-yes --force-yes install
+		# else
+		# 	comprobar-archivos "/pdis/Open-Sankore_2.5.1_i386.deb"
+		# 	dpkg -i /opt/pkgs/pdis/Open-Sankore_2.5.1_i386.deb
+		# 	apt-get -f --assume-yes --force-yes install
+		fi
 
-	# fi
+	fi
 
 }
 

@@ -1,3 +1,10 @@
+vx-dga-l-scripts (5.0-5) unstable; urgency=low
+
+  * Upgrade paquetes de Promethean
+  * OpenBoard disponible (en estado beta)
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Wed, 28 Jan 2020 21:10:00 +0200
+
 vx-dga-l-scripts (5.0-4) unstable; urgency=low
 
   * Se añade #includedir /usr/share/vitalinux/sudoers.d para gestionar permisos de sudo en vx
