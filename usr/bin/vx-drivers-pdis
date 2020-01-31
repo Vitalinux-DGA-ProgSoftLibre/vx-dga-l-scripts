@@ -272,7 +272,7 @@ function descargar-software-pdi {
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire-help-es_1.0.2-14_all.deb \
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activtools_5.17.14-0~Ubuntu~1604_i386.deb \
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activdriver_5.17.14-0~Ubuntu~1604_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb
+		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb \
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activ-meta-es_2.0.0-71_i386.deb"
 		fi
 		;;
