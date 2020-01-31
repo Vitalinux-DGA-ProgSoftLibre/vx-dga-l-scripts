@@ -256,14 +256,16 @@ function descargar-software-pdi {
 		;;
 
 		"Promethean")
-		# Faltan 32 bits...de momento no se publica dicha versión
+		# Faltaría 32 bits...de momento no se publica dicha versión
 		if [ "$ARCHSO" = "64" ] ; then
-		  # Los drivers de la pizarra (activaid, activdriver y activtools) no se instalan de forma adecuada...se pasan a repos en migasfree...
-		  FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activinspire_2.18.68238-1.amd64_amd64.deb \
+		  FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activaid_2.0.1~Ubuntu~1804_amd64.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activdriver_5.18.18-0~Ubuntu~1804_amd64.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activinspire_2.18.68238-1.amd64_amd64.deb \
 			/pdis/Promethean/bionic/promethean64_bionic/activinspire-32bitdependsfor64bit_2.18.68238-1.i386_i386.deb \
 			/pdis/Promethean/bionic/promethean64_bionic/activinspire-help-es_1.0.2-14_all.deb \
 			/pdis/Promethean/bionic/promethean64_bionic/activ-meta-es_2.0.0-71_amd64.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activresources-core-es_1.0.1-147_all.deb"
+			/pdis/Promethean/bionic/promethean64_bionic/activresources-core-es_1.0.1-147_all.deb \
+			/pdis/Promethean/bionic/promethean64_bionic/activtools_5.18.18-0~Ubuntu~1804_amd64.deb"
 		else
 		  FILESPDI="/pdis/Promethean/xenial_last/promethean32_xenial/activaid_2.0.1~Ubuntu~1604_i386.deb \
 		    /pdis/Promethean/xenial_last/promethean32_xenial/activhwr-es_1.0.1-79_all.deb \
@@ -432,8 +434,8 @@ function instalar-software-pdi {
 
 	"Promethean")
 
-		# Primero instalamos los drivers que estarán en migasfree:
-		apt-get install activdriver activtools
+		# Primero instalamos los complementos de drivers gráficos necesarios para que no haga downgrade
+		apt-get --assume-yes install xserver-xorg-input-evdev-hwe-18.04
 		dpkg -i /opt/pkgs/pdis/activ*.deb
 		apt-get -f --assume-yes --force-yes install
 	;;
