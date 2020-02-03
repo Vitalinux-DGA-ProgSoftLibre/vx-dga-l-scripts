@@ -278,59 +278,74 @@ function descargar-software-pdi {
 		;;
 
 		"Smartboard")
-		# Lo primero es saber si es una SmartBoard480 o no:
-		if lsusb | grep "0b8c:0090" > /dev/null 2>&1 ; then
-			SB480="1"
-		else
-			SB480="0"
-		fi
-		if [ "$ARCHSO" = "64" ] && [ "$SB480" = "1" ]  ; then
-			yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Lo sentimos pero de momento SmartBoard NO facilita controladores para 64 bits "\
-				--window-icon vitalinux \
-				--image pdi \
-				--width="400" --height="100" \
-				--center --justify="center" --text-align="center" --button="gtk-ok":0
-			return 1
-		elif [ "$ARCHSO" = "64" ] ; then
-			# Si la arquitectura es de 64 bits, pero no es la 480, podría funcionar el software...no lo sabemos
-			yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Su sistema es de 64 bits. Es posible que el software que se instale no funcione adecuadamente...si es así hable con Soporte Vitalinux "\
-				--window-icon vitalinux \
-				--image pdi \
-				--width="400" --height="100" \
-				--center --justify="center" --text-align="center" \
-				--button="Continuar instalación":0 \
-				--button="Cancelar":1 \
+		# La solución ahora se basa en aplicación dockerizada por Lliurex
+		# Ojo, SOLO 64 bits. Suponemos que los paquetes de 32 habría que probar, pero de momento no hay arc32
+		
+		yad --title "Instalación de Software de la PDI $PDI" \
+			--text " Las pizarras SmartBoard requieren dockerizar la aplicación para que funcionen. Ésto puede implicar un proceso de carga que pueda tardar un rato...no desespere "\
+			--window-icon vitalinux \
+			--image pdi \
+			--width="400" --height="100" \
+			--center --justify="center" --text-align="center" \
+			--button="Continuar ":0 \
+			--button="Cancelar":1 \
 
-			if [ "$?" != "0" ]; then
-				return 1
-			fi
-		else
-			# No sabemos si funcionará
-			yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Su PDI parece ser una SmartBoard 480...pero no sabemos si la versión publicada sea compatible con Ubuntu bionic. Si tiene problemas contacte con Soporte Vitalinux "\
-				--window-icon vitalinux \
-				--image pdi \
-				--width="400" --height="100" \
-				--center --justify="center" --text-align="center" \
-				--button="Continuar instalación manual":0 \
-				--button="Cancelar":1 \
 
-			if [ "$?" != "0" ]; then
-				return 1
-			fi
-		fi
 
-		FILESPDI="/pdis/SmartBoard/smart_board/nwfermi-0.6.5.1_i386.deb \
-			/pdis/SmartBoard/smart_board/smart-activation_1.1.2066.1-1_i386.deb \
-			/pdis/SmartBoard/smart_board/smart-common_10.3.2171.1-1_i386.deb \
-			/pdis/SmartBoard/smart_board/smart-gallerysetup_1.3.6235.1-1_i386.deb \
-			/pdis/SmartBoard/smart_board/smart-hwr_11.3.2121.1-1_i386.deb \
-			/pdis/SmartBoard/smart_board/smart-languagesetup_2.2.2060.4-1_i386.deb \
-			/pdis/SmartBoard/smart_board/smart-notebook_11.0.7511.0-1_i386.deb \
-			/pdis/SmartBoard/smart_board/smart-product-drivers_11.3.2121.1-1_i386.deb \
-			/pdis/SmartBoard/smart_board/xf86-input-nextwindow-trusty_0.3.4~trusty1_i386.deb"
+		
+		# # Lo primero es saber si es una SmartBoard480 o no:
+		# if lsusb | grep "0b8c:0090" > /dev/null 2>&1 ; then
+		# 	SB480="1"
+		# else
+		# 	SB480="0"
+		# fi
+		# if [ "$ARCHSO" = "64" ] && [ "$SB480" = "1" ]  ; then
+		# 	yad --title "Instalación de Software de la PDI $PDI" \
+		# 		--text " Lo sentimos pero de momento SmartBoard NO facilita controladores para 64 bits "\
+		# 		--window-icon vitalinux \
+		# 		--image pdi \
+		# 		--width="400" --height="100" \
+		# 		--center --justify="center" --text-align="center" --button="gtk-ok":0
+		# 	return 1
+		# elif [ "$ARCHSO" = "64" ] ; then
+		# 	# Si la arquitectura es de 64 bits, pero no es la 480, podría funcionar el software...no lo sabemos
+		# 	yad --title "Instalación de Software de la PDI $PDI" \
+		# 		--text " Su sistema es de 64 bits. Es posible que el software que se instale no funcione adecuadamente...si es así hable con Soporte Vitalinux "\
+		# 		--window-icon vitalinux \
+		# 		--image pdi \
+		# 		--width="400" --height="100" \
+		# 		--center --justify="center" --text-align="center" \
+		# 		--button="Continuar instalación":0 \
+		# 		--button="Cancelar":1 \
+
+		# 	if [ "$?" != "0" ]; then
+		# 		return 1
+		# 	fi
+		# else
+		# 	# No sabemos si funcionará
+		# 	yad --title "Instalación de Software de la PDI $PDI" \
+		# 		--text " Su PDI parece ser una SmartBoard 480...pero no sabemos si la versión publicada sea compatible con Ubuntu bionic. Si tiene problemas contacte con Soporte Vitalinux "\
+		# 		--window-icon vitalinux \
+		# 		--image pdi \
+		# 		--width="400" --height="100" \
+		# 		--center --justify="center" --text-align="center" \
+		# 		--button="Continuar instalación manual":0 \
+		# 		--button="Cancelar":1 \
+
+		# 	if [ "$?" != "0" ]; then
+		# 		return 1
+		# 	fi
+		# fi
+
+		# FILESPDI="/pdis/SmartBoard/smart_board/nwfermi-0.6.5.1_i386.deb \
+		# 	/pdis/SmartBoard/smart_board/smart-activation_1.1.2066.1-1_i386.deb \
+		# 	/pdis/SmartBoard/smart_board/smart-common_10.3.2171.1-1_i386.deb \
+		# 	/pdis/SmartBoard/smart_board/smart-gallerysetup_1.3.6235.1-1_i386.deb \
+		# 	/pdis/SmartBoard/smart_board/smart-hwr_11.3.2121.1-1_i386.deb \
+		# 	/pdis/SmartBoard/smart_board/smart-languagesetup_2.2.2060.4-1_i386.deb \
+		# 	/pdis/SmartBoard/smart_board/smart-notebook_11.0.7511.0-1_i386.deb \
+		# 	/pdis/SmartBoard/smart_board/smart-product-drivers_11.3.2121.1-1_i386.deb \
+		# 	/pdis/SmartBoard/smart_board/xf86-input-nextwindow-trusty_0.3.4~trusty1_i386.deb"
 		;;
 
 	esac
@@ -441,19 +456,33 @@ function instalar-software-pdi {
 	;;
 
 	"Smartboard")
-	dpkg -i /opt/pkgs/pdis/smart-activation_1.1.2066.1-1_i386.deb \
-		/opt/pkgs/pdis/smart-common_10.3.2171.1-1_i386.deb \
-		/opt/pkgs/pdis/smart-gallerysetup_1.3.6235.1-1_i386.deb \
-		/opt/pkgs/pdis/smart-hwr_11.3.2121.1-1_i386.deb \
-		/opt/pkgs/pdis/smart-languagesetup_2.2.2060.4-1_i386.deb \
-		/opt/pkgs/pdis/smart-notebook_11.0.7511.0-1_i386.deb \
-		/opt/pkgs/pdis/smart-product-drivers_11.3.2121.1-1_i386.deb
-	if [ "$SB480" = "1" ]  ; then
-		apt-get -y --force-yes install libc6-dev libc6 libc-dev-bin dkms
-		dpkg -i /opt/pkgs/pdis/xf86-input-nextwindow-trusty_0.3.4~trusty1_i386.deb \
-			/opt/pkgs/pdis/nwfermi-0.6.5.1_i386.deb
-	fi
-	apt-get -f --assume-yes --force-yes install
+		# Install nwfermi daemon y module
+		apt-get --assume-yes install nwfermi-module nwfermi-daemon
+		# Install vx-dga-l-pdi-smartboard
+		apt-get --assume-yes install vx-dga-l-pdi-smartboard
+		# Precarga de la imagen...
+		sudo /usr/bin/lliurex-smart -download
+
+		if lsusb | grep "0b8c:0090" > /dev/null 2>&1 ; then
+			SB480="1"
+		else
+			SB480="0"
+		fi
+		if [ "$SB480" = "1" ]  ; then
+			# Avisar de que se deben seguir las instrucciones para que funcione
+			yad --title "Instalación de Software de la PDI $PDI" \
+			--text " Tu pizarra es la S480. Puede requerir las siguientes acciones para funcionar:\n
+			   Navega hasta las Opciones y \n \
+			   -> Configuración del ratón y movimiento\n \
+			   - Habilita modo de uso simultáneo del ratón\n \
+			   - Deshabilita la Función de uso único del ratón\n \
+			   - Deshabilita los mensajes emergentes "\
+			--window-icon vitalinux \
+			--image pdi \
+			--width="400" --height="100" \
+			--center --justify="center" --text-align="center" \
+			--button="OK":0
+		fi
 	;;
 
 	esac

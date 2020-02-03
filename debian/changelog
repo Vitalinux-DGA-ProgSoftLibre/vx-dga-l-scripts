@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-8) unstable; urgency=low
+
+  * Test drivers de pizarra SmartBoard, Lliurex Powered
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Tue, 4 Feb 2020 00:11:00 +0200
+
 vx-dga-l-scripts (5.0-7) unstable; urgency=low
 
   * Problema de regresión con drivers de pizarra
