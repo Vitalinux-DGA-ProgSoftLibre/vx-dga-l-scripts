@@ -1,0 +1,57 @@
+#!/bin/bash
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+uso() {
+    echo "=> ¡¡Importante!! Debes indicar como parámetros:
+    1) Ruta del archivo, lanzador o directorio a copiar
+    2) usuario1;usuario2;usuario3|all a los que copiarle lo anterior en su Escritorio
+    3) Puedes pasar tantas parejas de parametros anteriores como desees
+    p.e. /usr/bin/vx-copiar-en-escritorio /usr/share/applications/vx-lanzador.desktop all"
+}
+
+copiardatos() {
+    # Recibimos como parámetro el HOMEDIR del usuario y lo que hay que copiar:
+    # 1) HOMEDIR
+    # 2) Fichero, lanzador, directorio ... a copiar en el Escritorio del Usuario
+    USUARIO="$(vx-usuario-grafico "${1}")"
+    for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
+        if [[ -d "${1}/${DIR}" ]] ; then
+            rsync -ahv "${2}" "${1}/${DIR}"
+            RUTABASE="$(basename "${2}")"
+            chown -R "${USUARIO}" "${1}/${DIR}/${RUTABASE}"
+        fi
+    done
+}
+
+# Comprobamos que se le pasan parámetros al script:
+[[ -z "${1}" || -z "${2}" ]] && uso && exit 1
+
+until [[ -z "${1}" || -z "${2}" ]] ; do
+    [[ ! -f "${1}" && ! -d "${1}" ]] && uso && exit 1
+    
+    # Si es root y hay que copiarlo en el Escritorio de todos los usuarios lo hacemos:
+    if [[ "${2}" == "all" && "$(whoami)" == "root" ]] ; then
+        for HOMEDIR in $(vx-home-usuarios-graficos) ; do
+            [ -d "${HOMEDIR}" ] && copiardatos "${HOMEDIR}" "${1}"
+        done
+    fi
+    
+    if [[ "${2}" != "all" ]] ; then
+        USUARIO="$(whoami)"
+        for USU in ${2//;/ } ; do
+            if [[ "${USUARIO}" == ${USU} || "${USUARIO}" == "root" ]] ; then
+                HOMEDIR="$(vx-home-usuario-grafico "${USU}")"
+                [ -d "${HOMEDIR}" ] && copiardatos "${HOMEDIR}" "${1}"
+            fi
+        done
+    fi
+    
+    # Si es root el que lanza el Script lo copiamos
+    [[ "$(whoami)" == "root" ]] && \
+    [ -d "/etc/skel/Escritorio" ] && \
+    rsync -ahv "${1}" "/etc/skel/Escritorio/"
+    
+    shift 2 || exit 0
+done

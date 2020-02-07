@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-9) unstable; urgency=low
+
+  * Se añade el script /usr/bin/vx-copiar-en-escritorio
+
+ -- Arturo Martín <amartinromero@gmail.com>  Fri, 7 Feb 2020 00:10:00 +0200
+
 vx-dga-l-scripts (5.0-8) unstable; urgency=low
 
   * Test drivers de pizarra SmartBoard, Lliurex Powered
