@@ -1,6 +1,7 @@
 vx-dga-l-scripts (5.0-9) unstable; urgency=low
 
   * Se añade el script /usr/bin/vx-copiar-en-escritorio
+  * Se añade el parametro LOCKEDRICOHNX para el desbloqueo con tarjeta de Ricoh
 
  -- Arturo Martín <amartinromero@gmail.com>  Fri, 7 Feb 2020 00:10:00 +0200
 
