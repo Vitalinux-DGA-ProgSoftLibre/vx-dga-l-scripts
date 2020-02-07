@@ -215,5 +215,5 @@ esac
 eliminar_impresoras_mal_instaladas
 # Reiniciamos cups para que surta efecto toda la configuración hecha:
 sleep 1
-#/etc/init.d/cups restart &> /dev/null
-systemctl restart cups.service
+#systemctl restart cups.service
+/etc/init.d/cups restart
