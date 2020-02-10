@@ -90,11 +90,11 @@ function confimpresora {
         FICH="/etc/cups/tea4cups.conf"
         if [ -f "${FICH}" ] && \
         ! crudini --get "${FICH}" "${NOMBRE}" "posthook_usercodeinfo" > /dev/null 2>&1 ; then
-            (
-                echo "[${NOMBRE}]"
-                echo "posthook_usercodeinfo : /usr/bin/vx-imprimir-con-usercode-info"
-                echo "prehook_usercode : /usr/bin/vx-imprimir-con-usercode"
-            ) >> /etc/cups/tea4cups.conf
+            echo "=> Añadimos la sección: [${NOMBRE}] en ${FICH}"
+            SECCION="[${NOMBRE}]\n"
+            SECCION+="posthook_usercodeinfo : /usr/bin/vx-imprimir-con-usercode-info\n"
+            SECCION+="prehook_usercode : /usr/bin/vx-imprimir-con-usercode"
+            echo -e "${SECCION}" | tee -a /etc/cups/tea4cups.conf
         fi
     else
         echo "=> No se han modificado las opciones de tea4cups ..."

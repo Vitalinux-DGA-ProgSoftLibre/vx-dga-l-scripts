@@ -1,6 +1,7 @@
 vx-dga-l-scripts (5.0-10) unstable; urgency=low
 
   * Añadimos las opciones SHOWUSERCODEPRINT y SHOWNOMBREPRINT para controlar el yad de impresión
+  * Cambiamos la forma de dar de alta la sección de la impresora en tea4cups
 
  -- Arturo Martín <amartinromero@gmail.com>  Sat, 8 Feb 2020 00:10:00 +0200
 
