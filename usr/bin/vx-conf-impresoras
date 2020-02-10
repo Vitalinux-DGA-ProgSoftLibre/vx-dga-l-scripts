@@ -45,7 +45,9 @@ function confimpresora {
     \n\tNOMBREPRINT[tunombre] \
     \n\tMODO_PASS_HIDDEN[0|1] \
     \n\tPASSRETENCION[0000] \
-    \n\tLOCKEDRICOHNX[0|1]"
+    \n\tLOCKEDRICOHNX[0|1] \
+    \n\tSHOWUSERCODEPRINT[0|1] \
+    \n\tSHOWNOMBREPRINT[0|1]"
     
     (( ${#} < 3 )) && mensaje "${MENSAJE}" && return 1
     lpstat -v | grep -q "${2}:" && \
@@ -67,6 +69,8 @@ function confimpresora {
     MODO_PASS="${9:-0}"
     PASSRETENCION="${10:-0000}"
     LOCKEDRICOHNX="${11:-0}"
+    SHOWUSERCODEPRINT="${12:-1}"
+    SHOWNOMBREPRINT="${13:-1}"
     
     if ${CONFOPTSTEA4CUPS} && [ -x "/usr/bin/vx-tea4cups-confoptions-cli" ] ; then
         if vx-tea4cups-confoptions-cli \
@@ -75,7 +79,9 @@ function confimpresora {
         "PASSRETENCION=${PASSRETENCION}" \
         "USERCODEPRINT=${USERCODEPRINT}" \
         "NOMBREPRINT=${NOMBREPRINT}" \
-        "LOCKEDRICOHNX=${LOCKEDRICOHNX}" ; then
+        "LOCKEDRICOHNX=${LOCKEDRICOHNX}" \
+        "SHOWUSERCODEPRINT=${SHOWUSERCODEPRINT}" \
+        "SHOWNOMBREPRINT=${SHOWNOMBREPRINT}" ; then
             echo "=> Se han configurado las opciones de tea4cups deseadas ..."
         else
             echo "=> Problemas para configurar las opciones de tea4cups deseadas ..."
