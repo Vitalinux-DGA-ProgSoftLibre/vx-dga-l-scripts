@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-11) unstable; urgency=low
+
+  * Nuevo script de gestión de las extensiones para Chrome/Chromium
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Fri, 21 Feb 2020 10:10:00 +0200
+
 vx-dga-l-scripts (5.0-10) unstable; urgency=low
 
   * Añadimos las opciones SHOWUSERCODEPRINT y SHOWNOMBREPRINT para controlar el yad de impresión
