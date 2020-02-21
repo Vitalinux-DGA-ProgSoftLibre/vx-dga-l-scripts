@@ -1,6 +1,7 @@
 vx-dga-l-scripts (5.0-11) unstable; urgency=low
 
   * Nuevo script de gestión de las extensiones para Chrome/Chromium
+  * El script para crear un usb bootable llama directamente a unetbootin
 
  -- Ignacio Sancho <sannacho@gmail.com>  Fri, 21 Feb 2020 10:10:00 +0200
 
