@@ -207,7 +207,7 @@ function descargar-software-pdi {
 		"Hitachi") 
 		## Test
 		yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Las pizarras Hitachi no tienen drivers actualizados. Se recomienda usar Vitalinux 1.0 (32 o 64 bits) \n Sin embargo se intentará instalar dicho software..."\
+				--text " Las pizarras Hitachi TRIO no tienen drivers actualizados. Se recomienda usar Vitalinux 1.0 (32 o 64 bits) \n Las pizarras Hitachi DUO deberían funcionar"\
 				--window-icon vitalinux \
 				--image pdi \
 				--width="400" --height="100" \
@@ -217,7 +217,7 @@ function descargar-software-pdi {
 			if [ "$?" != "0" ]; then
 				return 1
 			fi
-		FILESPDI="/pdis/HITACHI/StarBoardSoftware_9.62_i586.deb"
+		#FILESPDI="/pdis/HITACHI/StarBoardSoftware_9.63_ubuntu16_amd64.deb"
 		;;
 
 		"Interwrite")
@@ -375,28 +375,33 @@ function instalar-software-pdi {
 	;;
 
 	"Hitachi")
-	if test -f ./StarBoardSoftware_9.62_i586.deb ; then
-		if ! dpkg -l | grep -e "starboardsoftware[ ]*9.62" >/dev/null 2>/dev/null ; then
-			dpkg -i /opt/pkgs/pdis/StarBoardSoftware_9.62_i586.deb
-		else
-			echo "El software para esta PDI esta actualizado a la ultima version...se omite su instalacion"
-		fi
-		/usr/local/StarBoardSoftware/install.sh
-		apt-get -f --assume-yes --force-yes install
+	#if test -f ./StarBoardSoftware_9.63_ubuntu16_amd64.deb ; then
+			# if ! dpkg -l | grep -e "starboardsoftware[ ]*9.63" >/dev/null 2>/dev/null ; then
+			# 	dpkg -i /opt/pkgs/pdis/StarBoardSoftware_9.63_ubuntu16_amd64.deb
+			# else
+			# 	echo "El software para esta PDI esta actualizado a la ultima version...se omite su instalacion"
+			# fi
+		apt-get --assume-yes --force-yes starboardsoftware
+			#/usr/local/StarBoardSoftware/install.sh
+			#apt-get -f --assume-yes --force-yes install
 		# Instalamos los drivers necesarios
 		# 1. El primero es para que el servicio que el demonio que se encarga de hablar con la pizarra (driver) DGBoard se pueda ejecutar en 64 bits
-		apt-get --assume-yes --force-yes install libusb-0.1-4:i386 libxtst6-dbg:i386 libxtst6:i386
+		#apt-get --assume-yes --force-yes install libusb-0.1-4:i386 libxtst6-dbg:i386 libxtst6:i386
 		# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
 		# pero tampoco molesta que se cargue en memoria
 		dpkg -l | grep -e "vx-dga-l-lsadrv-hitachi" >/dev/null 2>/dev/null  && \
-                        apt-get --assume-yes --force-yes purge vx-dga-l-lsadrv-hitachi
+            apt-get --assume-yes --force-yes purge vx-dga-l-lsadrv-hitachi
 		apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
+		# Por último, debemos activar el servicio de starboard (no lo hace por defecto) al arranque. 
+		# Al estar mal construido el paquete 
+		sed -i 's/# chkconfig/### BEGIN INIT INFO\n# Default-Start: 2 3 4 5\n### END INIT INFO/g' /etc/init.d/starboardservice
+		systemctl enable starboardservice
 		# Modificamos el lanzador de calibrado que no se ejecuta correctamente desde entorno grafico
 		if [ -f /usr/share/applications/hitachi-starboard-calibrate.desktop ] ; then
 			sed -i 's/^Terminal=[Tt]rue/Terminal=false/g' /usr/share/applications/hitachi-starboard-calibrate.desktop
 		fi
 
-	fi
+	#fi
 	;;
 
 	"Interwrite")
@@ -489,7 +494,7 @@ function instalar-software-pdi {
 
 	# Por último instalamos el open-boad/open-sankore
 	# De momento no se puede, la última versión disponible (xenial), tiene problemas de dependencias...:-(
-	if yad --center --title "Drivers PDIs" --question \
+	if ! dpkg -l | grep -q openboard 2>/dev/null && yad --center --title "Drivers PDIs" --question \
 		--window-icon vitalinux \
 		--image pdi \
 		--text "   Deseas (se recomienda) instalar <b>Open-Board( llamado antes Open-Sankore)</b>   " \
