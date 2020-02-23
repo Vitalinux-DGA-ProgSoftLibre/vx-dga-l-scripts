@@ -38,7 +38,7 @@ until [ -z "${1}" ] ; do
     
     if (( ${#1} == 32 )) ; then
         EXTENSION="${1}"
-        elif (( ${!#1} == 32 )); then
+        elif (( $(expr length ${!1}) == 32 )); then
         EXTENSION="${!1}"
     else
         echo "=> Error!! La chrome-extension indicada no es instalable: \"${1}\""
@@ -48,7 +48,7 @@ until [ -z "${1}" ] ; do
     case "${OPCION}" in
         "--install" )
             if ! jq -r ".ExtensionInstallForcelist[]" "${FICHEXTENSIONES}" | grep -q $EXTENSION 2>/dev/null; then
-                jq ".ExtensionInstallForcelist += [\"${EXTENSION}\"]" "${FICHEXTENSIONES}" | sponge "${FICHEXTENSIONES}"
+                jq ".ExtensionInstallForcelist += [\"${EXTENSION};https://clients2.google.com/service/update2/crx\"]" "${FICHEXTENSIONES}" | sponge "${FICHEXTENSIONES}" && \
                 echo "=> Se ha instalado la chrome-extensión: ${1}"
             else
                 echo "=> La chrome-extension ${1} ya esta instalada ..."
