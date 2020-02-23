@@ -1,3 +1,10 @@
+vx-dga-l-scripts (4.1-6) unstable; urgency=low
+
+  * Se modifica el script de creación de un usb-bootable para que lance unetbootin
+  * Adaptación del script de añadir extensiones a Chrome válido para Chrome y Chromium
+
+ -- Ignacio Sacnho <sannacho@gmail.com>  Sun, 23 Feb 2020 10:10:00 +0200
+
 vx-dga-l-scripts (4.1-5) unstable; urgency=low
 
   * Modificamos el script vx-conf-impresoras:

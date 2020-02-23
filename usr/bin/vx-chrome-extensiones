@@ -9,7 +9,7 @@ uso() {
     MENSAJE+="\n1) --install|--remove"
     MENSAJE+="\n2,3,...) Extensiones a instalar o desinstalar"
     MENSAJE+="\nEj. vx-chrome-extensiones --install ARCWELDER APKWELDING UBLOCK"
-    MENSAJE+="\nEj. vx-chrome-extensiones --remove pkmbjddkmnknjdhfjiekjoniilcjkfpo.json"
+    MENSAJE+="\nEj. vx-chrome-extensiones --remove pkmbjddkmnknjdhfjiekjoniilcjkfpo"
     mensaje "${MENSAJE}"
 }
 
@@ -23,34 +23,22 @@ OPCION="${1}"
 ! [[ "${OPCION}" =~ --install|--remove ]] && uso && exit 1
 shift
 
-DIRBASE="/usr/share/vitalinux/google-chrome-extensions"
-DIREXTENSIONS="/opt/google/chrome/extensions"
-[ ! -d "$DIREXTENSIONS" ] && mkdir -p "$DIREXTENSIONS" && chmod +rx "$DIREXTENSIONS"
+FICHEXTENSIONES="/etc/opt/chrome/policies/managed/vx-navegador-chrome-extensiones.json"
+[ ! -f "$FICHEXTENSIONES" ] && { echo "No existe el fichero de configuración de extensiones...falta el paquete vx-dga-l-navegadores-extensiones-chrome"; exit 1;}
 
-# Declaramos las extensiones disponibles en el paquete
+# Formato del fichero de extensiones en el paquete
+# SCREENCASTIFY="mmeijimgabbpbgpdklnllpncmdofkcpn"
+# OFFICEONLINE="ndjpnladcallmjemlbaebfadecfhkepb"
 
-# SCREENCASTIFY="mmeijimgabbpbgpdklnllpncmdofkcpn.json"
-# OFFICEONLINE="ndjpnladcallmjemlbaebfadecfhkepb.json"
-# COPIARPEGAROFFICEONLINE="ifbmcpbgkhlpfcodhjhdbllhiaomkdej.json"
-# ADDBLOCKPLUS="cfhdojbkjhnklbpkdaibdccddilifddb.json"
-# VIDEODOWNLOADHELPER="lmjnegcaeklhafolokijcfjliaokphfk.json"
-# S2BOT4SCRATCH="pllkalmkifgmanfoghenhgafbcpbicdj.json"
-# ZERONOISECLASSRROOM="pgpkohbgbjmihckldcacljomfkkaogjd.json"
-# UBLOCK="cjpalhdlnbpafiamejdnhcphjbkeiagm.json"
-# BITBLOQ="ddpdpmibfdhifigignfdiggfbcmfblfj.json"
-# # App y Extension de Arc Welder que permite testear Apps de Android:
-# ARCWELDER="emfinbmielocnlhgmfkkmkngdoccbadn.json"
-# APKWELDING="pkmbjddkmnknjdhfjiekjoniilcjkfpo.json"
-
-FICH_LISTA_EXTENSIONES="${DIRBASE}/chrome-extensiones-listado"
+FICH_LISTA_EXTENSIONES="/usr/share/vitalinux/google-chrome-extensions/chrome-extensiones-listado"
 [ -f "${FICH_LISTA_EXTENSIONES}" ] && . "${FICH_LISTA_EXTENSIONES}"
 
 until [ -z "${1}" ] ; do
     EXTENSION=""
     
-    if [[ "${1##*.}" == "json" ]] ; then
+    if (( ${#1} == 32 )) ; then
         EXTENSION="${1}"
-        elif [[ "${!1##*.}" == "json" ]] ; then
+        elif (( ${!#1} == 32 )); then
         EXTENSION="${!1}"
     else
         echo "=> Error!! La chrome-extension indicada no es instalable: \"${1}\""
@@ -59,24 +47,15 @@ until [ -z "${1}" ] ; do
     
     case "${OPCION}" in
         "--install" )
-            if [ ! -f "${DIREXTENSIONS}/${EXTENSION}" ] ; then
-                if [ -f "${DIRBASE}/${EXTENSION}" ] ; then
-                    cp "${DIRBASE}/${EXTENSION}" "${DIREXTENSIONS}"
-                else
-                    cat > "${DIREXTENSIONS}/${EXTENSION}" <<EOF
-{
-    "external_update_url": "https://clients2.google.com/service/update2/crx"
-}
-EOF
-                fi
+            if ! jq -r ".ExtensionInstallForcelist[]" "${FICHEXTENSIONES}" | grep -q $EXTENSION 2>/dev/null; then
+                jq ".ExtensionInstallForcelist += [\"${EXTENSION}\"]" "${FICHEXTENSIONES}" | sponge "${FICHEXTENSIONES}"
                 echo "=> Se ha instalado la chrome-extensión: ${1}"
             else
                 echo "=> La chrome-extension ${1} ya esta instalada ..."
             fi
         ;;
         "--remove" )
-            [ -f "${DIREXTENSIONS}/${EXTENSION}" ] && \
-            rm -f "${DIREXTENSIONS}/${EXTENSION}" && \
+            jq "del(.ExtensionInstallForcelist[] | select(contains(\"${EXTENSION}\")))" "${FICHEXTENSIONES}" | sponge "${FICHEXTENSIONES}"
             echo "=> Se ha eliminado la extensión de Google Chrome: ${1}"
         ;;
     esac
