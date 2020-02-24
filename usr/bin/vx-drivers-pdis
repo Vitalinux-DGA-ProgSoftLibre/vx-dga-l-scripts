@@ -60,6 +60,18 @@ function close_exit(){
 }
 export -f close_exit
 
+function esperando(){
+	# Función que permite mostrar algo en pantalla mientras se espera la ejcución de un comando "largo"
+	# Para llamarlo, lanzar el proceso largo con & y así se captura aquí...
+	pid=$! # Get PID of background command
+	while kill -0 $pid 2>/dev/null  # Signal 0 just tests whether the process exists
+	do
+		echo -n "."
+		sleep 1.5
+	done
+	echo ""
+}
+
 
 function seleccionar-modelo-pdi {
 
@@ -466,7 +478,9 @@ function instalar-software-pdi {
 		# Install vx-dga-l-pdi-smartboard
 		apt-get --assume-yes install vx-dga-l-pdi-smartboard
 		# Precarga de la imagen...
-		sudo /usr/bin/lliurex-smart -download
+		echo "Vamos a descargar la imagen docker de la aplicación...paciencia"
+		sudo /usr/bin/lliurex-smart -download &
+		esperando
 
 		if lsusb | grep "0b8c:0090" > /dev/null 2>&1 ; then
 			SB480="1"

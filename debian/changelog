@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-12) unstable; urgency=low
+
+  * Revisión y adaptación de nuevos drivers de PDI's: SmartBoard e Hitachi
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Fri, 24 Feb 2020 10:10:00 +0200
+
 vx-dga-l-scripts (5.0-11) unstable; urgency=low
 
   * Nuevo script de gestión de las extensiones para Chrome/Chromium
