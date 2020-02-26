@@ -219,7 +219,7 @@ function descargar-software-pdi {
 		"Hitachi") 
 		## Test
 		yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Las pizarras Hitachi TRIO no tienen drivers actualizados. Se recomienda usar Vitalinux 1.0 (32 o 64 bits) \n Las pizarras Hitachi DUO deberían funcionar"\
+				--text " Las pizarras <b>Hitachi TRIO</b> no tienen drivers actualizados. Se recomienda usar Vitalinux 1.0 (32 o 64 bits) \n\n Las pizarras <b>Hitachi DUO</b> funcionan sin problemas"\
 				--window-icon vitalinux \
 				--image pdi \
 				--width="400" --height="100" \
@@ -393,14 +393,14 @@ function instalar-software-pdi {
 			# else
 			# 	echo "El software para esta PDI esta actualizado a la ultima version...se omite su instalacion"
 			# fi
-		apt-get --assume-yes --force-yes starboardsoftware
+		apt-get --assume-yes --force-yes install starboardsoftware
 			#/usr/local/StarBoardSoftware/install.sh
 			#apt-get -f --assume-yes --force-yes install
 		# Instalamos los drivers necesarios
 		# 1. El primero es para que el servicio que el demonio que se encarga de hablar con la pizarra (driver) DGBoard se pueda ejecutar en 64 bits
-		#apt-get --assume-yes --force-yes install libusb-0.1-4:i386 libxtst6-dbg:i386 libxtst6:i386
+		apt-get --assume-yes --force-yes install libusb-0.1-4:i386 libxtst6-dbg:i386 libxtst6:i386
 		# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
-		# pero tampoco molesta que se cargue en memoria
+		# pero tampoco molesta que se cargue en memoria. Hacemos una reinstalación por si acaso...
 		dpkg -l | grep -e "vx-dga-l-lsadrv-hitachi" >/dev/null 2>/dev/null  && \
             apt-get --assume-yes --force-yes purge vx-dga-l-lsadrv-hitachi
 		apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
