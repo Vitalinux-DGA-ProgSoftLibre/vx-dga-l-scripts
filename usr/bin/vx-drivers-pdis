@@ -417,6 +417,7 @@ function instalar-software-pdi {
 			if [ -f /usr/share/applications/hitachi-starboard-calibrate.desktop ] ; then
 				sed -i 's/^Terminal=[Tt]rue/Terminal=false/g' /usr/share/applications/hitachi-starboard-calibrate.desktop
 			fi
+		fi
 	;;
 
 	"Interwrite")
