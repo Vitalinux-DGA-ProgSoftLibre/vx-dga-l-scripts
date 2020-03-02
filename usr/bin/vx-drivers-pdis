@@ -220,12 +220,12 @@ function descargar-software-pdi {
 			if lsusb | grep "1477:0008" > /dev/null 2>&1 ; then
 				HITACHITRIO="1"
 				yad --title "Instalación de Software de la PDI $PDI" \
-					--text " La pizarra conectada parece que es un modelo <b>HITACHI TRIO</b>. Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador " \
+					--text " La pizarra conectada parece que es un modelo <b>HITACHI TRIO</b>. Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador\n La instalación implica un proceso de descarga que puede ser costoso en tiempo: Se recomienda tener conexión a red por cable " \
 					--window-icon vitalinux \
 					--image pdi \
 					--width="400" --height="100" \
 					--center --justify="center" --text-align="center" \
-					--button="gtk-ok":0 \
+					--button="Continuar":0 \
 					--button="Salir":1
 				if [ "$?" != "0" ]; then
 					return 1
@@ -238,7 +238,7 @@ function descargar-software-pdi {
 					--image pdi \
 					--width="400" --height="100" \
 					--center --justify="center" --text-align="center" \
-					--button="gtk-ok":0 \
+					--button="Continuar":0 \
 					--button="Salir":1
 				if [ "$?" != "0" ]; then
 					return 1
@@ -302,7 +302,7 @@ function descargar-software-pdi {
 		# La solución ahora se basa en aplicación dockerizada por Lliurex
 		# Ojo, SOLO 64 bits. Suponemos que los paquetes de 32 habría que probar, pero de momento no hay ARC-32
 			yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Las pizarras SmartBoard requieren dockerizar la aplicación para que funcionen. Ésto puede implicar un proceso de carga que pueda tardar un rato...no desespere "\
+				--text " Las pizarras SmartBoard requieren dockerizar la aplicación para que funcionen. Ésto implica un proceso de descarga que puede ser costoso en tiempo: Se recomienda tener conexión a red por cable "\
 				--window-icon vitalinux \
 				--image pdi \
 				--width="400" --height="100" \
@@ -395,7 +395,7 @@ function instalar-software-pdi {
 		if [ "$HITACHITRIO" = "1" ]  ; then
 			apt-get --assume-yes --force-yes install vx-dga-l-pdi-starboard-hitachitrio
 			# Los drivers necesarios ya vienen como dependencia del paquete anterior
-			echo "Vamos a descargar la imagen docker de la aplicación...PACIENCIA y ESPERA A QUE SE INDIQUE"
+			echo "Descargando la imagen docker de la aplicación...PACIENCIA y ESPERA A QUE SE INDIQUE"
 			sudo /usr/bin/vx-starboard -download &
 			esperando
 		else
@@ -473,7 +473,7 @@ function instalar-software-pdi {
 		# Install vx-dga-l-pdi-smartboard
 		apt-get --assume-yes install vx-dga-l-pdi-smartboard
 		# Precarga de la imagen...
-		echo "Vamos a descargar la imagen docker de la aplicación...PACIENCIA y ESPERA A QUE SE INDIQUE"
+		echo "Descargando la imagen docker de la aplicación...PACIENCIA y ESPERA A QUE SE INDIQUE"
 		sudo /usr/bin/lliurex-smart -download &
 		esperando
 
