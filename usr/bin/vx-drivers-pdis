@@ -203,39 +203,54 @@ function descargar-software-pdi {
 	case $PDI in
 
 		"eBeam")
-		if [ "$ARCHSO" = "64" ] ; then
-			yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Lo sentimos pero de momento eBeam NO facilita controladores para 64 bits "\
-				--window-icon vitalinux \
-				--image pdi \
-				--width="400" --height="100" \
-				--center --justify="center" --text-align="center" --button="gtk-ok":0
-			return 1
-		fi
 		## Test
-		FILESPDI="/pdis/eBeam/eBeam-Interact_3.6-0_bionic_amd64.deb"
+			if [ "$ARCHSO" = "64" ] ; then
+				yad --title "Instalación de Software de la PDI $PDI" \
+					--text " Lo sentimos pero de momento eBeam NO facilita controladores para 64 bits "\
+					--window-icon vitalinux \
+					--image pdi \
+					--width="400" --height="100" \
+					--center --justify="center" --text-align="center" --button="gtk-ok":0
+				return 1
+			fi
+			FILESPDI="/pdis/eBeam/eBeam-Interact_3.6-0_bionic_amd64.deb"
 		;;
 
 		"Hitachi") 
-		## Test
-		yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Las pizarras <b>Hitachi TRIO</b> no tienen drivers actualizados. Se recomienda usar Vitalinux 1.0 (32 o 64 bits) \n\n Las pizarras <b>Hitachi DUO</b> funcionan sin problemas"\
-				--window-icon vitalinux \
-				--image pdi \
-				--width="400" --height="100" \
-				--center --justify="center" --text-align="center" \
-				--button="gtk-ok":0 \
-				--button="Salir":1
-			if [ "$?" != "0" ]; then
-				return 1
+			if lsusb | grep "1477:0008" > /dev/null 2>&1 ; then
+				HITACHITRIO="1"
+				yad --title "Instalación de Software de la PDI $PDI" \
+					--text " La pizarra conectada parece que es un modelo <b>HITACHI TRIO</b>. Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador " \
+					--window-icon vitalinux \
+					--image pdi \
+					--width="400" --height="100" \
+					--center --justify="center" --text-align="center" \
+					--button="gtk-ok":0 \
+					--button="Salir":1
+				if [ "$?" != "0" ]; then
+					return 1
+				fi
+			else
+				HITACHITRIO="0"
+				yad --title "Instalación de Software de la PDI $PDI" \
+					--text " La pizarra conectada parece que es un modelo <b>HITACHI DUO</b>. Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador " \
+					--window-icon vitalinux \
+					--image pdi \
+					--width="400" --height="100" \
+					--center --justify="center" --text-align="center" \
+					--button="gtk-ok":0 \
+					--button="Salir":1
+				if [ "$?" != "0" ]; then
+					return 1
+				fi
 			fi
-		#FILESPDI="/pdis/HITACHI/StarBoardSoftware_9.63_ubuntu16_amd64.deb"
+			#FILESPDI="/pdis/HITACHI/StarBoardSoftware_9.63_ubuntu16_amd64.deb"
 		;;
 
 		"Interwrite")
-		# Test
-		FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.5.0.24 \
-		    /pdis/Interwrite/DeviceManager_Ubuntu_7.7.0.5"
+		## Test
+			FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.5.0.24 \
+				/pdis/Interwrite/DeviceManager_Ubuntu_7.7.0.5"
 		;;
 
 		"IQBoard")
@@ -258,52 +273,42 @@ function descargar-software-pdi {
 		;;
 
 		"Multiclass")
-		## Test.
 			FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_$ARCHSO.deb"
-			# if [ "$ARCHSO" = "64" ] ; then
-			#   FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_64.deb"
-			# else
-			#   FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_32.deb"
-			# fi
 		;;
 
 		"Promethean")
-		# Faltaría 32 bits...de momento no se publica dicha versión
-		if [ "$ARCHSO" = "64" ] ; then
-		  FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activaid_2.0.1~Ubuntu~1804_amd64.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activdriver_5.18.18-0~Ubuntu~1804_amd64.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activinspire_2.18.68238-1.amd64_amd64.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activinspire-32bitdependsfor64bit_2.18.68238-1.i386_i386.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activinspire-help-es_1.0.2-14_all.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activ-meta-es_2.0.0-71_amd64.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activresources-core-es_1.0.1-147_all.deb \
-			/pdis/Promethean/bionic/promethean64_bionic/activtools_5.18.18-0~Ubuntu~1804_amd64.deb"
-		else
-		  FILESPDI="/pdis/Promethean/xenial_last/promethean32_xenial/activaid_2.0.1~Ubuntu~1604_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activhwr-es_1.0.1-79_all.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire-help-es_1.0.2-14_all.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activtools_5.17.14-0~Ubuntu~1604_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activdriver_5.17.14-0~Ubuntu~1604_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb \
-		    /pdis/Promethean/xenial_last/promethean32_xenial/activ-meta-es_2.0.0-71_i386.deb"
-		fi
+		# Faltará 32 bits...de momento no se publica dicha versión
+			if [ "$ARCHSO" = "64" ] ; then
+			FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activaid_2.0.1~Ubuntu~1804_amd64.deb \
+				/pdis/Promethean/bionic/promethean64_bionic/activdriver_5.18.18-0~Ubuntu~1804_amd64.deb \
+				/pdis/Promethean/bionic/promethean64_bionic/activinspire_2.18.68238-1.amd64_amd64.deb \
+				/pdis/Promethean/bionic/promethean64_bionic/activinspire-32bitdependsfor64bit_2.18.68238-1.i386_i386.deb \
+				/pdis/Promethean/bionic/promethean64_bionic/activinspire-help-es_1.0.2-14_all.deb \
+				/pdis/Promethean/bionic/promethean64_bionic/activ-meta-es_2.0.0-71_amd64.deb \
+				/pdis/Promethean/bionic/promethean64_bionic/activresources-core-es_1.0.1-147_all.deb \
+				/pdis/Promethean/bionic/promethean64_bionic/activtools_5.18.18-0~Ubuntu~1804_amd64.deb"
+			else
+			FILESPDI="/pdis/Promethean/xenial_last/promethean32_xenial/activaid_2.0.1~Ubuntu~1604_i386.deb \
+				/pdis/Promethean/xenial_last/promethean32_xenial/activhwr-es_1.0.1-79_all.deb \
+				/pdis/Promethean/xenial_last/promethean32_xenial/activinspire-help-es_1.0.2-14_all.deb \
+				/pdis/Promethean/xenial_last/promethean32_xenial/activtools_5.17.14-0~Ubuntu~1604_i386.deb \
+				/pdis/Promethean/xenial_last/promethean32_xenial/activdriver_5.17.14-0~Ubuntu~1604_i386.deb \
+				/pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb \
+				/pdis/Promethean/xenial_last/promethean32_xenial/activ-meta-es_2.0.0-71_i386.deb"
+			fi
 		;;
 
 		"Smartboard")
 		# La solución ahora se basa en aplicación dockerizada por Lliurex
-		# Ojo, SOLO 64 bits. Suponemos que los paquetes de 32 habría que probar, pero de momento no hay arc32
-		
-		yad --title "Instalación de Software de la PDI $PDI" \
-			--text " Las pizarras SmartBoard requieren dockerizar la aplicación para que funcionen. Ésto puede implicar un proceso de carga que pueda tardar un rato...no desespere "\
-			--window-icon vitalinux \
-			--image pdi \
-			--width="400" --height="100" \
-			--center --justify="center" --text-align="center" \
-			--button="Continuar ":0 \
-			--button="Cancelar":1 \
-
-
-
+		# Ojo, SOLO 64 bits. Suponemos que los paquetes de 32 habría que probar, pero de momento no hay ARC-32
+			yad --title "Instalación de Software de la PDI $PDI" \
+				--text " Las pizarras SmartBoard requieren dockerizar la aplicación para que funcionen. Ésto puede implicar un proceso de carga que pueda tardar un rato...no desespere "\
+				--window-icon vitalinux \
+				--image pdi \
+				--width="400" --height="100" \
+				--center --justify="center" --text-align="center" \
+				--button="Continuar ":0 \
+				--button="Cancelar":1 \
 		
 		# # Lo primero es saber si es una SmartBoard480 o no:
 		# if lsusb | grep "0b8c:0090" > /dev/null 2>&1 ; then
@@ -387,80 +392,69 @@ function instalar-software-pdi {
 	;;
 
 	"Hitachi")
-	#if test -f ./StarBoardSoftware_9.63_ubuntu16_amd64.deb ; then
-			# if ! dpkg -l | grep -e "starboardsoftware[ ]*9.63" >/dev/null 2>/dev/null ; then
-			# 	dpkg -i /opt/pkgs/pdis/StarBoardSoftware_9.63_ubuntu16_amd64.deb
-			# else
-			# 	echo "El software para esta PDI esta actualizado a la ultima version...se omite su instalacion"
-			# fi
-		apt-get --assume-yes --force-yes install starboardsoftware
-			#/usr/local/StarBoardSoftware/install.sh
-			#apt-get -f --assume-yes --force-yes install
-		# Instalamos los drivers necesarios
-		# 1. El primero es para que el servicio que el demonio que se encarga de hablar con la pizarra (driver) DGBoard se pueda ejecutar en 64 bits
-		apt-get --assume-yes --force-yes install libusb-0.1-4:i386 libxtst6-dbg:i386 libxtst6:i386
-		# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
-		# pero tampoco molesta que se cargue en memoria. Hacemos una reinstalación por si acaso...
-		dpkg -l | grep -e "vx-dga-l-lsadrv-hitachi" >/dev/null 2>/dev/null  && \
-            apt-get --assume-yes --force-yes purge vx-dga-l-lsadrv-hitachi
-		apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
-		# Por último, debemos activar el servicio de starboard (no lo hace por defecto) al arranque. 
-		# Al estar mal construido el paquete 
-		sed -i 's/# chkconfig/### BEGIN INIT INFO\n# Default-Start: 2 3 4 5\n### END INIT INFO/g' /etc/init.d/starboardservice
-		systemctl enable starboardservice
-		# Modificamos el lanzador de calibrado que no se ejecuta correctamente desde entorno grafico
-		if [ -f /usr/share/applications/hitachi-starboard-calibrate.desktop ] ; then
-			sed -i 's/^Terminal=[Tt]rue/Terminal=false/g' /usr/share/applications/hitachi-starboard-calibrate.desktop
-		fi
-
-	#fi
+		if [ "$HITACHITRIO" = "1" ]  ; then
+			apt-get --assume-yes --force-yes install vx-dga-l-pdi-starboard-hitachitrio
+			# Los drivers necesarios ya vienen como dependencia del paquete anterior
+			echo "Vamos a descargar la imagen docker de la aplicación...PACIENCIA y ESPERA A QUE SE INDIQUE"
+			sudo /usr/bin/vx-starboard -download &
+			esperando
+		else
+			apt-get --assume-yes --force-yes install starboardsoftware
+			# Instalamos los drivers necesarios
+			# 1. El primero es para que el servicio que el demonio que se encarga de hablar con la pizarra (driver) DGBoard se pueda ejecutar en 64 bits
+			apt-get --assume-yes --force-yes install libusb-0.1-4:i386 libxtst6-dbg:i386 libxtst6:i386
+			# 2. lsadrv es el módulo del kernel que necesitan las FX77 Trio para funcionar. Aportado por la comunidad (no por HITACHI). Para las DUO no es neceario
+			# pero tampoco molesta que se cargue en memoria. Hacemos una reinstalación por si acaso...
+			#dpkg -l | grep -e "vx-dga-l-lsadrv-hitachi" >/dev/null 2>/dev/null  && \
+			#	apt-get --assume-yes --force-yes purge vx-dga-l-lsadrv-hitachi
+			#apt-get --assume-yes --force-yes install vx-dga-l-lsadrv-hitachi
+			
+			# Por último, debemos activar el servicio de starboard (no lo hace por defecto) al arranque. 
+			# Al estar mal construido el paquete 
+			sed -i 's/# chkconfig/### BEGIN INIT INFO\n# Default-Start: 2 3 4 5\n### END INIT INFO/g' /etc/init.d/starboardservice
+			systemctl enable starboardservice
+			# Modificamos el lanzador de calibrado que no se ejecuta correctamente desde entorno grafico
+			if [ -f /usr/share/applications/hitachi-starboard-calibrate.desktop ] ; then
+				sed -i 's/^Terminal=[Tt]rue/Terminal=false/g' /usr/share/applications/hitachi-starboard-calibrate.desktop
+			fi
 	;;
 
 	"Interwrite")
-	[ -f WorkSpace_Ubuntu_6.5.0.24 ] && \
-		chmod +x WorkSpace_Ubuntu_6.5.0.24 && \
-		  ./WorkSpace_Ubuntu_6.5.0.24
-	[ -f DeviceManager_Ubuntu_7.7.0.5 ] && \
-		chmod +x DeviceManager_Ubuntu_7.7.0.5 && \
-		  ./DeviceManager_Ubuntu_7.7.0.5
+		[ -f WorkSpace_Ubuntu_6.5.0.24 ] && \
+			chmod +x WorkSpace_Ubuntu_6.5.0.24 && \
+			./WorkSpace_Ubuntu_6.5.0.24
+		[ -f DeviceManager_Ubuntu_7.7.0.5 ] && \
+			chmod +x DeviceManager_Ubuntu_7.7.0.5 && \
+			./DeviceManager_Ubuntu_7.7.0.5
 	;;
 
 	"IQBoard")
-	# Cosultar en /var/lib/dpkg/info/iqboard.deb.postinst que hay acciones que no se pueden realizar
-	if test -f ./iqboard.deb -a -f ./rsboardep.deb ; then
-		# Borramos cualquier instalacion previa de drivers o software
-		if dpkg -l | grep iqboard.deb >/dev/null 2>/dev/null ; then
-			echo "Borrando software instalado..."
-			dpkg -P iqboard.deb
-		fi
-		if dpkg -l | grep rsboard >/dev/null 2>/dev/null ; then
-			echo "Borrando driver instalado..."
-			dpkg -P rsboardep
-		fi
-		dpkg -i /opt/pkgs/pdis/rsboardep.deb
-		dpkg -i /opt/pkgs/pdis/iqboard.deb
-		if test -f /usr/share/gnome/autostart/RSBoardEPStart.desktop ; then
-		  cp /usr/share/gnome/autostart/RSBoardEPStart.desktop /etc/xdg/autostart/
-		fi
+		# Cosultar en /var/lib/dpkg/info/iqboard.deb.postinst que hay acciones que no se pueden realizar
+		if test -f ./iqboard.deb -a -f ./rsboardep.deb ; then
+			# Borramos cualquier instalacion previa de drivers o software
+			if dpkg -l | grep iqboard.deb >/dev/null 2>/dev/null ; then
+				echo "Borrando software instalado..."
+				dpkg -P iqboard.deb
+			fi
+			if dpkg -l | grep rsboard >/dev/null 2>/dev/null ; then
+				echo "Borrando driver instalado..."
+				dpkg -P rsboardep
+			fi
+			dpkg -i /opt/pkgs/pdis/rsboardep.deb
+			dpkg -i /opt/pkgs/pdis/iqboard.deb
+			if test -f /usr/share/gnome/autostart/RSBoardEPStart.desktop ; then
+			cp /usr/share/gnome/autostart/RSBoardEPStart.desktop /etc/xdg/autostart/
+			fi
 
-	fi
+		fi
 	;;
 
 	"Multiclass")
-	# Antiguos drivers de las pizarras multiclass...solo válido para las antiguas
-	# En éste caso además se requiere instalación manual....
-	# 	if test -f ./multiCLASSBoard.tar.gz ; then
-	#	tar -xzvf /opt/pkgs/pdis/multiCLASSBoard.tar.gz
-	#	cd /opt/pkgs/pdis/multiCLASSBoard/setup
-	#	chmod +x ./setup.sh
-	#	./setup.sh
-	#	cd /opt/pkgs/pdis
-	#fi
-	if [ "$ARCHSO" = "64" ] ; then
-	  dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_64.deb
-	else
-	  dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_32.deb
-	fi
+		if [ "$ARCHSO" = "64" ] ; then
+		dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_64.deb
+		else
+		dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_32.deb
+		fi
 
 	;;
 
@@ -478,7 +472,7 @@ function instalar-software-pdi {
 		# Install vx-dga-l-pdi-smartboard
 		apt-get --assume-yes install vx-dga-l-pdi-smartboard
 		# Precarga de la imagen...
-		echo "Vamos a descargar la imagen docker de la aplicación...paciencia"
+		echo "Vamos a descargar la imagen docker de la aplicación...PACIENCIA y ESPERA A QUE SE INDIQUE"
 		sudo /usr/bin/lliurex-smart -download &
 		esperando
 
