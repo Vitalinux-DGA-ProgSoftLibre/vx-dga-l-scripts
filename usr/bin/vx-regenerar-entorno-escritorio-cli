@@ -70,6 +70,20 @@ for DIR in $(vx-home-usuarios-graficos) ; do
     fi
     USUARIO="$(vx-usuario-grafico ${DIR})"
     chown -R "${USUARIO}".sudo "${DIR}/.cache"
+    
+    # Sincronizamos Albert Launcher:
+    if [ -d "/etc/skel/.config/albert" ] ; then
+        if ! su "${USUARIO}" \
+        -c 'rsync -ahv --delete /etc/skel/.config/albert '${DIR}'/.config' \
+        --login &> /dev/null ; then
+            ERRORES=1
+            echo "ERROR: Problema al copiar Albert en ${DIR} ..."
+        else
+            echo "OK: copiado Albert en ${DIR} ..."
+        fi
+    else
+        echo "Warning: No hay configuración de Albert Launcher"
+    fi
 done
 
 # 4) Devolvemos el Greeter a su configuración original eliminando las personalizaciones del usuario:

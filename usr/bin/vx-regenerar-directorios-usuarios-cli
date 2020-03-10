@@ -92,18 +92,4 @@ for USUARIO in $(vx-usuarios-graficos) ; do
         IFS=${SAVEIFS}
     done
     
-    # Sincronizamos Albert Launcher:
-    if [ -d "/etc/skel/.config/albert" ] ; then
-        if ! su "${USUARIO}" \
-        -c 'rsync -ahv --delete /etc/skel/.config/albert '${HOMEUSU}'/.config' \
-        --login &> /dev/null ; then
-            ERRORES=1
-            echo "ERROR: Problema al copiar Albert en ${HOMEUSU} ..."
-        else
-            echo "OK: copiado Albert en ${HOMEUSU} ..."
-        fi
-    else
-        echo "Warning: No hay configuración de Albert Launcher"
-    fi
-    
 done
