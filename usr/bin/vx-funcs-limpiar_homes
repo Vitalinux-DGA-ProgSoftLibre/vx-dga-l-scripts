@@ -76,16 +76,11 @@ function vx-regenerar_entorno_escritorio_usuarios_especificos() {
             fi
         done
         
-        for DIR in ".config/pcmanfm" \
-        ".config/lxpanel" ; do
-            if ! su "${USUARIO}" \
-            -c 'rsync -ahv /etc/skel/'${DIR}' '${HOMEUSUARIO}'/.config' \
-            --login &> /dev/null ; then
-                ERRORES=1
-                echo "ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSUARIO} ..."
-            else
-                echo "OK: copiado /etc/skel/${DIR} en ${HOMEUSUARIO} ..."
-            fi
+        for DIR in ".config/pcmanfm" ".config/lxpanel" ; do
+            rsync -ahv --quiet --chown="${USU}":"${USU}" \
+            "/etc/skel/${DIR}" "${HOMEUSUARIO}/.config" && \
+            echo "OK: copiado /etc/skel/${DIR} en ${HOMEUSUARIO} ..." || \
+            echo "ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSUARIO} ..."
         done
         
         # 3) Eliminamos el contenido de los directorios .cache de los usuarios:
