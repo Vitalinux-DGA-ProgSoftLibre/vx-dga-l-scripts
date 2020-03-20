@@ -1,0 +1,129 @@
+#!/bin/bash
+# Versiones: [arturo@2019-12-18]
+
+uso() {
+    echo -e "¡¡Debes ser usuario root para ejecutar este script de gestión de lanzadores desktop!!
+# El script debe recibir como primer parametro --crear|--borrar.
+# En el caso de --crear un nuevo lanzador deben indicarse los siguientes 8 parámetros:
+    1) El nombre del fichero: p.e. vx-mi-lanzador.desktop
+    2) El Name del descriptor Desktop: p.e. Google Docs
+    3) El Name[es] del descriptor Desktop: p.e. Google Docs
+    4) El Comment del descriptor Desktop: p.e. Google Documents
+    5) El Comment[es] del descriptor Desktop: p.e. Documentos de Google
+    6) El Exec del descriptor Desktop: \"p.e. google-chrome-stable https://docs.google.com\"
+    7) El Icon del descriptor Desktop: p.e. logo-google-docs
+    8) Las Categories del descriptor Desktop: p.e. Education;
+    Ej. vx-conf-lanzadores-desktop --crear mi_lanzador.desktop \\
+    \"Google Docs\" \\
+    \"Documentos de Google\" \\
+    \"App Google Documents\" \\
+    \"App Documentos Google\" \\
+    \"chromium-browser https://docs.google.com\" \\
+    \"logo-google-docs\" \\
+    \"Education;Utils;\"
+# En el caso de --borrar un lanzador debe indicarse como parámetro el nombre del lanzador:
+    Ej. vx-conf-lanzadores-desktop --borrar mi_lanzador.desktop"
+}
+
+function crear-lanzador-desktop {
+    # Si Existe el lanzador ya creado retornamos al principal:
+    [ -f "${1}" ] && \
+    echo "=> El lanzador ya existe: ${1}" && return 1
+    # crear-lanzador-desktop NOMBRE_ARCHIVO LUGAR
+	cat > "${1}"<<EOF
+[Desktop Entry]
+Encoding=UTF-8
+Name=${NAME}
+Name[es]=${NAME_ES}
+Exec=${EXEC}
+Icon=${LOGO_DESK}
+Categories=${CATEGORIAS}
+Comment=${COMENTARIO}
+Comment[es]=${COMENTARIO_ES}
+Type=Application
+Terminal=false
+EOF
+    return 0
+}
+
+# Comprobamos que el usuario que ha lanzado el script es root:
+[[ "$(whoami)" != "root" ]] && \
+uso && exit 1
+
+# Comprobamos que el primer parámetro es --crear o --borrar:
+OPCION="${1}"
+! [[ "${OPCION}" =~ ^--crear$|^--borrar$ ]] && uso && exit 1
+shift
+
+USUARIO="$(vx-usuario-grafico)"
+HOMEUSUARIO="$(vx-home-usuario-grafico)"
+# comprobamos que el usuario gráfico es real y que su HOME existe:
+if ! getent passwd "${USUARIO}" > /dev/null 2>&1 || [[ ! -d "${HOMEUSUARIO}" ]]  ; then
+    echo "=> Problemas con el usuario gráfico ..."
+    exit 1
+fi
+
+[ ! -z "${1}" ] && \
+{
+    [[ "${1##*.}" == "desktop" ]] && \
+    {
+        LANZADOR="${1}" && echo "=> Se va a configurar el lanzador: ${LANZADOR}"
+    } || \
+    {
+        uso && exit 1 ;
+    }
+} || \
+{
+    uso && exit 1 ;
+}
+
+case "${OPCION}" in
+    "--crear" )
+        # Comprobamos que se le han pasado 8 parametros para crear el lanzador:
+        (( ${#} != 8 )) && uso && exit 1
+        NAME="${2}"
+        NAME_ES="${3}"
+        COMENTARIO="${4}"
+        COMENTARIO_ES="${5}"
+        EXEC="${6}"
+        # Logo SVG guardado normalmente en: /usr/share/icons/hicolor/scalable/apps/
+        LOGO_DESK="${7}"
+        CATEGORIAS="${8}"
+        # Creamos los lanzadores:
+        for DIR in "${HOMEUSUARIO}/Escritorio" \
+        "${HOMEUSUARIO}/Desktop" ; do
+            [ -d "${DIR}" ] && \
+            {
+                crear-lanzador-desktop "${DIR}/${LANZADOR}" && \
+                chown "${USUARIO}" "${DIR}/${LANZADOR}" && \
+                echo "=> Se ha creado el lanzador: ${DIR}/${LANZADOR}"
+            }
+        done
+        for DIR in "/etc/skel/Escritorio" \
+        "/usr/share/applications" ; do
+            [ -d "${DIR}" ] && \
+            {
+                crear-lanzador-desktop "${DIR}/${LANZADOR}" && \
+                echo "=> Se ha creado el lanzador: ${DIR}/${LANZADOR}"
+            }
+        done
+    ;;
+    "--borrar" )
+        # Comprobamos la existencia de lanzadores y los eliminamos:
+        for DIR in "${HOMEUSUARIO}/Escritorio" \
+        "${HOMEUSUARIO}/Desktop" \
+        "/etc/skel/Escritorio" \
+        "/usr/share/applications" \
+        $(echo $(eval echo {$(vx-home-usuarios-graficos | tr -s "\n" " " | sed -e 's/[ \t]*$//;s/[[:space:]]/,/g')}"/.local/share/applications")); do
+            echo "=> Comprobamos si existe: ${DIR}/${LANZADOR}"
+            [ -f "${DIR}/${LANZADOR}" ] && \
+            {
+                rm -f "${DIR}/${LANZADOR}" && \
+                echo "=> Se ha eliminado el lanzador: ${DIR}/${LANZADOR}" ;
+            } || \
+            echo "=> No existe el lanzador: ${DIR}/${LANZADOR}"
+        done
+    ;;
+esac
+
+exit 0

@@ -18,7 +18,7 @@ USUARIO="$(whoami)"
 LISTA_USUARIOS="$(vx-home-usuarios-graficos)" || \
 LISTA_USUARIOS="$(vx-home-usuario-grafico)"
 for HOMEUSU in ${LISTA_USUARIOS} ; do
-    for DIR in ".config/google-chrome" ".mozilla" ; do
+    for DIR in ".config/google-chrome" ".mozilla" ".config/chromium" ; do
         [ -d "${HOMEUSU}/${DIR}" ] && \
         LOG="${LOG}\nSe va a eliminar ${HOMEUSU}/${DIR}" && \
         rm -Rf "${HOMEUSU}/${DIR}"

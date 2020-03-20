@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [[ -f "/usr/bin/okular" && -x "/usr/bin/crudini" ]] ; then
+    
+    # El lanzador de okular no es el mismo en vx-14 que en vx-18:
+    [ -f "/usr/share/applications/kde4/okular.desktop" ] && FICHDESKTOP="kde4-okular.desktop"
+    [ -f "/usr/share/applications/org.kde.okular.desktop" ] && FICHDESKTOP="okularApplication_pdf.desktop"
+    # [ -f "/usr/share/applications/org.kde.okular.desktop" ] && FICHDESKTOP="org.kde.okular.desktop"
+    
+    echo "=> Configurando lanzador de okular como aplicación preferente para abrir PDFs: ${FICHDESKTOP}"
+    # Por defecto creamos el mime para los esqueletos de los nuevos usuarios:
+    # crudini creara la sección o parámetro en caso de no existir, asignando el valor indicado
+    FICH="/etc/skel/.local/share/applications/mimeapps.list"
+    if [ -f "${FICH}" ] ; then
+        for SECCION in "Default Applications" "Added Associations" ; do
+            crudini --set "${FICH}" "${SECCION}" "application/pdf" "${FICHDESKTOP}" && \
+            echo "=> Okular configurado: \"${SECCION}\" \"application/pdf\" ${FICH}"
+        done
+    fi
+    
+    # Si ya tenemos mimes personalizados definidos en los usuarios, los modificamos:
+    for USUDIR in $(vx-home-usuarios-graficos) ; do
+        FICH="${USUDIR}/.local/share/applications/mimeapps.list"
+        if [ -f "${FICH}" ]; then
+            # sed -i '/pdf/d' ${USUDIR}/.local/share/applications/mimeapps.list
+            for SECCION in "Default Applications" "Added Associations" ; do
+                crudini --set "${FICH}" "${SECCION}" "application/pdf" "${FICHDESKTOP}" && \
+                echo "=> Okular configurado: \"${SECCION}\" \"application/pdf\" ${FICH}"
+            done
+        fi
+    done
+    
+    # A nivel global del sistema podemos modificar dos ficheros:
+    # /etc/xdg/lubuntu/applications/defaults.list
+    # O también: /usr/share/applications/mimeapps.list
+    # Nos decantamos por éste último
+    GLOBALMIMEFILE="/usr/share/applications/mimeapps.list"
+    if [ -f $GLOBALMIMEFILE ] ; then
+        SECCION="Default Applications"
+        crudini --set "${GLOBALMIMEFILE}" "${SECCION}" "application/pdf" "${FICHDESKTOP}" && \
+        echo "=> Okular configurado: \"${SECCION}\" \"application/pdf\" ${GLOBALMIMEFILE}"
+    fi
+fi

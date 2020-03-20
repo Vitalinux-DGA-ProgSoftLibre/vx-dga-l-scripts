@@ -1,3 +1,13 @@
+vx-dga-l-scripts (5.0-16) unstable; urgency=low
+
+  * Añadimos el script /usr/bin/vx-conf-soft-pdf-okular para vx-14 y vx-18
+  * Mejoramos el script /usr/bin/vx-conf-lanzadores-desktop
+  * Se añaden mensajes de salida en la funciones de gestión de usuarios
+  * Creamos el script /usr/bin/vx-funcs-limpiar_homes con funciones de gestión de perfiles
+  * Añadimos .config/chromium al script de reset de navegadores Web
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 19 Mar 2020 00:10:00 +0200
+
 vx-dga-l-scripts (5.0-15) unstable; urgency=low
 
   * Regenerar lanzador albert en limpieza del escritorio

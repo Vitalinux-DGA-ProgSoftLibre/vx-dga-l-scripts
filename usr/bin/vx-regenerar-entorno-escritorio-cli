@@ -61,7 +61,7 @@ done
 # 2) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
 vx-eliminar-ficheros-conf-personales
 
-# 3) Eliminamos el contenido de los directorios .cache de los usuarios:
+# 3) Eliminamos el contenido de los directorios .cache y .config/albert de los usuarios:
 for DIR in $(vx-home-usuarios-graficos) ; do
     if [ -d "${DIR}/.cache" ] ; then
         rm -Rf "${DIR}/.cache"/* && echo "=> Eliminado: ${DIR}/.cache/*"

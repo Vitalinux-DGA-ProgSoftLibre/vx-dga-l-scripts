@@ -1,0 +1,149 @@
+#!/bin/bash
+
+FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
+[ -f "${FICHVARS}" ] && . "${FICHVARS}"
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+function vx-funcs-limpiar_homes-help() {
+    FICHFUNCS="/usr/bin/vx-funcs-limpiar_homes"
+    for FUNCION in $(sed -n "s/^function \(.*\)().*/\1/gp" "${FICHFUNCS}") ; do
+        [[ "${1}" != "--help" ]] && echo "${FUNCION} --help" && continue
+        [[ "${FUNCION}" != "vx-help-funcs-users" ]] && \
+        echo ":== Función ${FUNCION} ==:" && \
+        "${FUNCION}" --help
+        echo "--"
+    done
+}
+
+function vx-regenerar_entorno_escritorio_usuarios_especificos() {
+    AYUDA="# Función: Regenera el Home de usuarios concretos:"
+    AYUDA+="\n# Uso: vx-regenerar_home_usuarios_especificos [usu1] [usu2] ..."
+    AYUDA+="\n# Uso: vx-regenerar_home_usuarios_especificos profesor dga"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    [[ "$(whoami)" != "root" ]] && \
+    echo "=> Debes ser root para regenerar el Entorno de Escritorio de usuarios" && \
+    return 1
+    
+    FUNCION="Regenerar Entorno Escritorio"
+    
+    # Hacemos un bucle con los usuarios pasados como parámetro a la función:
+    for USUARIO in ${@} ; do
+        # Si no existe el usuario pasamos al siguiente:
+        ! genent passwd "${USUARIO}" > /dev/null 2>&1 && \
+        {
+            echo "=> ${FUNCION}: El usuario \"${USUARIO}\" no existe. Pasamos al siguiente ..." && \
+            continue ;
+        } || \
+        echo "=> ${FUNCION} para: \"${USUARIO}\":"
+        
+        HOMEUSUARIO="$(vx-home-usuario-grafico "${USUARIO}")"
+        
+        # 1) Comenzamos regenerando el contenido del Escritorio
+        BASE="/etc/skel/Escritorio/"
+        if test -d "${BASE}" ; then
+            for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
+                if test -d "${HOMEUSUARIO}/${DIR}" ; then
+                    if su "${USUARIO}" \
+                    -c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
+                    --login &> /dev/null ; then
+                        echo " => OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                    else
+                        echo " => ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                    fi
+                fi
+            done
+        fi
+        
+        # 2) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio:
+        # Codigo extraido del script: /usr/bin/vx-eliminar-ficheros-conf-personales
+        for DIR in ".config/openbox" \
+        ".config/lxsession" \
+        ".config/pcmanfm" \
+        ".config/lxpanel" \
+        ".config/libfm" \
+        ".config/lxterminal" ; do
+            if test -d "${HOMEUSUARIO}/${DIR}" ; then
+                if ! rm -Rf "${HOMEUSUARIO}/${DIR}" ; then
+                    ERRORES=1
+                    echo "ERROR: No se ha podido eliminar ${HOMEUSUARIO}/${DIR} ..."
+                else
+                    echo "OK: Se ha eliminado ${HOMEUSUARIO}/${DIR} ..."
+                fi
+            fi
+        done
+        
+        for DIR in ".config/pcmanfm" \
+        ".config/lxpanel" ; do
+            if ! su "${USUARIO}" \
+            -c 'rsync -ahv /etc/skel/'${DIR}' '${HOMEUSUARIO}'/.config' \
+            --login &> /dev/null ; then
+                ERRORES=1
+                echo "ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSUARIO} ..."
+            else
+                echo "OK: copiado /etc/skel/${DIR} en ${HOMEUSUARIO} ..."
+            fi
+        done
+        
+        # 3) Eliminamos el contenido de los directorios .cache de los usuarios:
+        if [ -d "${HOMEUSUARIO}/.cache" ] ; then
+            rm -Rf "${HOMEUSUARIO}/.cache"/* && echo "=> Eliminado: ${HOMEUSUARIO}/.cache/*"
+        else
+            mkdir -p "${HOMEUSUARIO}/.cache"
+        fi
+        #USUARIO="$(vx-usuario-grafico ${HOMEUSUARIO})"
+        chown -R "${USUARIO}".sudo "${HOMEUSUARIO}/.cache"
+        
+        # 4) Sincronizamos y regeneramos Albert Launcher:
+        if [ -d "/etc/skel/.config/albert" ] ; then
+            if ! su "${USUARIO}" \
+            -c 'rsync -ahv --delete /etc/skel/.config/albert '${HOMEUSUARIO}'/.config' \
+            --login &> /dev/null ; then
+                ERRORES=1
+                echo "ERROR: Problema al copiar Albert en ${HOMEUSUARIO} ..."
+            else
+                echo "OK: copiado Albert en ${HOMEUSUARIO} ..."
+            fi
+        else
+            echo "Warning: No hay configuración de Albert Launcher"
+        fi
+        
+    done
+}
+
+function vx-resetear_navegadores_web_usuarios_especificos() {
+    AYUDA="# Función: Resetea los navegadores Web de usuarios concretos:"
+    AYUDA+="\n# Uso: vx-resetear_navegadores_web_usuarios_especificos [usu1] [usu2] ..."
+    AYUDA+="\n# Uso: vx-resetear_navegadores_web_usuarios_especificos profesor dga"
+    [ "${1}" == "--help" ] && \
+    echo -e "${AYUDA}" && return 0
+    
+    [[ "$(whoami)" != "root" ]] && \
+    echo "=> Debes ser root para resetear los navegadores Web de usuarios" && \
+    return 1
+    
+    # Hacemos un bucle con los usuarios pasados como parámetro a la función:
+    for USUARIO in ${@} ; do
+        # Si no existe el usuario pasamos al siguiente:
+        FUNCION="Resetear navegadores Web"
+        ! genent passwd "${USUARIO}" > /dev/null 2>&1 && \
+        {
+            echo "=> ${FUNCION}: El usuario \"${USUARIO}\" no existe. Pasamos al siguiente ..." && \
+            continue ;
+        } || \
+        echo "=> ${FUNCION} para: \"${USUARIO}\":"
+        
+        HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
+        
+        for DIR in ".config/google-chrome" ".mozilla" ".config/chromium" ; do
+            [ -d "${HOMEUSUARIO}/${DIR}" ] && \
+            rm -Rf "${HOMEUSUARIO}/${DIR}" && \
+            echo "=> ${FUNCION}: ${HOMEUSUARIO}/${DIR} eliminado"
+        done
+    done
+}
+
+"$@" 2> /dev/null

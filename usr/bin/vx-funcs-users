@@ -5,13 +5,14 @@ FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 
 USUARIOGRAFICO="$(vx-usuario-grafico)"
 
-function vx-help-funcs-users() {
+function vx-funcs-users-help() {
     FICHFUNCS="/usr/bin/vx-funcs-users"
     for FUNCION in $(sed -n "s/^function \(.*\)().*/\1/gp" "${FICHFUNCS}") ; do
         [[ "${1}" != "--help" ]] && echo "${FUNCION} --help" && continue
         [[ "${FUNCION}" != "vx-help-funcs-users" ]] && \
         echo ":== Función ${FUNCION} ==:" && \
         "${FUNCION}" --help
+        echo "--"
     done
 }
 
@@ -351,8 +352,12 @@ function vx-borrar_usuario() {
     USUARIOS="$*"
     for USUARIO in ${USUARIOS} ; do
         if test "${USUARIOGRAFICO}" != "${USUARIO}" ; then
-            ( getent passwd "${USUARIO}" > /dev/null 2>&1 ) && \
-            /usr/sbin/userdel -fr "${USUARIO}"
+            if getent passwd "${USUARIO}" > /dev/null 2>&1 ; then
+                /usr/sbin/userdel -fr "${USUARIO}" && \
+                echo "=> Se ha eliminado el usuario: ${USUARIO}"
+            else
+                echo "=> El usuario ${USUARIO} no existe en el sistema ..."
+            fi
         fi
     done
 }
