@@ -1,6 +1,10 @@
 #!/bin/bash
 # Versiones: [arturo@2019-12-18]
 
+# Importamos las funciones generales:
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
 uso() {
     echo -e "¡¡Debes ser usuario root para ejecutar este script de gestión de lanzadores desktop!!
 # El script debe recibir como primer parametro --crear|--borrar.
@@ -13,6 +17,9 @@ uso() {
     6) El Exec del descriptor Desktop: \"p.e. google-chrome-stable https://docs.google.com\"
     7) El Icon del descriptor Desktop: p.e. logo-google-docs
     8) Las Categories del descriptor Desktop: p.e. Education;
+    9) ¿Lanzar en el escritorio de los usuarios gráficos? p.e. true|false
+    10) Si el (9) es true lista de UIDs: p.e. 1001;1002;profesor;1010;user10
+    11) Si el (9) es true lista de GIDs: p.e. 1001;grupo1;1010;grupo15;2002
     Ej. vx-conf-lanzadores-desktop --crear mi_lanzador.desktop \\
     \"Google Docs\" \\
     \"Documentos de Google\" \\
@@ -20,7 +27,10 @@ uso() {
     \"App Documentos Google\" \\
     \"chromium-browser https://docs.google.com\" \\
     \"logo-google-docs\" \\
-    \"Education;Utils;\"
+    \"Education;Utils;\" \\
+    \"true\" \\
+    \"1001;1002;profesor;1010;user10\" \\
+    \"1001;grupo1;1010;grupo15;2002\"
 # En el caso de --borrar un lanzador debe indicarse como parámetro el nombre del lanzador:
     Ej. vx-conf-lanzadores-desktop --borrar mi_lanzador.desktop"
 }
@@ -56,7 +66,9 @@ OPCION="${1}"
 shift
 
 USUARIO="$(vx-usuario-grafico)"
+UIDUSUARIO="$(id -u "${USUARIO}")"
 HOMEUSUARIO="$(vx-home-usuario-grafico)"
+
 # comprobamos que el usuario gráfico es real y que su HOME existe:
 if ! getent passwd "${USUARIO}" > /dev/null 2>&1 || [[ ! -d "${HOMEUSUARIO}" ]]  ; then
     echo "=> Problemas con el usuario gráfico ..."
@@ -89,18 +101,59 @@ case "${OPCION}" in
         # Logo SVG guardado normalmente en: /usr/share/icons/hicolor/scalable/apps/
         LOGO_DESK="${7}"
         CATEGORIAS="${8}"
-        # Creamos los lanzadores:
-        for DIR in "${HOMEUSUARIO}/Escritorio" \
-        "${HOMEUSUARIO}/Desktop" ; do
+        EN_ESCRITORIO="${9:-"true"}"
+        UIDS="${10:-"all"}"
+        GIDS="${11:-"all"}"
+        
+        # Creamos los lanzadores en escritorio si es necesario:
+        if "${EN_ESCRITORIO}" ; then
+            CREAR_EN_DESKTOP_USUARIO="false"
+            # Comprobamos con los UIDs|GIDs si hay que crear el lanzador en el Escritorio:
+            [[ "${UIDS}" == "all" ]] && CREAR_EN_DESKTOP_USUARIO="true"
+            [[ "${GIDS}" == "all" ]] && CREAR_EN_DESKTOP_USUARIO="true"
+            IFSANT="${IFS}"
+            IFS=";"
+            for UIDUSU in ${UIDS} ; do
+                [[ "${UIDUSU}" == "null" ]] && break
+                # Comprobamos si el UID entregado esta en formato digitos o nombre:
+                if vx-check_is_integer "${UIDUSU}" ; then
+                    [[ "${UIDUSU}" == "${UIDUSUARIO}" ]] && CREAR_EN_DESKTOP_USUARIO="true"
+                else
+                    [[ "${UIDUSU}" == "${USUARIO}" ]] && CREAR_EN_DESKTOP_USUARIO="true"
+                fi
+            done
+            for GIDUSU in ${GIDS} ; do
+                [[ "${GIDUSU}" == "null" ]] && break
+                # Comprobamos si el GID entregado esta en formato digitos o nombre:
+                if vx-check_is_integer "${GIDUSU}" ; then
+                    [[ $(id -G "${USUARIO}" | tr -s " " ";") =~ ^${GIDUSU}\;|\;${GIDUSU}\;|\;${GIDUSU}$ ]] && \
+                    CREAR_EN_DESKTOP_USUARIO="true"
+                else
+                    [[ $(id -Gn "${USUARIO}" | tr -s " " ";") =~ ^${GIDUSU}\;|\;${GIDUSU}\;|\;${GIDUSU}$ ]] && \
+                    CREAR_EN_DESKTOP_USUARIO="true"
+                fi
+            done
+            IFS="${IFSANT}"
+            if "${CREAR_EN_DESKTOP_USUARIO}" ; then
+                for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch"; do
+                    [ -d "${HOMEUSUARIO}/${DIR}" ] && \
+                    {
+                        crear-lanzador-desktop "${HOMEUSUARIO}/${DIR}/${LANZADOR}" && \
+                        chown "${USUARIO}" "${HOMEUSUARIO}/${DIR}/${LANZADOR}" && \
+                        echo "=> Se ha creado el lanzador: ${HOMEUSUARIO}/${DIR}/${LANZADOR}"
+                    }
+                done
+            fi
+            DIR="/etc/skel/Escritorio"
             [ -d "${DIR}" ] && \
             {
                 crear-lanzador-desktop "${DIR}/${LANZADOR}" && \
-                chown "${USUARIO}" "${DIR}/${LANZADOR}" && \
                 echo "=> Se ha creado el lanzador: ${DIR}/${LANZADOR}"
             }
-        done
-        for DIR in "/etc/skel/Escritorio" \
-        "/usr/share/applications" ; do
+        fi
+        
+        # Creamos el lanzador accesible para todos los usuarios:
+        for DIR in "/usr/share/applications" ; do
             [ -d "${DIR}" ] && \
             {
                 crear-lanzador-desktop "${DIR}/${LANZADOR}" && \

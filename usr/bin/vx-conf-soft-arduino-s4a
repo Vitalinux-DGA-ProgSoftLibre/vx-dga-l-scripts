@@ -1,0 +1,60 @@
+#!/bin/bash
+## Configuramos el software ARDUINO y s4a para que se lancen a través de sudo:
+
+function uso() {
+    MENSAJE="# Script que configura ARDUINO y s4a para lanzarlos con permisos de sudo."
+    MENSAJE+="\n#¡¡Necesitas ser usuario \"root\" para esta configuración\""
+    MENSAJE+="\nSi no queremos que muestre mensajes por pantalla se le puede pasar como primer parámetro \"--mute\""
+    MENSAJE+="\n\t=> Ej. vx-conf-soft-arduino-s4a (por defecto, mostraría mensajes de salida)"
+    MENSAJE+="\n\t=> Ej. vx-conf-soft-arduino-s4a --mute (NO mostraría mensajes de salida)"
+    echo -e "${MENSAJE}"
+}
+
+[[ "$(whoami)" != "root" ]] && \
+uso && exit 1
+
+[[ "${1}" == "--help" ]] && uso && exit 0
+[[ "${1}" == "--mute" ]] && MUTE="true" || MUTE="false"
+
+function configurar_sudo() {
+    LANZADOR="${1}"
+    if [ -f "${LANZADOR}" ]   ; then
+        crudini --set "${LANZADOR}" "Desktop Entry" "Exec" "${2}" && \
+        {
+            ! "${MUTE}" && \
+            echo "=> Se ha configurado para lanzador para lanzarse con permisos de sudo: ${LANZADOR}"
+        } || \
+        {
+            ! "${MUTE}" && \
+            echo "=> Problemas para configurar el lanzardor para lanzarse con permisos de sudo: ${LANZADOR}"
+        }
+        # Configuramos sudo para el comando anterior:
+        FICH="${3}"
+        if [ ! -f "${FICH}" ] ; then
+    cat > "${FICH}"<<EOF
+#ALL ALL = (root) NOPASSWD: /usr/bin/arduino, /usr/bin/s4a
+ALL ALL = (root) NOPASSWD: ${4}
+EOF
+            [ -f "${FICH}" ] && chmod 440 "${FICH}" && \
+            echo "=> Se ha creado el fichero de sudo: ${FICH}"
+        fi
+    fi
+}
+
+PARAMETROS=( "/usr/share/applications/arduino.desktop" \
+    "sudo arduino" \
+    "/etc/sudoers.d/arduino" \
+    "/usr/bin/arduino" \
+    "/usr/share/applications/s4a.desktop" \
+    "sudo s4a" \
+    "/etc/sudoers.d/s4a" \
+    "/usr/bin/s4a"
+)
+
+# Llamamos a la función pasandole los parametros {0..7} de 4 en 4 mediante seq:
+for VAR in $(seq 0 4 7) ; do
+    prueba "${PARAMETROS[$VAR]}" \
+    "${PARAMETROS[((VAR + 1))]}" \
+    "${PARAMETROS[((VAR + 2))]}" \
+    "${PARAMETROS[((VAR + 3))]}"
+done

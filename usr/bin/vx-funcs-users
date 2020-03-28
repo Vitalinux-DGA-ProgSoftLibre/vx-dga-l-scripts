@@ -5,6 +5,54 @@ FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 
 USUARIOGRAFICO="$(vx-usuario-grafico)"
 
+function vx-conf_idioma_usuario() {
+    # Require 3 parametros: usuario, lenguaje (en) y formatslocale (en_GB.UTF-8)
+    USUARIO="${1}"
+    ! vx-check_exit_users && \
+    echo "=> ¡¡Error!! El usuario no existe: ${USUARIO}" && exit 1
+    HOMEUSU="$(vx-home-usuario-grafico "${USUARIO}")"
+    LENGUAJE="${2}"
+    FORMATOLOCAL="${3}"
+    # Establecer el idioma elegido por defecto del lightdm:
+      cat > "/var/lib/AccountsService/users/${USUARIO}" <<EOF
+[User]
+#Language=en
+Language=${LENGUAJE}
+#FormatsLocale=en_GB.UTF-8
+FormatsLocale=${FORMATOLOCAL}
+XSession=Lubuntu
+SystemAccount=false
+EOF
+    # Establecer el idioma elegido en el PAM environment:
+      cat > "${HOMEUSU}/.pam_environment" <<EOF
+LANGUAGE=${LENGUAJE}
+LANG=${FORMATOLOCAL}
+LC_TIME=${FORMATOLOCAL}
+EOF
+    # Ajustamos el propietario del pam_environment:
+    chown "${USUARIO}".sudo "${HOMEUSU}/.pam_environment"
+    
+    return 0
+}
+
+function vx-check_exit_users() {
+    USERSOK="true"
+    until [ -z "${1}" ] ; do
+        ! getent passwd "${1}" > /dev/null 2>&1 && USERSOK="false"
+        shift
+    done
+    "${USERSOK}" && return 0 || return 1
+}
+
+function vx-check_exit_groups() {
+    GRUPOSOK="true"
+    until [ -z "${1}" ] ; do
+        ! getent group "${1}" > /dev/null 2>&1 && GRUPOSOK="false"
+        shift
+    done
+    "${GRUPOSOK}" && return 0 || return 1
+}
+
 function vx-funcs-users-help() {
     FICHFUNCS="/usr/bin/vx-funcs-users"
     for FUNCION in $(sed -n "s/^function \(.*\)().*/\1/gp" "${FICHFUNCS}") ; do

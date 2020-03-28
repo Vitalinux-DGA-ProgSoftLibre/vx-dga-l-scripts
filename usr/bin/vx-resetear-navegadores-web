@@ -6,18 +6,30 @@ LOG="#### $(date)"
 # Cierra y Elimina toda la información de los navegadores Web:
 
 # 1) Comenzamos cerrando las posibles sesiones abiertas de los navegadores:
-for NAVEGADOR in "firefox" "chrome" ; do
+for NAVEGADOR in "firefox" "chrome" "chromium-browser" ; do
     pkill -f "${NAVEGADOR}" && \
     LOG="${LOG}\nSe han cerrado las ventanas abiertas de ${NAVEGADOR} ..." || \
     LOG="${LOG}\nNo había ninguna ventana abierta en ${NAVEGADOR} ..."
 done
 
-# 2) Eliminamos los datos almacenados por los navegadores de los usuarios con permisos de hacerlo:
+# 2) Eliminamos los datos almacenados por los navegadores de los usuarios:
+# 2.1) Si no se pasan parámetros y lo llama el usuario root se resetean los navegadores de todos los usuarios gráficos
+# 2.2) Si no se pasan parámetros y no lo llama el usuario root se resetean los navegadores del usuario gráfico actual
+# 2.3) Si se le pasan ususarios como parámetros resetea únicamente los de esos usuarios
 USUARIO="$(whoami)"
-[[ "${USUARIO}" == "root" ]] && \
-LISTA_USUARIOS="$(vx-home-usuarios-graficos)" || \
-LISTA_USUARIOS="$(vx-home-usuario-grafico)"
-for HOMEUSU in ${LISTA_USUARIOS} ; do
+if [[ ! -z "${1}" && "${USUARIO}" == "root" ]] ; then
+    LISTA_USUARIOS=("${@}")
+    elif [[ "${USUARIO}" == "root" ]] ; then
+    LISTA_USUARIOS=($(vx-usuarios-graficos))
+else
+    LISTA_USUARIOS=("${USUARIO}")
+fi
+
+for USU in ${LISTA_USUARIOS[@]} ; do
+    # Comprobamos que el usuario existe y cual es su HOME:
+    vx-funcs-users vx-check_exit_users "${USU}" && \
+    HOMEUSU="$(vx-home-usuario-grafico "${USU}")" || \
+    continue
     for DIR in ".config/google-chrome" ".mozilla" ".config/chromium" ; do
         [ -d "${HOMEUSU}/${DIR}" ] && \
         LOG="${LOG}\nSe va a eliminar ${HOMEUSU}/${DIR}" && \

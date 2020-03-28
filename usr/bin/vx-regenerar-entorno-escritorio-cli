@@ -5,6 +5,8 @@
 
 EJECUTOR=$(whoami)
 LOG="vx-regenerar-entorno-escritorio.log"
+USUGRAF="$(vx-usuario-grafico)"
+HOMEUSUGRAF="$(vx-home-usuario-grafico "${EJECUTOR}")"
 
 function log_xsession(){
     #
@@ -18,7 +20,9 @@ function log_xsession(){
     done
     
     if [ "${LOGFILE}" ] ; then
-        DIRLOG="/var/log/vitalinux"
+        [ "${EJECUTOR}" == "root" ] && \
+        DIRLOG="/var/log/vitalinux" || \
+        DIRLOG="${HOMEUSUGRAF}/.vx-logs"
         [ ! -d "${DIRLOG}" ] && mkdir -p "${DIRLOG}"
         LOGFILE="${DIRLOG}/${LOGFILE}"
     else
@@ -27,64 +31,62 @@ function log_xsession(){
     exec 2>&1
     exec > >(tee -i "${LOGFILE}")
 }
-
+# 1) Preparamos la auditoria del servicio:
 log_xsession -o "${LOG}"
 
-if test "${EJECUTOR}" != "root" ; then
-    echo "Se requiren privilegios de \"root\" para Regenerar los Entornos de Escritorio de los usuarios ..."
-    exit 1
+# Regeneramos el entorno de escritorio de los usuarios:
+# 2.1) Si no se pasan parámetros y lo llama el usuario root se regeneran todos los usuarios gráficos
+# 2.2) Si no se pasan parámetros y no lo llama el usuario root se regenera la del usuario gráfico actual
+# 2.3) Si se le pasan ususarios como parámetros se regeneran únicamente los de esos usuarios
+if [[ ! -z "${1}" && "${EJECUTOR}" == "root" ]] ; then
+    LISTA_USUARIOS=("${@}")
+    elif [[ "${EJECUTOR}" == "root" ]] ; then
+    LISTA_USUARIOS=($(vx-usuarios-graficos))
+else
+    LISTA_USUARIOS=("${EJECUTOR}")
 fi
 
-echo "=> $(date) - Se va a Regenerar los Entornos de Escritorio de los usuarios del sistema ..."
+echo "=> $(date) Se va a Regenerar el Entorno de Escritorio de: ${LISTA_USUARIOS[@]}"
 
 # 1) Comenzamos regenerando el contenido del Escritorio
-for USUARIO in $(vx-usuarios-graficos) ; do
+for USUARIO in ${LISTA_USUARIOS[@]} ; do
+    # Comprobamos que el usuario existe y cual es su HOME:
+    vx-funcs-users vx-check_exit_users "${USU}" && \
+    HOMEUSUARIO="$(vx-home-usuario-grafico "${USUARIO}")" || \
+    continue
     
-    HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
     BASE="/etc/skel/Escritorio/"
     if test -d "${BASE}" ; then
         for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
             if test -d "${HOMEUSUARIO}/${DIR}" ; then
-                if su "${USUARIO}" \
-                -c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
-                --login &> /dev/null ; then
-                    echo " => OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                # if su "${USUARIO}" \
+                # -c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
+                # --login &> /dev/null ; then
+                #     echo " => OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                # else
+                #     echo " => ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                # fi
+                if rsync --delete -rl --chown="${USUARIO}" "${BASE}" "${HOMEUSUARIO}/${DIR}" ; then
+                    echo " => OK: Se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
                 else
-                    echo " => ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                    echo " => ERROR: No se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
                 fi
             fi
         done
     fi
     
-done
-
-# 2) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
-vx-eliminar-ficheros-conf-personales
-
-# 3) Eliminamos el contenido de los directorios .cache y .config/albert de los usuarios:
-for DIR in $(vx-home-usuarios-graficos) ; do
-    if [ -d "${DIR}/.cache" ] ; then
-        rm -Rf "${DIR}/.cache"/* && echo "=> Eliminado: ${DIR}/.cache/*"
+    # 2) Eliminamos el contenido de los directorios ".cache":
+    if [ -d "${HOMEUSUARIO}/.cache" ] ; then
+        rm -Rf "${HOMEUSUARIO}/.cache"/* && echo "=> Eliminado: ${HOMEUSUARIO}/.cache/*"
     else
-        mkdir -p "${DIR}/.cache"
+        mkdir -p "${HOMEUSUARIO}/.cache"
     fi
-    USUARIO="$(vx-usuario-grafico ${DIR})"
-    chown -R "${USUARIO}".sudo "${DIR}/.cache"
+    chown -R "${USUARIO}" "${HOMEUSUARIO}/.cache"
     
-    # Sincronizamos Albert Launcher:
-    if [ -d "/etc/skel/.config/albert" ] ; then
-        if ! su "${USUARIO}" \
-        -c 'rsync -ahv --delete /etc/skel/.config/albert '${DIR}'/.config' \
-        --login &> /dev/null ; then
-            ERRORES=1
-            echo "ERROR: Problema al copiar Albert en ${DIR} ..."
-        else
-            echo "OK: copiado Albert en ${DIR} ..."
-        fi
-    else
-        echo "Warning: No hay configuración de Albert Launcher"
-    fi
 done
+
+# 3) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
+vx-eliminar-ficheros-conf-personales
 
 # 4) Devolvemos el Greeter a su configuración original eliminando las personalizaciones del usuario:
 FICHGREETER="/etc/lightdm/lightdm-gtk-greeter.conf"

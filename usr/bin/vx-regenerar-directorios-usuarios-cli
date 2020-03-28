@@ -3,7 +3,10 @@
 #Diseñado por Arturo Martín
 #Proyecto Software Libre DGA
 
-EJECUTOR=$(whoami)
+EJECUTOR="$(whoami)"
+LOG="vx-regenerar-directorios-perfil-usuarios.log"
+USUGRAF="$(vx-usuario-grafico)"
+HOMEUSUGRAF="$(vx-home-usuario-grafico "${EJECUTOR}")"
 
 function log_xsession(){
     #
@@ -17,47 +20,38 @@ function log_xsession(){
     done
     
     if [ "${LOGFILE}" ] ; then
-        if [ ! -d /var/log/vitalinux ]; then
-            mkdir -p /var/log/vitalinux
-        fi
-        LOGFILE="/var/log/vitalinux/${LOGFILE}"
+        [ "${EJECUTOR}" == "root" ] && \
+        DIRLOG="/var/log/vitalinux" || \
+        DIRLOG="${HOMEUSUGRAF}/.vx-logs"
+        [ ! -d "${DIRLOG}" ] && mkdir -p "${DIRLOG}"
+        LOGFILE="${DIRLOG}/${LOGFILE}"
     else
-        LOGFILE="/tmp/logfile.regenerar-perfil-usuarios.log"
+        LOGFILE="/tmp/logfile.regenerar-entorno-escritorio.log"
     fi
-    
     exec 2>&1
-    exec > >(tee -i "${LOGFILE}" )
-    
+    exec > >(tee -i "${LOGFILE}")
 }
+# 1) Preparamos la auditoria del servicio:
+log_xsession -o "${LOG}"
 
-log_xsession -o vx-regenerar-perfil-usuarios.log
-
-if test "${EJECUTOR}" != "root" ; then
-    echo "Se requiren privilegios de \"root\" para lanzar Regenerar los perfiles de los usuarios ..."
-    exit 1
+# Regeneramos el entorno de escritorio de los usuarios:
+# 2.1) Si no se pasan parámetros y lo llama el usuario root se regeneran todos los usuarios gráficos
+# 2.2) Si no se pasan parámetros y no lo llama el usuario root se regenera la del usuario gráfico actual
+# 2.3) Si se le pasan ususarios como parámetros se regeneran únicamente los de esos usuarios
+if [[ ! -z "${1}" && "${EJECUTOR}" == "root" ]] ; then
+    LISTA_USUARIOS=("${@}")
+    elif [[ "${EJECUTOR}" == "root" ]] ; then
+    LISTA_USUARIOS=($(vx-usuarios-graficos))
+else
+    LISTA_USUARIOS=("${EJECUTOR}")
 fi
 
-echo "=> $(date) - Se va a Regenerar los perfiles de los usuarios del sistema ..."
+echo "=> $(date) Se va a Regenerar los directorios del perfil del usuario: ${LISTA_USUARIOS[@]}"
 
 # 1) Comenzamos regenerando el contenido del Escritorio y resto de directorios del perfil de los usuarios
-for USUARIO in $(vx-usuarios-graficos) ; do
+for USUARIO in ${LISTA_USUARIOS[@]} ; do
     echo ":=> Sincronizando directorios del usuario: ${USUARIO}"
     HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
-    # El directorio Escritorio se regenera a través del script vx-regenerar-entorno-escritorio-cli:
-    # BASE="/etc/skel/Escritorio/"
-    # if test -d "${BASE}" ; then
-    # 	for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
-    # 		if test -d "${HOMEUSUARIO}/${DIR}" ; then
-    # 			if su "${USUARIO}" \
-    # 				-c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
-    # 				--login &> /dev/null ; then
-    # 				echo " --> OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
-    # 			else
-    # 				echo " --> ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
-    # 			fi
-    # 		fi
-    # 	done
-    # fi
     
     #BASE="$(su "${USUARIO}" -c 'mktemp -d --tmpdir vx-sincro-directorios.XXXXXXXX' --login)"
     ## Definimos los distintos nombres de los directorios del perfil en los 4 idiomas principales:
@@ -79,12 +73,17 @@ for USUARIO in $(vx-usuarios-graficos) ; do
             for DIR in ${LISTA_DIR[*]} ; do
                 # echo "=> Se va a tratar de sincronizar el directorio: \"${DIR}\""
                 if test -d "${HOMEUSUARIO}/${DIR}" ; then
-                    if su "${USUARIO}" \
-                    -c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
-                    --login > /dev/null 2>&1; then
-                        echo "==> OK: Se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
+                    # if su "${USUARIO}" \
+                    # -c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
+                    # --login > /dev/null 2>&1; then
+                    #     echo "==> OK: Se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
+                    # else
+                    #     echo "==> ERROR: No se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
+                    # fi
+                    if rsync --delete -rl --chown="${USUARIO}" "${BASE}" "${HOMEUSUARIO}/${DIR}" ; then
+                        echo " => OK: Sincronizado ${HOMEUSUARIO}/${DIR} del usuario: ${USUARIO} ..."
                     else
-                        echo "==> ERROR: No se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
+                        echo " => ERROR: No sincronizado ${HOMEUSUARIO}/${DIR} del usuario: ${USUARIO} ..."
                     fi
                 fi
             done
@@ -92,4 +91,22 @@ for USUARIO in $(vx-usuarios-graficos) ; do
         IFS=${SAVEIFS}
     done
     
+    # Eliminamos el registro del Albert (core.db) y sus indexaciones que pudiera existir:
+    if [ -d "/etc/skel/.config/albert" ] ; then
+        # if ! su "${USUARIO}" \
+        # -c 'rsync -ahv --delete /etc/skel/.config/albert '${DIR}'/.config' \
+        # --login &> /dev/null ; then
+        #     ERRORES=1
+        #     echo "ERROR: Problema al copiar Albert en ${DIR} ..."
+        # else
+        #     echo "OK: copiado Albert en ${DIR} ..."
+        # fi
+        if rsync -ahv --delete --chown="${USUARIO}" "/etc/skel/.config/albert" "${HOMEUSUARIO}/.config" ; then
+            echo "OK: copiado /etc/skel/.config/albert en ${HOMEUSUARIO}/.config"
+        else
+            echo "ERROR: Problema al copiar /etc/skel/.config/albert en ${HOMEUSUARIO}/.config"
+        fi
+    else
+        echo "Warning: No hay configuración de Albert Launcher"
+    fi
 done

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+FICHEBOOKS="/usr/share/vitalinux/ebooks/ebooks-listado.json"
