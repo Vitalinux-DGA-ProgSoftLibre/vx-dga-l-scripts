@@ -9,6 +9,7 @@ vx-dga-l-scripts (5.0-16) unstable; urgency=low
   * Adaptamos vx-resetear-navegadores-web para tener en cuenta el navegador chromium
   * Adaptamos vx-regenerar-entorno-escritorio-cli para poder pasar por parámetros los usuarios afectados
   * Adaptamos vx-regenerar-directorios-usuarios-cli para poder pasar por parámetros los usuarios afectados
+  * Adaptamos vx-regenerar-perfil-usuarios-cli para poder pasar por parámetros los usuarios afectados
   * Añadimos script vx-conf-ebooks para configurar ebooks del fichero de configuración de centro
   * Añadimos script vx-conf-soft-pdf-okular para vx-14 y vx-18
   * Añadimos script vx-conf-lanzadores-desktop para configurar lanzadores definidos en la configuración de centro
