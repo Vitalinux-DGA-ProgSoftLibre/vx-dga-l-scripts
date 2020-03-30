@@ -67,9 +67,9 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
                 #     echo " => ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
                 # fi
                 if rsync --delete -rl --chown="${USUARIO}" "${BASE}" "${HOMEUSUARIO}/${DIR}" ; then
-                    echo " => OK: Se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
+                    echo "=> OK: Se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
                 else
-                    echo " => ERROR: No se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
+                    echo "=> ERROR: No se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
                 fi
             fi
         done
@@ -83,16 +83,17 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
     fi
     chown -R "${USUARIO}" "${HOMEUSUARIO}/.cache"
     
+    # 3) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
+    vx-eliminar-ficheros-conf-personales "${USUARIO}"
+    echo -e "\n#### Sincronización Terminada: ${USUARIO} ####\n\n"
 done
-
-# 3) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
-vx-eliminar-ficheros-conf-personales
 
 # 4) Devolvemos el Greeter a su configuración original eliminando las personalizaciones del usuario:
 FICHGREETER="/etc/lightdm/lightdm-gtk-greeter.conf"
 [ -f "${FICHGREETER}" ] && rm -f "${FICHGREETER}"
 
 # Mensaje de terminación:
-echo "=> Ya se ha terminado de regenerar el Entorno de Escritorio.  Comprobar que todo esta Ok!!"
+echo "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[@]}"
+echo "=> Comprobar que todo esta Ok!!"
 
 exit 0

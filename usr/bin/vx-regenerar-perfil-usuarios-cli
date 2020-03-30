@@ -6,18 +6,20 @@
 EJECUTOR=$(whoami)
 
 function mensaje-error-root {
-	TEXTO="Se requiren privilegios de \"administrador\" para Regenerar el perfil de los usuarios del sistema ..."
-	echo "${TEXTO}"
-	exit 1
+    TEXTO="Se requiren privilegios de \"administrador\" para Regenerar el perfil de los usuarios del sistema ..."
+    echo "${TEXTO}"
+    exit 1
 }
 
 if test "${EJECUTOR}" != "root" ; then
-	mensaje-error-root
+    mensaje-error-root
 fi
 
 # 1) Regeneramos el Entorno de Escritorio de los usuarios y sus archivos de configuración:
-vx-regenerar-entorno-escritorio-cli
+vx-regenerar-entorno-escritorio-cli "${@}"
 # 2) Regeneramos los directorios del Perfil de los usuarios:
-vx-regenerar-directorios-usuarios-cli
+vx-regenerar-directorios-usuarios-cli "${@}"
+
 # Mensaje de terminación:
-echo "=> Ya se ha terminado de regenerar el los perfiles de los usuarios.  Comprobar que todo esta Ok!!"
+echo "=> Terminada regeneración perfiles de usuarios: ${LISTA_USUARIOS[@]}"
+echo "=> Comprobar que todo esta Ok!!"
