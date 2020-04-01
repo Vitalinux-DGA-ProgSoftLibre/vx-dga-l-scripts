@@ -1,12 +1,15 @@
 #!/bin/bash
 
-#Diseñado por Arturo Martín
-#Proyecto Software Libre DGA
+# [arturo@2020-3-31]
+# Proyecto Software Libre DGA
 
 EJECUTOR=$(whoami)
 LOG="vx-regenerar-entorno-escritorio.log"
 USUGRAF="$(vx-usuario-grafico)"
 HOMEUSUGRAF="$(vx-home-usuario-grafico "${EJECUTOR}")"
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
 function log_xsession(){
     #
@@ -46,7 +49,7 @@ else
     LISTA_USUARIOS=("${EJECUTOR}")
 fi
 
-echo "=> $(date) Se va a Regenerar el Entorno de Escritorio de: ${LISTA_USUARIOS[@]}"
+vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"
 
 # 1) Comenzamos regenerando el contenido del Escritorio
 for USUARIO in ${LISTA_USUARIOS[@]} ; do
@@ -55,6 +58,7 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
     HOMEUSUARIO="$(vx-home-usuario-grafico "${USUARIO}")" || \
     continue
     
+    vx-colorear_echo "azul" "## Comienzo Sincronización Escritorio: ${USUARIO} ####"
     BASE="/etc/skel/Escritorio/"
     if test -d "${BASE}" ; then
         for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
@@ -66,10 +70,13 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
                 # else
                 #     echo " => ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
                 # fi
-                if rsync --delete -rl --chown="${USUARIO}" "${BASE}" "${HOMEUSUARIO}/${DIR}" ; then
-                    echo "=> OK: Se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
+                getent group "${USUARIO}" > /dev/null 2>&1 && \
+                PROPIETARIO="${USUARIO}:${USUARIO}" || \
+                PROPIETARIO="${USUARIO}"
+                if rsync --delete -ah --chown="${PROPIETARIO}" "${BASE}" "${HOMEUSUARIO}/${DIR}" ; then
+                    vx-colorear_echo "verde" "=> OK: Se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
                 else
-                    echo "=> ERROR: No se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
+                    vx-colorear_echo "rojo" "=> ERROR: No se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
                 fi
             fi
         done
@@ -77,7 +84,8 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
     
     # 2) Eliminamos el contenido de los directorios ".cache":
     if [ -d "${HOMEUSUARIO}/.cache" ] ; then
-        rm -Rf "${HOMEUSUARIO}/.cache"/* && echo "=> Eliminado: ${HOMEUSUARIO}/.cache/*"
+        rm -Rf "${HOMEUSUARIO}/.cache"/* && \
+        vx-colorear_echo "verde" "=> Eliminado: ${HOMEUSUARIO}/.cache/*"
     else
         mkdir -p "${HOMEUSUARIO}/.cache"
     fi
@@ -85,15 +93,16 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
     
     # 3) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
     vx-eliminar-ficheros-conf-personales "${USUARIO}"
-    echo -e "\n#### Sincronización Terminada: ${USUARIO} ####\n\n"
+    vx-colorear_echo "azul" "## Fin Sincronización Escritorio: ${USUARIO} ##"
 done
 
 # 4) Devolvemos el Greeter a su configuración original eliminando las personalizaciones del usuario:
 FICHGREETER="/etc/lightdm/lightdm-gtk-greeter.conf"
-[ -f "${FICHGREETER}" ] && rm -f "${FICHGREETER}"
+[[ -f "${FICHGREETER}" && "${EJECUTOR}" == "root" ]] && rm -f "${FICHGREETER}" && \
+vx-colorear_echo "verde" "=> Eliminamos personalizaciones del Greeter: ${FICHGREETER}"
 
 # Mensaje de terminación:
-echo "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[@]}"
-echo "=> Comprobar que todo esta Ok!!"
+vx-colorear_echo "azul" "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"
+vx-colorear_echo "azul" "=> Comprobar que todo esta Ok!!"
 
 exit 0

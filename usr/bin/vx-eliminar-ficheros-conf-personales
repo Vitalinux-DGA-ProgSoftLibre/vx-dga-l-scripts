@@ -1,4 +1,5 @@
 #!/bin/bash
+# [arturo@2020-3-31]
 
 <<INFO
 
@@ -25,8 +26,14 @@
 
 INFO
 
-ERRORES=0
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
 EJECUTOR="$(whoami)"
+
+# 1) Preparamos la auditoria del servicio:
+LOG="vx-eliminar-ficheros-conf-personales.log"
+vx-log_xsession -o "${LOG}"
 
 # Regeneramos los ficheros de configuración personales de los usuarios:
 # 2.1) Si no se pasan parámetros y lo llama el usuario root se regeneran todos los usuarios gráficos
@@ -40,11 +47,19 @@ else
     LISTA_USUARIOS=("${EJECUTOR}")
 fi
 
+vx-colorear_echo "magenta" "[$(vx-fecha)] Eliminación Ficheros Configuración usuarios: ${LISTA_USUARIOS[*]}"
+
 for USUARIO in ${LISTA_USUARIOS[@]} ; do
     # Comprobamos que el usuario existe y cual es su HOME:
     vx-funcs-users vx-check_exit_users "${USU}" && \
     HOMEUSU="$(vx-home-usuario-grafico "${USUARIO}")" || \
     continue
+    
+    getent group "${USUARIO}" > /dev/null 2>&1 && \
+    PROPIETARIO="${USUARIO}:${USUARIO}" || \
+    PROPIETARIO="${USUARIO}"
+    
+    vx-colorear_echo "azul" "=> Eliminando Ficheros de Configuración: ${USUARIO}"
     
     for DIR in ".config/openbox" \
     ".config/lxsession" \
@@ -52,12 +67,11 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
     ".config/lxpanel" \
     ".config/libfm" \
     ".config/lxterminal" ; do
-        if test -d "${HOMEUSU}/${DIR}" ; then
+        if [ -d "${HOMEUSU}/${DIR}" ] ; then
             if ! rm -Rf "${HOMEUSU}/${DIR}" ; then
-                ERRORES=1
-                echo "=> ERROR: No se ha podido eliminar ${HOMEUSU}/${DIR} ..."
+                vx-colorear_echo "rojo" "=> ERROR: No se ha podido eliminar ${HOMEUSU}/${DIR} ..."
             else
-                echo "=> OK: Se ha eliminado ${HOMEUSU}/${DIR} ..."
+                vx-colorear_echo "verde" "=> OK: Se ha eliminado ${HOMEUSU}/${DIR} ..."
             fi
         fi
     done
@@ -76,11 +90,13 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
         # else
         #     echo "OK: copiado /etc/skel/${DIR} en ${HOMEUSU} ..."
         # fi
-        if rsync --delete -rl --chown="${USUARIO}" "/etc/skel/${DIR}" "${HOMEUSU}/.config" ; then
-            echo "=> OK: copiado /etc/skel/${DIR} en ${HOMEUSU}/.config"
+        [[ ! -d "/etc/skel/${DIR}" ]] && continue
+        if rsync --delete -ah --chown="${PROPIETARIO}" "/etc/skel/${DIR}/" "${HOMEUSU}/${DIR}" ; then
+            vx-colorear_echo "verde" "=> OK: copiado /etc/skel/${DIR}/ en ${HOMEUSU}/${DIR}"
         else
-            echo "=> ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSU}/.config"
+            vx-colorear_echo "rojo" "=> ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSU}/${DIR}"
         fi
+        
     done
     
     # Sincronizamos Albert Launcher:
@@ -93,19 +109,19 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
         # else
         #     echo "OK: copiado Albert en ${HOMEUSU} ..."
         # fi
-        if rsync -ahv --delete --chown="${USUARIO}" --exclude "core.db" "/etc/skel/.config/albert" "${HOMEUSU}/.config" ; then
-            echo "OK: copiado /etc/skel/.config/albert en ${HOMEUSU}/.config"
+        
+        DIR=".config/albert"
+        if rsync -ah --delete --chown="${PROPIETARIO}" --exclude "core.db" "/etc/skel/${DIR}/" "${HOMEUSU}/${DIR}" ; then
+            vx-colorear_echo "verde" "=> OK: copiado /etc/skel/${DIR}/ en ${HOMEUSU}/${DIR}"
         else
-            echo "ERROR: Problema al copiar /etc/skel/.config/albert en ${HOMEUSU}/.config"
+            vx-colorear_echo "rojo" "=> ERROR: Problema al copiar /etc/skel/${DIR}/ en ${HOMEUSU}/${DIR}"
         fi
     else
-        echo "Warning: No hay configuración de Albert Launcher"
+        vx-colorear_echo "rojo" "=> Warning: No hay configuración de Albert Launcher"
     fi
+    
+    vx-colorear_echo "azul" "=> Terminada eliminación Ficheros de Configuración: ${USUARIO}"
     
 done
 
-#if test "${ERRORES}" -eq 0 ; then
-#	exit 0
-#else
-#	exit 1
-#fi
+exit 0

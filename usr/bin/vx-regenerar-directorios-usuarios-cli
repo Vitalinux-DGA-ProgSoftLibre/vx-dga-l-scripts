@@ -1,38 +1,16 @@
 #!/bin/bash
 
-#Diseñado por Arturo Martín
-#Proyecto Software Libre DGA
+# [arturo@2020-3-31]
+# Proyecto Software Libre DGA
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
 EJECUTOR="$(whoami)"
-LOG="vx-regenerar-directorios-perfil-usuarios.log"
-USUGRAF="$(vx-usuario-grafico)"
-HOMEUSUGRAF="$(vx-home-usuario-grafico "${EJECUTOR}")"
 
-function log_xsession(){
-    #
-    # Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
-    # Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
-    #
-    while getopts 'o:' OPT; do
-        case ${OPT} in
-            o) LOGFILE=${OPTARG};;
-        esac
-    done
-    
-    if [ "${LOGFILE}" ] ; then
-        [ "${EJECUTOR}" == "root" ] && \
-        DIRLOG="/var/log/vitalinux" || \
-        DIRLOG="${HOMEUSUGRAF}/.vx-logs"
-        [ ! -d "${DIRLOG}" ] && mkdir -p "${DIRLOG}"
-        LOGFILE="${DIRLOG}/${LOGFILE}"
-    else
-        LOGFILE="/tmp/logfile.regenerar-entorno-escritorio.log"
-    fi
-    exec 2>&1
-    exec > >(tee -i "${LOGFILE}")
-}
 # 1) Preparamos la auditoria del servicio:
-log_xsession -o "${LOG}"
+LOG="vx-regenerar-directorios-perfil-usuarios.log"
+vx-log_xsession -o "${LOG}"
 
 # Regeneramos el entorno de escritorio de los usuarios:
 # 2.1) Si no se pasan parámetros y lo llama el usuario root se regeneran todos los usuarios gráficos
@@ -46,12 +24,16 @@ else
     LISTA_USUARIOS=("${EJECUTOR}")
 fi
 
-echo "=> $(date) Se va a Regenerar los directorios del perfil del usuario: ${LISTA_USUARIOS[@]}"
+vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración directorios perfil de usuarios: ${LISTA_USUARIOS[*]}"
 
 # 1) Comenzamos regenerando el contenido del Escritorio y resto de directorios del perfil de los usuarios
 for USUARIO in ${LISTA_USUARIOS[@]} ; do
-    echo ":=> Sincronizando directorios del usuario: ${USUARIO}"
-    HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
+    # Comprobamos que el usuario existe y cual es su HOME:
+    vx-funcs-users vx-check_exit_users "${USU}" && \
+    HOMEUSUARIO="$(vx-home-usuario-grafico "${USUARIO}")" || \
+    continue
+    
+    vx-colorear_echo "azul" "=> Regeneración de directorios del perfil: ${USUARIO}"
     
     #BASE="$(su "${USUARIO}" -c 'mktemp -d --tmpdir vx-sincro-directorios.XXXXXXXX' --login)"
     ## Definimos los distintos nombres de los directorios del perfil en los 4 idiomas principales:
@@ -80,10 +62,13 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
                     # else
                     #     echo "==> ERROR: No se ha sincronizado el directorio ${DIR} del usuario ${USUARIO} ..."
                     # fi
-                    if rsync --delete -rl --chown="${USUARIO}" "${BASE}" "${HOMEUSUARIO}/${DIR}" ; then
-                        echo " => OK: Sincronizado ${HOMEUSUARIO}/${DIR} del usuario: ${USUARIO} ..."
+                    getent group "${USUARIO}" > /dev/null 2>&1 && \
+                    PROPIETARIO="${USUARIO}:${USUARIO}" || \
+                    PROPIETARIO="${USUARIO}"
+                    if rsync --delete -ah --chown="${PROPIETARIO}" "${BASE}" "${HOMEUSUARIO}/${DIR}" ; then
+                        vx-colorear_echo "verde" " => OK: Sincronizado ${HOMEUSUARIO}/${DIR} del usuario: ${USUARIO} ..."
                     else
-                        echo " => ERROR: No sincronizado ${HOMEUSUARIO}/${DIR} del usuario: ${USUARIO} ..."
+                        vx-colorear_echo "rojo" " => ERROR: No sincronizado ${HOMEUSUARIO}/${DIR} del usuario: ${USUARIO} ..."
                     fi
                 fi
             done
@@ -101,12 +86,18 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
         # else
         #     echo "OK: copiado Albert en ${DIR} ..."
         # fi
-        if rsync -ahv --delete --chown="${USUARIO}" "/etc/skel/.config/albert" "${HOMEUSUARIO}/.config" ; then
-            echo "OK: copiado /etc/skel/.config/albert en ${HOMEUSUARIO}/.config"
+        getent group "${USUARIO}" > /dev/null 2>&1 && \
+        PROPIETARIO="${USUARIO}:${USUARIO}" || \
+        PROPIETARIO="${USUARIO}"
+        if rsync -ah --delete --chown="${PROPIETARIO}" "/etc/skel/.config/albert" "${HOMEUSUARIO}/.config" ; then
+            vx-colorear_echo "verde" "=> OK: copiado /etc/skel/.config/albert en ${HOMEUSUARIO}/.config"
         else
-            echo "ERROR: Problema al copiar /etc/skel/.config/albert en ${HOMEUSUARIO}/.config"
+            vx-colorear_echo "rojo" "=> ERROR: Problema al copiar /etc/skel/.config/albert en ${HOMEUSUARIO}/.config"
         fi
     else
-        echo "Warning: No hay configuración de Albert Launcher"
+        vx-colorear_echo "rojo" "=> Warning: No hay configuración de Albert Launcher"
     fi
+    
+    vx-colorear_echo "azul" "=> Terminada Regeneración Directorios del perfil: ${USUARIO}"
+    
 done

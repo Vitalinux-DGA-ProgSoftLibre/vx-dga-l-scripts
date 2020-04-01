@@ -1,25 +1,35 @@
 #!/bin/bash
 
-#Diseñado por Arturo Martín
-#Proyecto Software Libre DGA
+# [arturo@2020-3-31]
+# Proyecto Software Libre DGA
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
 EJECUTOR=$(whoami)
 
-function mensaje-error-root {
-    TEXTO="Se requiren privilegios de \"administrador\" para Regenerar el perfil de los usuarios del sistema ..."
-    echo "${TEXTO}"
-    exit 1
-}
+# 1) Preparamos la auditoria del servicio:
+LOG="vx-regenerar-perfil-usuarios.log"
+vx-log_xsession -o "${LOG}"
 
-if test "${EJECUTOR}" != "root" ; then
-    mensaje-error-root
+if [[ ! -z "${1}" && "${EJECUTOR}" == "root" ]] ; then
+    LISTA_USUARIOS=("${@}")
+    elif [[ "${EJECUTOR}" == "root" ]] ; then
+    LISTA_USUARIOS=($(vx-usuarios-graficos))
+else
+    LISTA_USUARIOS=("${EJECUTOR}")
 fi
 
-# 1) Regeneramos el Entorno de Escritorio de los usuarios y sus archivos de configuración:
-vx-regenerar-entorno-escritorio-cli "${@}"
-# 2) Regeneramos los directorios del Perfil de los usuarios:
-vx-regenerar-directorios-usuarios-cli "${@}"
+# 2) Regeneramos Escritorio y directorios del perfil de los usuarios:
+vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración el Entorno de Escritorio y Directorios Perfil de usuarios: ${LISTA_USUARIOS[*]}"
+vx-colorear_echo "magenta" "# 1) Regeneramos el Entorno de Escritorio de los usuarios y sus archivos de configuración: ${LISTA_USUARIOS[*]}"
+vx-regenerar-entorno-escritorio-cli "${LISTA_USUARIOS[@]}"
+vx-colorear_echo "magenta" "##### Sincronización de Escritorios Terminada: ${LISTA_USUARIOS[*]} #####"
 
-# Mensaje de terminación:
-echo "=> Terminada regeneración perfiles de usuarios: ${LISTA_USUARIOS[@]}"
-echo "=> Comprobar que todo esta Ok!!"
+vx-colorear_echo "magenta" "# 2) Regeneramos los directorios del Perfil de los usuarios: ${LISTA_USUARIOS[*]}"
+vx-regenerar-directorios-usuarios-cli "${LISTA_USUARIOS[@]}"
+vx-colorear_echo "magenta" "##### Sincronización de Directorios de Usuarios Terminada: ${LISTA_USUARIOS[*]} #####"
+
+# 3) Mensaje de terminación:
+vx-colorear_echo "magenta" "=> Terminada regeneración perfiles de usuarios: ${LISTA_USUARIOS[*]}"
+vx-colorear_echo "magenta" "=> Comprobar que todo esta Ok!!"

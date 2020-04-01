@@ -15,6 +15,8 @@ vx-dga-l-scripts (5.0-16) unstable; urgency=low
   * Añadimos script vx-conf-lanzadores-desktop para configurar lanzadores definidos en la configuración de centro
   * Añadimos script vx-conf-soft-arduino-s4a para lanzar arduino y s4a con sudo
   * Añadimos un fichero con la lista de ebooks usados por los centros /usr/share/vitalinux/ebooks/ebooks-listado.json
+  * Añadimos script vx-conf-dialout para configurar usuarios en ese grupo
+  * Añadimos la dependecia con members para poder conocer los usuarios que pertenecen a un grupo
 
  -- Arturo Martín <amartinromero@gmail.com>  Sat, 28 Mar 2020 00:10:00 +0200
 

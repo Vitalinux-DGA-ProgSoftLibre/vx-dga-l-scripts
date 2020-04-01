@@ -6,9 +6,9 @@ FICHFUNCS="/usr/bin/vx-funcs-bash"
 [ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
 uso() {
-    echo -e "¡¡Debes ser usuario root para ejecutar este script de gestión de lanzadores desktop!!
-# El script debe recibir como primer parametro --crear|--borrar.
-# En el caso de --crear un nuevo lanzador deben indicarse los siguientes 8 parámetros:
+    echo -e "${1}
+# El script debe recibir como primer parametro: --crear|--borrar.
+# En el caso de --crear un nuevo lanzador deben indicarse los siguientes parámetros:
     1) El nombre del fichero: p.e. vx-mi-lanzador.desktop
     2) El Name del descriptor Desktop: p.e. Google Docs
     3) El Name[es] del descriptor Desktop: p.e. Google Docs
@@ -57,12 +57,14 @@ EOF
 }
 
 # Comprobamos que el usuario que ha lanzado el script es root:
+MENSAJE="¡¡Debes ser usuario root para ejecutar este script de gestión de lanzadores desktop!!"
 [[ "$(whoami)" != "root" ]] && \
-uso && exit 1
+uso "${MENSAJE}" && exit 1
 
 # Comprobamos que el primer parámetro es --crear o --borrar:
+MENSAJE="¡¡El primer parámetro debe ser --crear o --borrar!!"
 OPCION="${1}"
-! [[ "${OPCION}" =~ ^--crear$|^--borrar$ ]] && uso && exit 1
+! [[ "${OPCION}" =~ ^--crear$|^--borrar$ ]] && uso "${MENSAJE}" && exit 1
 shift
 
 USUARIO="$(vx-usuario-grafico)"
@@ -75,6 +77,7 @@ if ! getent passwd "${USUARIO}" > /dev/null 2>&1 || [[ ! -d "${HOMEUSUARIO}" ]] 
     exit 1
 fi
 
+MENSAJE="¡¡El segundo parámetro debe ser el nombre de un fichero *.desktop!!"
 [ ! -z "${1}" ] && \
 {
     [[ "${1##*.}" == "desktop" ]] && \
@@ -82,17 +85,18 @@ fi
         LANZADOR="${1}" && echo "=> Se va a configurar el lanzador: ${LANZADOR}"
     } || \
     {
-        uso && exit 1 ;
+        uso "${MENSAJE}" && exit 1 ;
     }
 } || \
 {
-    uso && exit 1 ;
+    uso "${MENSAJE}" && exit 1 ;
 }
 
 case "${OPCION}" in
     "--crear" )
         # Comprobamos que se le han pasado 8 parametros para crear el lanzador:
-        (( ${#} != 8 )) && uso && exit 1
+        MENSAJE="¡¡Además del nombre del lanzador deben pasarse al menos 7 parámetros más para crearlo!!"
+        (( ${#} < 7 )) && uso "${MENSAJE}" && exit 1
         NAME="${2}"
         NAME_ES="${3}"
         COMENTARIO="${4}"
@@ -104,6 +108,10 @@ case "${OPCION}" in
         EN_ESCRITORIO="${9:-"true"}"
         UIDS="${10:-"all"}"
         GIDS="${11:-"all"}"
+        
+        getent group "${USUARIO}" > /dev/null 2>&1 && \
+        PROPIETARIO="${USUARIO}:${USUARIO}" || \
+        PROPIETARIO="${USUARIO}"
         
         # Creamos los lanzadores en escritorio si es necesario:
         if "${EN_ESCRITORIO}" ; then
@@ -139,7 +147,7 @@ case "${OPCION}" in
                     [ -d "${HOMEUSUARIO}/${DIR}" ] && \
                     {
                         crear-lanzador-desktop "${HOMEUSUARIO}/${DIR}/${LANZADOR}" && \
-                        chown "${USUARIO}" "${HOMEUSUARIO}/${DIR}/${LANZADOR}" && \
+                        chown "${PROPIETARIO}" "${HOMEUSUARIO}/${DIR}/${LANZADOR}" && \
                         echo "=> Se ha creado el lanzador: ${HOMEUSUARIO}/${DIR}/${LANZADOR}"
                     }
                 done
