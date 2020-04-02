@@ -1,4 +1,14 @@
 #!/bin/bash
+# Ultima modificación: [arturo@2020-4-1]
+
+function vx-lista_uniq() {
+    local LISTA=()
+    for ELEM in ${@} ; do
+        [[ ! "${LISTA[@]}" =~ ${ELEM} ]] && \
+        LISTA+=("${ELEM}")
+    done
+    echo "${LISTA[@]}"
+}
 
 function vx-fecha() {
     # Muestra la fecha en el siguiente formato: 20-03-31_martes_12:13:45

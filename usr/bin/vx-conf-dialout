@@ -1,5 +1,5 @@
 #!/bin/bash
-# [arturo@2020-3-31]
+# Ultima modificación: [arturo@2020-4-1]
 
 # Importamos las funciones:
 for FICHFUNCS in "/usr/bin/vx-funcs-bash" "/usr/bin/vx-funcs-users" ; do

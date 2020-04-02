@@ -1,4 +1,5 @@
 #!/bin/bash
+# Ultima modificación: [arturo@2020-4-1]
 
 FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 [ -f "${FICHVARS}" ] && . "${FICHVARS}"

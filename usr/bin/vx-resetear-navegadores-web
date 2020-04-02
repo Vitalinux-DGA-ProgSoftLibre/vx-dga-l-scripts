@@ -1,5 +1,5 @@
 #!/bin/bash
-# [arturo@2020-4-1]
+# Última modificación: [arturo@2020-4-1]
 # Cierra y Elimina toda la información de los navegadores Web:
 
 FICHFUNCS="/usr/bin/vx-funcs-bash"
@@ -9,7 +9,7 @@ FICHFUNCS="/usr/bin/vx-funcs-bash"
 LOG="vx-resetear-navegadores-web.log"
 vx-log_xsession -o "${LOG}"
 
-vx-colorear_echo "magenta" "$(vx-fecha) Reseteamos navegadores Web"
+vx-colorear_echo "magenta" "[$(vx-fecha)] Reseteamos navegadores Web"
 
 # 1) Comenzamos cerrando las posibles sesiones abiertas de los navegadores:
 for NAVEGADOR in "firefox" "chrome" "chromium-browser" ; do
@@ -42,19 +42,28 @@ done
 # else
 #     LISTA_USUARIOS=("${USUARIO}")
 # fi
-LISTADO=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
 
-declare -a AFECTADOS
+# Los parámetros recibidos para determinar la lista de usuarios afectados puede ser:
+# 1) -ug => devolvería el usuario gráfico actual
+# 2) -u usu1,usu2,usu3,... => devolvería la lista de que usuarios indicados son reales
+# 3) -g grupo1,grupo2,... => devolvería la lista de que usuarios forman parte de esos grupos
+# 4) usu1 usu2 usu3 ... => devolvería la lista de usuarios indicados que son reales
+# 5) [sin parámetros] => devolvería la lista de todos los usuarios gráficos si el ejecutor es root, o el usuario que ejecuta si no es root
+LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
+
 for USU in ${LISTA_USUARIOS[@]} ; do
     # Comprobamos que el usuario existe y cual es su HOME: (lo hace la función vx-obtener_lista_usuarios)
     # vx-funcs-users vx-check_exit_users "${USU}" && \
     # HOMEUSU="$(vx-home-usuario-grafico "${USU}")" || \
     # continue
+    HOMEUSU="$(vx-home-usuario-grafico "${USU}")"
     AFECTADOS=()
     for DIR in ".config/google-chrome" ".mozilla" ".config/chromium" ; do
         [ -d "${HOMEUSU}/${DIR}" ] && \
         rm -Rf "${HOMEUSU}/${DIR}" && \
         AFECTADOS=("${DIR}")
     done
-    echo "=> Eliminados Conf. NavWeb:${USU}:${AFECTADOS[*]}"
+    (( ${#AFECTADOS[@]} != 0 )) && \
+    echo "=> Eliminada Configuración Navegadores Web: ${USU}:$(echo ${AFECTADOS[*]} | tr -s " " ":")" || \
+    echo "=> Los Navegadores Web estaban reseteados: ${USU}"
 done

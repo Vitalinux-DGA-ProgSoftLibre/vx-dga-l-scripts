@@ -1,4 +1,5 @@
 #!/bin/bash
+# Ultima modificación: [arturo@2020-4-1]
 
 FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 [ -f "${FICHVARS}" ] && . "${FICHVARS}"
@@ -14,7 +15,7 @@ function vx-obtener_lista_usuarios() {
     # # Si 1parámetro es "-g" y 2parametro "grupo1,grupo2,...": devuelve la lista de usuarios sin comas pertenecientes a los grupos indicados
     # # Si no es ninguna de las anteriores comprueba la lista de usuarios pasada por parámetros y devuelve la lista de usarios reales
     local USUARIO="$(whoami)"
-    LISTA_USUARIOS=()
+    local LISTA_USUARIOS=()
     if [[ ! -z "${1}" && "${USUARIO}" == "root" && "${1}" == "-ug" ]] ; then
         LISTA_USUARIOS=("$(vx-usuario-grafico)")
         elif [[ ! -z "${1}" && "${USUARIO}" == "root" && "${1}" == "-u" ]] ; then
@@ -33,24 +34,24 @@ function vx-obtener_lista_usuarios() {
         elif [[ ! -z "${1}" && "${USUARIO}" == "root" ]] ; then
         for USU in ${@} ; do
             vx-check_exit_users "${USU}" && \
-            LISTA_USUARIOS=("${USU}")
+            LISTA_USUARIOS+=("${USU}")
         done
         elif [[ "${USUARIO}" == "root" ]] ; then
         LISTA_USUARIOS=($(vx-usuarios-graficos))
     else
         LISTA_USUARIOS=("${USUARIO}")
     fi
-    echo "${LISTA_USUARIOS[@]}"
+    echo "$(vx-funcs-bash vx-lista_uniq ${LISTA_USUARIOS[@]})"
 }
 
 function vx-conf_idioma_usuario() {
     # Require 3 parametros: usuario, lenguaje (en) y formatslocale (en_GB.UTF-8)
-    USUARIO="${1}"
+    local USUARIO="${1}"
     ! vx-check_exit_users && \
     echo "=> ¡¡Error!! El usuario no existe: ${USUARIO}" && exit 1
-    HOMEUSU="$(vx-home-usuario-grafico "${USUARIO}")"
-    LENGUAJE="${2}"
-    FORMATOLOCAL="${3}"
+    local HOMEUSU="$(vx-home-usuario-grafico "${USUARIO}")"
+    local LENGUAJE="${2}"
+    local FORMATOLOCAL="${3}"
     # Establecer el idioma elegido por defecto del lightdm:
       cat > "/var/lib/AccountsService/users/${USUARIO}" <<EOF
 [User]
@@ -74,7 +75,7 @@ EOF
 }
 
 function vx-check_exit_users() {
-    USERSOK="true"
+    local USERSOK="true"
     until [ -z "${1}" ] ; do
         ! getent passwd "${1}" > /dev/null 2>&1 && USERSOK="false"
         shift
@@ -83,7 +84,7 @@ function vx-check_exit_users() {
 }
 
 function vx-check_exit_groups() {
-    GRUPOSOK="true"
+    local GRUPOSOK="true"
     until [ -z "${1}" ] ; do
         ! getent group "${1}" > /dev/null 2>&1 && GRUPOSOK="false"
         shift
@@ -92,7 +93,7 @@ function vx-check_exit_groups() {
 }
 
 function vx-funcs-users-help() {
-    FICHFUNCS="/usr/bin/vx-funcs-users"
+    local FICHFUNCS="/usr/bin/vx-funcs-users"
     for FUNCION in $(sed -n "s/^function \(.*\)().*/\1/gp" "${FICHFUNCS}") ; do
         [[ "${1}" != "--help" ]] && echo "${FUNCION} --help" && continue
         [[ "${FUNCION}" != "vx-help-funcs-users" ]] && \
@@ -103,14 +104,14 @@ function vx-funcs-users-help() {
 }
 
 function vx-resetear_usuarios() {
-    AYUDA="# Función: Elimina todos los usuarios a excepción de los usuarios pasados por parametro"
+    local AYUDA="# Función: Elimina todos los usuarios a excepción de los usuarios pasados por parametro"
     AYUDA+="\n# Uso: vx-resetear_usuarios [usu1] [usu2] ..."
     AYUDA+="\n# Uso: vx-resetear_usuarios profesor dga"
     [ "${1}" == "--help" ] && \
     echo -e "${AYUDA}" && return 0
     
-    LISTA_USUARIOS_A_CONSERVAR=(${*})
-    USUARIOS_A_BORRAR=($(vx-usuarios-graficos))
+    local LISTA_USUARIOS_A_CONSERVAR=(${*})
+    local USUARIOS_A_BORRAR=($(vx-usuarios-graficos))
     # echo "Todos usuarios gráficos actuales: ${USUARIOS_A_BORRAR[@]}"
     # echo "Usuarios a conservar: ${LISTA_USUARIOS_A_CONSERVAR[@]}"
     
@@ -137,7 +138,7 @@ function vx-resetear_usuarios() {
 }
 
 function vx-grupo_primario() {
-    AYUDA="# Función: Asocia a un usuario un grupo primario de pertenencia"
+    local AYUDA="# Función: Asocia a un usuario un grupo primario de pertenencia"
     AYUDA+="\n# Uso: vx-grupo_primario [usuario] [grupo] ... ..."
     AYUDA+="\n# Uso: vx-grupo_primario profesories sudo alumno1A alumno"
     [ "${1}" == "--help" ] && \

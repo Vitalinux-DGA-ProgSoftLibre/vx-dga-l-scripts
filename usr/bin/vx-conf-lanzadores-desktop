@@ -1,5 +1,5 @@
 #!/bin/bash
-# Versiones: [arturo@2019-12-18]
+# Última Modificación: [arturo@2020-4-2]
 
 # Importamos las funciones generales:
 FICHFUNCS="/usr/bin/vx-funcs-bash"
