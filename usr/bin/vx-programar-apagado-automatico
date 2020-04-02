@@ -1,0 +1,46 @@
+#!/bin/bash
+
+mensaje() {
+    echo "=> $(date) - ${1}"
+}
+
+# Comprobamos que es el usuario root quien llama al script:
+MENSAJE="Debes ser root para poder programar el apagado automático"
+[[ "$(whoami)" != "root" ]] && mensaje "${MENSAJE}" && exit 1
+
+# Comprobamos que se pasan al menos dos parametros, y en número par:
+MENSAJE="Debes pasar al menos parejas de parámetros: Hora y Minutos de apagado"
+! ( ! (( ${#} % 2 )) && (( ${#} >= 2 )) ) && mensaje "${MENSAJE}" && exit 1
+
+FICHLOG="/var/log/vitalinux/vx-script-apagado-automatico.log"
+FICHCONF="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
+[ -f "${FICHCONF}" ] && . "${FICHCONF}"
+FICHCRON="/etc/cron.d/apagado_automatico"
+
+function programar_hora_apagado() {
+    until test -z "${1}" ; do
+        HORA="${1}"
+        MINUTOS="${2}"
+        # En el caso de que no exista el archivo FICHCRON, o existiendo, no este la hora programada, se introducirá la siguiente línea:
+        if ! grep -E "^${MINUTOS} ${HORA} .*\|\| sudo /sbin/init 0" "${FICHCRON}" > /dev/null 2>&1 ; then
+            echo "${MINUTOS} ${HORA} * * * root export DISPLAY=:0 && (who | grep ' :0 ') && su \$(who | grep ' :0 ' | cut -d' ' -f1) -c '/usr/bin/cuentaatras' --login || sudo /sbin/init 0" >> "${FICHCRON}"
+            # Dejamos un LOG de la ejecución del script:
+            ( ! test -d "/var/log/vitalinux" ) && mkdir -p "/var/log/vitalinux"
+            echo "$(date) - Se ha configurado el apagado de equipos a las ${HORA}:${MINUTOS} ...." | tee -a "${FICHLOG}"
+        fi
+        shift 2
+    done
+}
+
+function eliminar_programaciones_antiguas() {
+    # sed -i "/^$/d" "${FICHCRON}"
+    sed -Ei '\#.*\|\| sudo /sbin/init 0#!d' "${FICHCRON}"
+}
+
+# Eliminamos configuraciones de apagado antiguas, comentadas y líneas en blanco
+eliminar_programaciones_antiguas
+
+# Programamos el apagado a partir del los parámetros pasados al script:
+programar_hora_apagado $@
+
+exit 0

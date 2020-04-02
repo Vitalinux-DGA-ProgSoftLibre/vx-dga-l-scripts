@@ -1,3 +1,9 @@
+vx-dga-l-scripts (4.1-8) unstable; urgency=low
+
+  * Añadimos script vx-programar-apagado-automatico para configurar la hora de apagado del fichero de configuración de centro
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 2 Apr 2020 20:10:00 +0200
+
 vx-dga-l-scripts (4.1-7) unstable; urgency=low
 
   * Cambiamos el nombre del yad del script de vx-informacion-red
