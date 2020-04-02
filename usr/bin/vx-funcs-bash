@@ -1,4 +1,49 @@
 #!/bin/bash
+# Ultima modificación: [arturo@2020-4-1]
+
+function vx-lista_uniq() {
+    local LISTA=()
+    for ELEM in ${@} ; do
+        [[ ! "${LISTA[@]}" =~ ${ELEM} ]] && \
+        LISTA+=("${ELEM}")
+    done
+    echo "${LISTA[@]}"
+}
+
+function vx-fecha() {
+    # Muestra la fecha en el siguiente formato: 20-03-31_martes_12:13:45
+    date +%y-%m-%d_%A_%T
+}
+
+function vx-check_is_integer() {
+    # Devuelve 0 en caso de que el parametro pasado sea un número entero:
+    REGEX='^[0-9]+$'
+    if [[ ${1} =~ ${REGEX} ]] ; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function vx-check_is_decimal() {
+    # Devuelve 0 en caso de que el parametro pasado sea un número entero o decimal sin signo:
+    REGEX='^[0-9]+([.][0-9]+)?$'
+    if [[ ${1} =~ ${REGEX} ]] ; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function vx-check_is_decimal_con_signo() {
+    # Devuelve 0 en caso de que el parametro pasado sea un número entero o decimal con signo:
+    REGEX='^[+-]?[0-9]+([.][0-9]+)?$'
+    if [[ ${1} =~ ${REGEX} ]] ; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 function vx-trim() {
     # Elimina los espacios al comienzo y final del texto pasado como parámetro
@@ -21,12 +66,16 @@ function vx-colorear_command_output() {
 }
 
 function vx-colorear_echo() {
+    # https://misc.flogisoft.com/bash/tip_colors_and_formatting
     case "${1}" in
         "rojo" ) COLOR=31 ;;
         "verde" ) COLOR=32 ;;
         "azul" ) COLOR=34 ;;
+        "magenta" ) COLOR=35 ;;
+        "cyan" ) COLOR=96 ;;
     esac
-    echo -e "\e[${COLOR}m\e[1m${2}\e[0m"
+    shift
+    echo -e "\e[${COLOR}m\e[1m${*}\e[0m"
 }
 
 function vx-colorear_command_output_rojo() {
@@ -68,18 +117,24 @@ function vx-log_xsession(){
     #
     # Ejemplo de llamada: LOG="vx-fichero.log" && vx-log_xsession -o "${LOG}"
     #
+    local EJECUTOR="$(whoami)"
+    local USUGRAF="$(vx-usuario-grafico)"
+    local HOMEUSUGRAF="$(vx-home-usuario-grafico "${EJECUTOR}")"
     while getopts 'o:' OPT; do
         case ${OPT} in
             o) LOGFILE=${OPTARG};;
+            *) LOGFILE="vx-log-${USUGRAF}-$(vx-fecha)"
         esac
     done
     
     if [ "${LOGFILE}" ] ; then
-        DIRLOG="/var/log/vitalinux"
+        [ "${EJECUTOR}" == "root" ] && \
+        DIRLOG="/var/log/vitalinux" || \
+        DIRLOG="${HOMEUSUGRAF}/.vx-logs"
         [ ! -d "${DIRLOG}" ] && mkdir -p "${DIRLOG}"
         LOGFILE="${DIRLOG}/${LOGFILE}"
     else
-        LOGFILE="/tmp/logfile.$(/usr/bin/vx-usuario-grafico).${RANDOM}.log"
+        LOGFILE="/tmp/vx-log-${USUGRAF}-$(vx-fecha)"
     fi
     exec 2>&1
     exec > >(tee -i "${LOGFILE}")

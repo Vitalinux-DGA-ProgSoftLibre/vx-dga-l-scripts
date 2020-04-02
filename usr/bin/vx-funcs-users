@@ -1,29 +1,117 @@
 #!/bin/bash
+# Ultima modificación: [arturo@2020-4-1]
 
 FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 [ -f "${FICHVARS}" ] && . "${FICHVARS}"
 
 USUARIOGRAFICO="$(vx-usuario-grafico)"
 
-function vx-help-funcs-users() {
-    FICHFUNCS="/usr/bin/vx-funcs-users"
+function vx-obtener_lista_usuarios() {
+    # Si NºParametros=0 y Ejecutor=root: devuelve la lista completa de usuarios gráficos
+    # Si NºParametros=0 y Ejecutor!=root: devuelve el ejecutor que ha llamado a la función
+    # Si NºParametros!=0 y Ejecutor=root:
+    # # Si primer parámetro es "-ug": devuelve el usuario gráfico
+    # # Si 1parámetro es "-u" y 2parametro "usu1,usu2,...": devuelve la lista de usuarios pasados sin comas
+    # # Si 1parámetro es "-g" y 2parametro "grupo1,grupo2,...": devuelve la lista de usuarios sin comas pertenecientes a los grupos indicados
+    # # Si no es ninguna de las anteriores comprueba la lista de usuarios pasada por parámetros y devuelve la lista de usarios reales
+    local USUARIO="$(whoami)"
+    local LISTA_USUARIOS=()
+    if [[ ! -z "${1}" && "${USUARIO}" == "root" && "${1}" == "-ug" ]] ; then
+        LISTA_USUARIOS=("$(vx-usuario-grafico)")
+        elif [[ ! -z "${1}" && "${USUARIO}" == "root" && "${1}" == "-u" ]] ; then
+        # -u: Se pasa como segundo parámetro una lista de usuarios separados por comas:
+        for USU in ${2//,/ } ; do
+            vx-check_exit_users "${USU}" && \
+            LISTA_USUARIOS+=("${USU}")
+        done
+        elif [[ ! -z "${1}" && "${USUARIO}" == "root" && "${1}" == "-g" ]] ; then
+        # -g: Se pasa como segundo parámetro una lista de grupos separados por comas:
+        LISTA_GRUPOS=(${2//,/ })
+        for GRUPO in ${LISTA_GRUPOS[@]} ; do
+            vx-funcs-users vx-check_exit_groups "${GRUPO}" && \
+            LISTA_USUARIOS+=($(members "${GRUPO}"))
+        done
+        elif [[ ! -z "${1}" && "${USUARIO}" == "root" ]] ; then
+        for USU in ${@} ; do
+            vx-check_exit_users "${USU}" && \
+            LISTA_USUARIOS+=("${USU}")
+        done
+        elif [[ "${USUARIO}" == "root" ]] ; then
+        LISTA_USUARIOS=($(vx-usuarios-graficos))
+    else
+        LISTA_USUARIOS=("${USUARIO}")
+    fi
+    echo "$(vx-funcs-bash vx-lista_uniq ${LISTA_USUARIOS[@]})"
+}
+
+function vx-conf_idioma_usuario() {
+    # Require 3 parametros: usuario, lenguaje (en) y formatslocale (en_GB.UTF-8)
+    local USUARIO="${1}"
+    ! vx-check_exit_users && \
+    echo "=> ¡¡Error!! El usuario no existe: ${USUARIO}" && exit 1
+    local HOMEUSU="$(vx-home-usuario-grafico "${USUARIO}")"
+    local LENGUAJE="${2}"
+    local FORMATOLOCAL="${3}"
+    # Establecer el idioma elegido por defecto del lightdm:
+      cat > "/var/lib/AccountsService/users/${USUARIO}" <<EOF
+[User]
+#Language=en
+Language=${LENGUAJE}
+#FormatsLocale=en_GB.UTF-8
+FormatsLocale=${FORMATOLOCAL}
+XSession=Lubuntu
+SystemAccount=false
+EOF
+    # Establecer el idioma elegido en el PAM environment:
+      cat > "${HOMEUSU}/.pam_environment" <<EOF
+LANGUAGE=${LENGUAJE}
+LANG=${FORMATOLOCAL}
+LC_TIME=${FORMATOLOCAL}
+EOF
+    # Ajustamos el propietario del pam_environment:
+    chown "${USUARIO}".sudo "${HOMEUSU}/.pam_environment"
+    
+    return 0
+}
+
+function vx-check_exit_users() {
+    local USERSOK="true"
+    until [ -z "${1}" ] ; do
+        ! getent passwd "${1}" > /dev/null 2>&1 && USERSOK="false"
+        shift
+    done
+    "${USERSOK}" && return 0 || return 1
+}
+
+function vx-check_exit_groups() {
+    local GRUPOSOK="true"
+    until [ -z "${1}" ] ; do
+        ! getent group "${1}" > /dev/null 2>&1 && GRUPOSOK="false"
+        shift
+    done
+    "${GRUPOSOK}" && return 0 || return 1
+}
+
+function vx-funcs-users-help() {
+    local FICHFUNCS="/usr/bin/vx-funcs-users"
     for FUNCION in $(sed -n "s/^function \(.*\)().*/\1/gp" "${FICHFUNCS}") ; do
         [[ "${1}" != "--help" ]] && echo "${FUNCION} --help" && continue
         [[ "${FUNCION}" != "vx-help-funcs-users" ]] && \
         echo ":== Función ${FUNCION} ==:" && \
         "${FUNCION}" --help
+        echo "--"
     done
 }
 
 function vx-resetear_usuarios() {
-    AYUDA="# Función: Elimina todos los usuarios a excepción de los usuarios pasados por parametro"
+    local AYUDA="# Función: Elimina todos los usuarios a excepción de los usuarios pasados por parametro"
     AYUDA+="\n# Uso: vx-resetear_usuarios [usu1] [usu2] ..."
     AYUDA+="\n# Uso: vx-resetear_usuarios profesor dga"
     [ "${1}" == "--help" ] && \
     echo -e "${AYUDA}" && return 0
     
-    LISTA_USUARIOS_A_CONSERVAR=(${*})
-    USUARIOS_A_BORRAR=($(vx-usuarios-graficos))
+    local LISTA_USUARIOS_A_CONSERVAR=(${*})
+    local USUARIOS_A_BORRAR=($(vx-usuarios-graficos))
     # echo "Todos usuarios gráficos actuales: ${USUARIOS_A_BORRAR[@]}"
     # echo "Usuarios a conservar: ${LISTA_USUARIOS_A_CONSERVAR[@]}"
     
@@ -50,7 +138,7 @@ function vx-resetear_usuarios() {
 }
 
 function vx-grupo_primario() {
-    AYUDA="# Función: Asocia a un usuario un grupo primario de pertenencia"
+    local AYUDA="# Función: Asocia a un usuario un grupo primario de pertenencia"
     AYUDA+="\n# Uso: vx-grupo_primario [usuario] [grupo] ... ..."
     AYUDA+="\n# Uso: vx-grupo_primario profesories sudo alumno1A alumno"
     [ "${1}" == "--help" ] && \
@@ -351,12 +439,14 @@ function vx-borrar_usuario() {
     USUARIOS="$*"
     for USUARIO in ${USUARIOS} ; do
         if test "${USUARIOGRAFICO}" != "${USUARIO}" ; then
-            ( getent passwd "${USUARIO}" > /dev/null 2>&1 ) && \
-            /usr/sbin/userdel -fr "${USUARIO}"
+            if getent passwd "${USUARIO}" > /dev/null 2>&1 ; then
+                /usr/sbin/userdel -fr "${USUARIO}" && \
+                echo "=> Se ha eliminado el usuario: ${USUARIO}"
+            else
+                echo "=> El usuario ${USUARIO} no existe en el sistema ..."
+            fi
         fi
     done
 }
-
-
 
 "$@" 2> /dev/null

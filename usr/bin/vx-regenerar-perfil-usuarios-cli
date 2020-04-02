@@ -1,23 +1,34 @@
 #!/bin/bash
+# Ultima modificación: [arturo@2020-4-1]
+# Proyecto Software Libre DGA
 
-#Diseñado por Arturo Martín
-#Proyecto Software Libre DGA
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
 EJECUTOR=$(whoami)
 
-function mensaje-error-root {
-	TEXTO="Se requiren privilegios de \"administrador\" para Regenerar el perfil de los usuarios del sistema ..."
-	echo "${TEXTO}"
-	exit 1
-}
+# 1) Preparamos la auditoria del servicio:
+LOG="vx-regenerar-perfil-usuarios.log"
+vx-log_xsession -o "${LOG}"
 
-if test "${EJECUTOR}" != "root" ; then
-	mensaje-error-root
-fi
+# Los parámetros recibidos para determinar la lista de usuarios afectados puede ser:
+# 1) -ug => devolvería el usuario gráfico actual
+# 2) -u usu1,usu2,usu3,... => devolvería la lista de que usuarios indicados son reales
+# 3) -g grupo1,grupo2,... => devolvería la lista de que usuarios forman parte de esos grupos
+# 4) usu1 usu2 usu3 ... => devolvería la lista de usuarios indicados que son reales
+# 5) [sin parámetros] => devolvería la lista de todos los usuarios gráficos si el ejecutor es root, o el usuario que ejecuta si no es root
+LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
 
-# 1) Regeneramos el Entorno de Escritorio de los usuarios y sus archivos de configuración:
-vx-regenerar-entorno-escritorio-cli
-# 2) Regeneramos los directorios del Perfil de los usuarios:
-vx-regenerar-directorios-usuarios-cli
-# Mensaje de terminación:
-echo "=> Ya se ha terminado de regenerar el los perfiles de los usuarios.  Comprobar que todo esta Ok!!"
+# 2) Regeneramos Escritorio y directorios del perfil de los usuarios:
+vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración el Entorno de Escritorio y Directorios Perfil de usuarios: ${LISTA_USUARIOS[*]}"
+vx-colorear_echo "magenta" "# 1) Regeneramos el Entorno de Escritorio de los usuarios y sus archivos de configuración: ${LISTA_USUARIOS[*]}"
+vx-regenerar-entorno-escritorio-cli "${LISTA_USUARIOS[@]}"
+vx-colorear_echo "magenta" "##### Sincronización de Escritorios Terminada: ${LISTA_USUARIOS[*]} #####"
+
+vx-colorear_echo "magenta" "# 2) Regeneramos los directorios del Perfil de los usuarios: ${LISTA_USUARIOS[*]}"
+vx-regenerar-directorios-usuarios-cli "${LISTA_USUARIOS[@]}"
+vx-colorear_echo "magenta" "##### Sincronización de Directorios de Usuarios Terminada: ${LISTA_USUARIOS[*]} #####"
+
+# 3) Mensaje de terminación:
+vx-colorear_echo "magenta" "=> Terminada regeneración perfiles de usuarios: ${LISTA_USUARIOS[*]}"
+vx-colorear_echo "magenta" "=> Comprobar que todo esta Ok!!"

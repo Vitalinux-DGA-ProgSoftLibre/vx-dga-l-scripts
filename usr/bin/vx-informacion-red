@@ -93,7 +93,7 @@ for IMPRESORA in "${LISTAIMPRESORAS[@]}" ; do
     (( CONTADOR++ ))
 done
 
-yad --title "Información de Parámetros de Red" \
+yad --title "Información Global de Vitalinux" \
 --center \
 --image preferences-system-network \
 --width 700 --height 450 \

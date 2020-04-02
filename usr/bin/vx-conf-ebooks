@@ -1,0 +1,7 @@
+#!/bin/bash
+# [arturo@2020-4-3]
+
+# Creamos un listado de libros disponibles, pero los lanzadores de los libros se crean
+# mediante el script vx-conf-lanzadores-desktop
+
+FICHEBOOKS="/usr/share/vitalinux/ebooks/ebooks-listado.json"

@@ -1,27 +1,69 @@
 #!/bin/bash
-
-FICHLOG=".vx-resetear-navegadores-web.log"
-LOG="#### $(date)"
-
+# Última modificación: [arturo@2020-4-1]
 # Cierra y Elimina toda la información de los navegadores Web:
 
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+# 1) Preparamos la auditoria del servicio:
+LOG="vx-resetear-navegadores-web.log"
+vx-log_xsession -o "${LOG}"
+
+vx-colorear_echo "magenta" "[$(vx-fecha)] Reseteamos navegadores Web"
+
 # 1) Comenzamos cerrando las posibles sesiones abiertas de los navegadores:
-for NAVEGADOR in "firefox" "chrome" ; do
+for NAVEGADOR in "firefox" "chrome" "chromium-browser" ; do
     pkill -f "${NAVEGADOR}" && \
-    LOG="${LOG}\nSe han cerrado las ventanas abiertas de ${NAVEGADOR} ..." || \
-    LOG="${LOG}\nNo había ninguna ventana abierta en ${NAVEGADOR} ..."
+    echo "=> Se han cerrado las ventanas abiertas de ${NAVEGADOR} ..." || \
+    echo "=> No había ninguna ventana abierta en ${NAVEGADOR} ..."
 done
 
-# 2) Eliminamos los datos almacenados por los navegadores de los usuarios con permisos de hacerlo:
-USUARIO="$(whoami)"
-[[ "${USUARIO}" == "root" ]] && \
-LISTA_USUARIOS="$(vx-home-usuarios-graficos)" || \
-LISTA_USUARIOS="$(vx-home-usuario-grafico)"
-for HOMEUSU in ${LISTA_USUARIOS} ; do
-    for DIR in ".config/google-chrome" ".mozilla" ; do
+# 2) Eliminamos los datos almacenados por los navegadores de los usuarios:
+# 2.1) Si no se pasan parámetros y lo llama el usuario root se resetean los navegadores de todos los usuarios gráficos
+# 2.2) Si no se pasan parámetros y no lo llama el usuario root se resetean los navegadores del usuario gráfico actual
+# 2.3) Si se le pasan ususarios como parámetros resetea únicamente los de esos usuarios
+# USUARIO="$(whoami)"
+# if [[ ! -z "${1}" && "${USUARIO}" == "root" && "${1}" == "-ug" ]] ; then
+#     LISTA_USUARIOS=("$(vx-usuario-grafico)")
+#     elif [[ ! -z "${1}" && "${USUARIO}" == "root" && "${1}" == "-u" ]] ; then
+#     # -u: Se pasa como segundo parámetro una lista de usuarios separados por comas:
+#     LISTA_USUARIOS=(${2//,/ })
+#     elif [[ ! -z "${1}" && "${USUARIO}" == "root" && "${1}" == "-g" ]] ; then
+#     # -g: Se pasa como segundo parámetro una lista de grupos separados por comas:
+#     LISTA_GRUPOS=(${2//,/ })
+#     for GRUPO in ${LISTA_GRUPOS[@]} ; do
+#         vx-funcs-users vx-check_exit_groups "${GRUPO}" && \
+#         LISTA_USUARIOS+=($(members "${GRUPO}"))
+#     done
+#     elif [[ ! -z "${1}" && "${USUARIO}" == "root" ]] ; then
+#     LISTA_USUARIOS=("${@}")
+#     elif [[ "${USUARIO}" == "root" ]] ; then
+#     LISTA_USUARIOS=($(vx-usuarios-graficos))
+# else
+#     LISTA_USUARIOS=("${USUARIO}")
+# fi
+
+# Los parámetros recibidos para determinar la lista de usuarios afectados puede ser:
+# 1) -ug => devolvería el usuario gráfico actual
+# 2) -u usu1,usu2,usu3,... => devolvería la lista de que usuarios indicados son reales
+# 3) -g grupo1,grupo2,... => devolvería la lista de que usuarios forman parte de esos grupos
+# 4) usu1 usu2 usu3 ... => devolvería la lista de usuarios indicados que son reales
+# 5) [sin parámetros] => devolvería la lista de todos los usuarios gráficos si el ejecutor es root, o el usuario que ejecuta si no es root
+LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
+
+for USU in ${LISTA_USUARIOS[@]} ; do
+    # Comprobamos que el usuario existe y cual es su HOME: (lo hace la función vx-obtener_lista_usuarios)
+    # vx-funcs-users vx-check_exit_users "${USU}" && \
+    # HOMEUSU="$(vx-home-usuario-grafico "${USU}")" || \
+    # continue
+    HOMEUSU="$(vx-home-usuario-grafico "${USU}")"
+    AFECTADOS=()
+    for DIR in ".config/google-chrome" ".mozilla" ".config/chromium" ; do
         [ -d "${HOMEUSU}/${DIR}" ] && \
-        LOG="${LOG}\nSe va a eliminar ${HOMEUSU}/${DIR}" && \
-        rm -Rf "${HOMEUSU}/${DIR}"
-        echo -e "${LOG}" > "${HOMEUSU}/${FICHLOG}"
+        rm -Rf "${HOMEUSU}/${DIR}" && \
+        AFECTADOS=("${DIR}")
     done
+    (( ${#AFECTADOS[@]} != 0 )) && \
+    echo "=> Eliminada Configuración Navegadores Web: ${USU}:$(echo ${AFECTADOS[*]} | tr -s " " ":")" || \
+    echo "=> Los Navegadores Web estaban reseteados: ${USU}"
 done

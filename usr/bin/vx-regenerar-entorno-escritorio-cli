@@ -1,10 +1,14 @@
 #!/bin/bash
-
-#Diseñado por Arturo Martín
-#Proyecto Software Libre DGA
+# Ultima modificación: [arturo@2020-4-1]
+# Proyecto Software Libre DGA
 
 EJECUTOR=$(whoami)
 LOG="vx-regenerar-entorno-escritorio.log"
+USUGRAF="$(vx-usuario-grafico)"
+HOMEUSUGRAF="$(vx-home-usuario-grafico "${EJECUTOR}")"
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
 function log_xsession(){
     #
@@ -18,7 +22,9 @@ function log_xsession(){
     done
     
     if [ "${LOGFILE}" ] ; then
-        DIRLOG="/var/log/vitalinux"
+        [ "${EJECUTOR}" == "root" ] && \
+        DIRLOG="/var/log/vitalinux" || \
+        DIRLOG="${HOMEUSUGRAF}/.vx-logs"
         [ ! -d "${DIRLOG}" ] && mkdir -p "${DIRLOG}"
         LOGFILE="${DIRLOG}/${LOGFILE}"
     else
@@ -27,57 +33,86 @@ function log_xsession(){
     exec 2>&1
     exec > >(tee -i "${LOGFILE}")
 }
-
+# 1) Preparamos la auditoria del servicio:
 log_xsession -o "${LOG}"
 
-if test "${EJECUTOR}" != "root" ; then
-    echo "Se requiren privilegios de \"root\" para Regenerar los Entornos de Escritorio de los usuarios ..."
-    exit 1
-fi
+# Regeneramos el entorno de escritorio de los usuarios:
+# 2.1) Si no se pasan parámetros y lo llama el usuario root se regeneran todos los usuarios gráficos
+# 2.2) Si no se pasan parámetros y no lo llama el usuario root se regenera la del usuario gráfico actual
+# 2.3) Si se le pasan ususarios como parámetros se regeneran únicamente los de esos usuarios
+# if [[ ! -z "${1}" && "${EJECUTOR}" == "root" ]] ; then
+#     LISTA_USUARIOS=("${@}")
+#     elif [[ "${EJECUTOR}" == "root" ]] ; then
+#     LISTA_USUARIOS=($(vx-usuarios-graficos))
+# else
+#     LISTA_USUARIOS=("${EJECUTOR}")
+# fi
 
-echo "=> $(date) - Se va a Regenerar los Entornos de Escritorio de los usuarios del sistema ..."
+# Los parámetros recibidos para determinar la lista de usuarios afectados puede ser:
+# 1) -ug => devolvería el usuario gráfico actual
+# 2) -u usu1,usu2,usu3,... => devolvería la lista de que usuarios indicados son reales
+# 3) -g grupo1,grupo2,... => devolvería la lista de que usuarios forman parte de esos grupos
+# 4) usu1 usu2 usu3 ... => devolvería la lista de usuarios indicados que son reales
+# 5) [sin parámetros] => devolvería la lista de todos los usuarios gráficos si el ejecutor es root, o el usuario que ejecuta si no es root
+LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
+
+vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"
 
 # 1) Comenzamos regenerando el contenido del Escritorio
-for USUARIO in $(vx-usuarios-graficos) ; do
+for USUARIO in ${LISTA_USUARIOS[@]} ; do
+    # Comprobamos que el usuario existe y cual es su HOME:
+    # vx-funcs-users vx-check_exit_users "${USU}" && \
+    # HOMEUSUARIO="$(vx-home-usuario-grafico "${USUARIO}")" || \
+    # continue
     
-    HOMEUSUARIO="$(getent passwd "${USUARIO}" | cut -d":" -f6)"
+    HOMEUSUARIO="$(vx-home-usuario-grafico "${USUARIO}")"
+    
+    vx-colorear_echo "azul" "## Comienzo Sincronización Escritorio: ${USUARIO} ####"
     BASE="/etc/skel/Escritorio/"
     if test -d "${BASE}" ; then
         for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
             if test -d "${HOMEUSUARIO}/${DIR}" ; then
-                if su "${USUARIO}" \
-                -c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
-                --login &> /dev/null ; then
-                    echo " => OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                # if su "${USUARIO}" \
+                # -c 'rsync --delete -rl '${BASE}' '${HOMEUSUARIO}'/'${DIR} \
+                # --login &> /dev/null ; then
+                #     echo " => OK: Se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                # else
+                #     echo " => ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                # fi
+                getent group "${USUARIO}" > /dev/null 2>&1 && \
+                PROPIETARIO="${USUARIO}:${USUARIO}" || \
+                PROPIETARIO="${USUARIO}"
+                if rsync --delete -ah --chown="${PROPIETARIO}" "${BASE}" "${HOMEUSUARIO}/${DIR}" ; then
+                    vx-colorear_echo "verde" "=> OK: Se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
                 else
-                    echo " => ERROR: No se ha sincronizado el ${DIR} del usuario ${USUARIO} ..."
+                    vx-colorear_echo "rojo" "=> ERROR: No se ha sincronizado el ${DIR} del usuario: ${USUARIO}"
                 fi
             fi
         done
     fi
     
-done
-
-# 2) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
-vx-eliminar-ficheros-conf-personales
-
-# 3) Eliminamos el contenido de los directorios .cache de los usuarios:
-for DIR in $(vx-home-usuarios-graficos) ; do
-    if [ -d "${DIR}/.cache" ] ; then
-        rm -Rf "${DIR}/.cache"/* && echo "=> Eliminado: ${DIR}/.cache/*"
+    # 2) Eliminamos el contenido de los directorios ".cache":
+    if [ -d "${HOMEUSUARIO}/.cache" ] ; then
+        rm -Rf "${HOMEUSUARIO}/.cache"/* && \
+        vx-colorear_echo "verde" "=> Eliminado: ${HOMEUSUARIO}/.cache/*"
     else
-        mkdir -p "${DIR}/.cache"
+        mkdir -p "${HOMEUSUARIO}/.cache"
     fi
-    USUARIO="$(vx-usuario-grafico ${DIR})"
-    chown -R "${USUARIO}".sudo "${DIR}/.cache"
+    chown -R "${USUARIO}" "${HOMEUSUARIO}/.cache"
+    
+    # 3) Seguimos con la regeneración de los archivos de configuración del Entorno de Escritorio
+    vx-eliminar-ficheros-conf-personales "${USUARIO}"
+    vx-colorear_echo "azul" "## Fin Sincronización Escritorio: ${USUARIO} ##"
 done
 
 # 4) Devolvemos el Greeter a su configuración original eliminando las personalizaciones del usuario:
-# => En vx-14 no se puede personlizar!!
+# => En vx-14 no se puede personalizar el Greeter
 # FICHGREETER="/etc/lightdm/lightdm-gtk-greeter.conf"
-# [ -f "${FICHGREETER}" ] && rm -f "${FICHGREETER}"
+# [[ -f "${FICHGREETER}" && "${EJECUTOR}" == "root" ]] && rm -f "${FICHGREETER}" && \
+# vx-colorear_echo "verde" "=> Eliminamos personalizaciones del Greeter: ${FICHGREETER}"
 
 # Mensaje de terminación:
-echo "=> Ya se ha terminado de regenerar el Entorno de Escritorio.  Comprobar que todo esta Ok!!"
+vx-colorear_echo "azul" "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"
+vx-colorear_echo "azul" "=> Comprobar que todo esta Ok!!"
 
 exit 0

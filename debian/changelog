@@ -1,3 +1,26 @@
+vx-dga-l-scripts (4.1-7) unstable; urgency=low
+
+  * Cambiamos el nombre del yad del script de vx-informacion-red
+  * Añadimos script vx-conf-ebooks para configurar ebooks del fichero de configuración de centro
+  * Añadimos script vx-conf-soft-pdf-okular para vx-14 y vx-18
+  * Añadimos script vx-conf-lanzadores-desktop para configurar lanzadores definidos en la configuración de centro
+  * Añadimos script vx-conf-soft-arduino-s4a para lanzar arduino y s4a con sudo
+  * Añadimos un fichero con la lista de ebooks usados por los centros /usr/share/vitalinux/ebooks/ebooks-listado.json
+  * Añadimos script vx-conf-dialout para configurar usuarios en ese grupo
+  * Añadimos la dependecia con members para poder conocer los usuarios que pertenecen a un grupo
+  * Añadimos funciones en vx-funcs-bash para saber si una variable es entera, decimal o decimal con signo
+  * Añadimos funciones an vx-funcs-users para chequear la existencia de usuarios y configuración idioma
+  * Añadimos funciones en vx-funcs-limpiar_homes para la gestión de perfiles
+  * Adpatamos vx-funcs-users para mostrar mensajes de salida en la funciones de gestión de usuarios
+  * Adaptamos vx-eliminar-ficheros-conf-personales para poder pasar por parámetros los usuarios afectados
+  * Adaptamos vx-resetear-navegadores-web para poder pasar por parámetros los usuarios afectados
+  * Adaptamos vx-resetear-navegadores-web para tener en cuenta el navegador chromium
+  * Adaptamos vx-regenerar-entorno-escritorio-cli para poder pasar por parámetros los usuarios afectados
+  * Adaptamos vx-regenerar-directorios-usuarios-cli para poder pasar por parámetros los usuarios afectados
+  * Adaptamos vx-regenerar-perfil-usuarios-cli para poder pasar por parámetros los usuarios afectados
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 2 Apr 2020 00:10:00 +0200
+
 vx-dga-l-scripts (4.1-6) unstable; urgency=low
 
   * Se modifica el script de creación de un usb-bootable para que lance unetbootin

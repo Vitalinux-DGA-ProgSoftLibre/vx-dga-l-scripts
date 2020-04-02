@@ -1,0 +1,55 @@
+#!/bin/bash
+
+EJECUTOR="$(whoami)"
+[ "${EJECUTOR}" != "root" ] && \
+echo "=> Error!! Debes ser root para configurar okular como visor PDF predeterminado." && \
+exit 1
+
+if [[ -f "/usr/bin/okular" && -x "/usr/bin/crudini" ]] ; then
+    
+    # El lanzador de okular no es el mismo en vx-14 que en vx-18:
+    [ -f "/usr/share/applications/kde4/okular.desktop" ] && FICHDESKTOP="kde4-okular.desktop"
+    [ -f "/usr/share/applications/org.kde.okular.desktop" ] && FICHDESKTOP="okularApplication_pdf.desktop"
+    # [ -f "/usr/share/applications/org.kde.okular.desktop" ] && FICHDESKTOP="org.kde.okular.desktop"
+    
+    echo "=> Okular como aplicación preferente para abrir PDFs: ${FICHDESKTOP}"
+    # Por defecto creamos el mime para los esqueletos de los nuevos usuarios:
+    # crudini creara la sección o parámetro en caso de no existir, asignando el valor indicado
+    
+    # Almacenaremos en un array los ficheros que se verán afectados:
+    # 1) Skel: /etc/skel/.local/share/applications/mimeapps.list
+    # 2) A nivel global: /usr/share/applications/mimeapps.list
+    # 3) mimes personalizados definidos en los usuarios
+    declare -a FICHEROS
+    declare -a MODIFICADOS
+    FICHEROS=( "/etc/skel/.local/share/applications/mimeapps.list" "/usr/share/applications/mimeapps.list" )
+    for USUDIR in $(vx-home-usuarios-graficos) ; do
+        FICH="${USUDIR}/.local/share/applications/mimeapps.list"
+        if [ -f "${FICH}" ]; then
+            FICHEROS+=("${FICH}")
+        fi
+    done
+    
+    for FICH in ${FICHEROS[@]} ; do
+        if [ -f "${FICH}" ] ; then
+            CAMBIO="false"
+            for SECCION in "Default Applications" "Added Associations" ; do
+                VALOR="$(crudini --get "${FICH}" "${SECCION}" "application/pdf")"
+                if [[ "${VALOR}" != "${FICHDESKTOP}" ]] ; then
+                    crudini --set "${FICH}" "${SECCION}" "application/pdf" "${FICHDESKTOP}" && \
+                    CAMBIO="true"
+                fi
+            done
+            ${CAMBIO} && MODIFICADOS+=("${FICH}")
+        fi
+    done
+    
+    MENSAJE="=> Okular configurado: "
+    (( ${#MODIFICADOS[@]} == 0 )) && \
+    MENSAJE+="Ya esta todo configurado" || \
+    MENSAJE+="\n\tSecciones: \"Default Applications\" \"Added Associations\" Valor: \"application/pdf\"\n\tFicheros: ${MODIFICADOS[*]}"
+    
+    echo -e "${MENSAJE}"
+fi
+
+exit 0
