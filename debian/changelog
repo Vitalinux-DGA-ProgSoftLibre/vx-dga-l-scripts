@@ -1,3 +1,9 @@
+vx-dga-l-scripts (4.1-10) unstable; urgency=low
+
+  * Añadimos vx-edit-postinst-package para poder editar ficheros de paquetes instalados
+
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 15 Apr 2020 08:30:00 +0200
+
 vx-dga-l-scripts (4.1-9) unstable; urgency=low
 
   * Adaptamos vx-programar-apagado-automatico para añadir la opción de resetear programación
