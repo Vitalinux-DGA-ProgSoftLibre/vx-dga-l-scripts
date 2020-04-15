@@ -1,0 +1,14 @@
+#!/bin/bash
+
+[ -z "${1}" ] && \
+echo "=> Debes pasar como primer parámetro el paquete del cual editar su postinst" && \
+echo "=> Puedes pasar como segundo parámetro el fichero a editar: prerm|preinst|postinst" && \
+echo "=> Por defecto, si no se indica el segundo parámetro será: postinst" && \
+exit 1
+
+RUTABASE="/var/lib/dpkg/info/"
+PACKAGE="${1}"
+SUFIFO="${2:-"postinst"}"
+FICHERO="${RUTABASE}/${PACKAGE}.${SUFIFO}"
+[ -f "${FICHERO}" ] && \
+nano "${FICHERO}"
