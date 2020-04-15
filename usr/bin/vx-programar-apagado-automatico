@@ -17,6 +17,12 @@ FICHCONF="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 [ -f "${FICHCONF}" ] && . "${FICHCONF}"
 FICHCRON="/etc/cron.d/apagado_automatico"
 
+function resetear_horas_apagado() {
+    # elimina toda configuración de apagado que hubiera:
+    echo -n "" > "${FICHCRON}"
+    return 0
+}
+
 function programar_hora_apagado() {
     until test -z "${1}" ; do
         HORA="${1}"
@@ -36,6 +42,9 @@ function eliminar_programaciones_antiguas() {
     # sed -i "/^$/d" "${FICHCRON}"
     sed -Ei '\#.*\|\| sudo /sbin/init 0#!d' "${FICHCRON}"
 }
+
+# Comprobamos si hay que resetear el apagado automático eliminando toda configuración:
+[[ "${1}" == "null" && "${2}" == "null" ]] && resetear_horas_apagado && shift 2
 
 # Eliminamos configuraciones de apagado antiguas, comentadas y líneas en blanco
 eliminar_programaciones_antiguas

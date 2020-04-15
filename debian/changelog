@@ -1,3 +1,9 @@
+vx-dga-l-scripts (4.1-9) unstable; urgency=low
+
+  * Adaptamos vx-programar-apagado-automatico para añadir la opción de resetear programación
+
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 15 Apr 2020 08:10:00 +0200
+
 vx-dga-l-scripts (4.1-8) unstable; urgency=low
 
   * Añadimos script vx-programar-apagado-automatico para configurar la hora de apagado del fichero de configuración de centro
