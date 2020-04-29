@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# last-act: arturo@2020-4-30
+# Instala la extension o extensiones de libreoffice pasadas como parámetro
+# Debe indicarse rutas absolutas o relativas del archivo: *.oxt
+# p.e. FICH="/usr/share/vitalinux/conf-centro/libreoffice-extensiones/es_ANY.oxt"
+
+[ -z "${1}" ] && \
+{
+    echo -e "=> Debes pasar como parámetro las rutas de las extensiones OXT a instalar.
+p.e: vx-conf-libreoffice-instalar-extension /usr/share/vitalinux/conf-centro/libreoffice-extensiones/es_ANY.oxt ...
+    " && exit 1 ;
+}
+
+until [ -z "${1}" ] ; do
+    FICH="${1}"
+    DIR="$(vx-home-usuario-grafico)/.config/libreoffice/4/user"
+    EXTENSION="$(basename "${FICH}")"
+    if [[ -d "${DIR}" ]] ; then
+        if [[ -f "${FICH}" ]] ; then
+            if ! ( unopkg list --shared 2> /dev/null | grep -q "${EXTENSION}" ) ; then
+                unopkg add -f -s --shared "${FICH}" &> /dev/null
+                echo "=> Se ha instalado la extensión de Libreoffice: ${EXTENSION}"
+            else
+                echo "=> Ya esta instalada la extensión de Libreoffice: ${EXTENSION}"
+            fi
+        else
+            echo "=> ¡¡Problemas!! La ruta a la extensión a instalar no existe: ${FICH}"
+        fi
+    else
+        echo "=> No se puede instalar la extensión ${EXTENSION} ya que $(vx-usuario-grafico) no ha iniciado todavía Libreoffice ..."
+        exit 1
+    fi
+    shift
+done
+exit 0

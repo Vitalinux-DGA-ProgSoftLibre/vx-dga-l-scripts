@@ -37,7 +37,7 @@ function instalarExtensionFirefox() {
         echo "=> Ok!! ${EXT_TYPE} firefox-extension \"${1}\" ${EXT_UID} ya esta instalada ..."
         return 0
     fi
-    if [ "$1" == "epubreader-2.0.7-fx.xpi" ]; then
+    if [ "$1" == "epubreader-2.0.9-fx.xpi" ]; then
         [ ! -f "${PATH_GLOBAL_FIREFOX}/{5384767E-00D9-40E9-B72F-9CC39D655D6F}.xpi" ] && \
         {
             cp "${EXT_URL}" "${PATH_GLOBAL_FIREFOX}/{5384767E-00D9-40E9-B72F-9CC39D655D6F}.xpi" && \
@@ -174,7 +174,12 @@ shift
 
 BASEDIR="/usr/share/vitalinux/firefox-extensions"
 FICH_LISTA_EXTENSIONES="${BASEDIR}/firefox-extensiones-listado"
-[ -f "${FICH_LISTA_EXTENSIONES}" ] && . "${FICH_LISTA_EXTENSIONES}"
+[ -f "${FICH_LISTA_EXTENSIONES}" ] && \
+. "${FICH_LISTA_EXTENSIONES}" || \
+{
+    echo "=> ¡¡Problemas!! No hay listado de extensiones disponible: ${FICH_LISTA_EXTENSIONES}" ;
+    exit 1
+}
 # Generamos una lista con los nombres de todas las extensiones disponibles:
 EXTENSIONES_DISPONIBLES=()
 for LINEA in $(sed -n "/^[^#].*=/p" "${FICH_LISTA_EXTENSIONES}") ; do
@@ -215,7 +220,7 @@ until [ -z "${1}" ] ; do
 done
 
 (( ${FALLOINS} == 1 )) && \
-echo "=> ¡¡Error!! La isntalación de alguna extensión de firefox ha dada problemas" && \
+echo "=> ¡¡Error!! La fallado la instalación de alguna extensión de firefox" && \
 exit 1
 
 (( ${FALLODES} == 1 )) && \

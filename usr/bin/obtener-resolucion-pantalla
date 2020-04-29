@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
 
 ## Comprobamos que existe el archivo donde estan definidas las resoluciones
-if test -f /usr/share/vitalinux/resolucion-pantalla/resoluciones-pantalla.txt ; then
-	# echo "Ok ... exite el archivo de definición de Resoluciones ..."
-	RESOLUTIONS="/usr/share/vitalinux/resolucion-pantalla/resoluciones-pantalla.txt"
-else
-	echo "Error ... no exite el archivo de definición de Resoluciones ..."
-	exit 1
-fi
+# if test -f /usr/share/vitalinux/resolucion-pantalla/resoluciones-pantalla.txt ; then
+#     # echo "Ok ... exite el archivo de definición de Resoluciones ..."
+#     RESOLUTIONS="/usr/share/vitalinux/resolucion-pantalla/resoluciones-pantalla.txt"
+# else
+#     echo "Error ... no exite el archivo de definición de Resoluciones ..."
+#     exit 1
+# fi
 
-xrandr -q 2> /dev/null | grep -Po 'current\s*\K\d+\s*x\s*\d+' | sed 's/ *x */ /' | tr -s " " ":" > /tmp/resolucion-pantalla
-resolucionx=$(cat /tmp/resolucion-pantalla | cut -d":" -f1)
-resoluciony=$(cat /tmp/resolucion-pantalla | cut -d":" -f2)
-grep "$resolucionx" "$RESOLUTIONS" | grep "$resoluciony" | awk -F" " '{print $2}'
+if vx-funcs-bash vx-detectar_gui ; then
+    RESOLUCIONGRAF="$(xrandr -q 2> /dev/null | grep -Po 'current\s*\K\d+\s*x\s*\d+' | sed 's/ *x */ /' | tr -s " " ":" | head -1)"
+else
+    # Es necesario ser root para suplantar al usuario gráfico y conocer la resolución:
+    # Si no se puede consultar por defecto se devuelve 16:9
+    [[ "$(whoami)" != "root" ]] && RESOLUCIONGRAF="16:9" || \
+    RESOLUCIONGRAF="$(export DISPLAY=:0 && su "$(vx-usuario-grafico)" -c "xrandr -q 2> /dev/null | grep -Po 'current\s*\K\d+\s*x\s*\d+' | sed 's/ *x */ /' | tr -s ' ' ':' | head -1" --login)"
+fi
+[[ "${RESOLUCIONGRAF}" =~ ^[0-9]+:[0-9]+$ ]] || RESOLUCIONGRAF="16:9"
+RESOLUCIONGRAFX=${RESOLUCIONGRAF%:*}
+RESOLUCIONGRAFY=${RESOLUCIONGRAF#*:}
+RESOL="$(echo "scale=4;(${RESOLUCIONGRAFX}/${RESOLUCIONGRAFY})" | bc)"
+RESOL4X3="$(echo "scale=4;(4/3)" | bc)"
+RESOL16X9="$(echo "scale=4;(16/9)" | bc)"
+
+RESULTADO="$(echo "scale=4; (sqrt((${RESOL16X9} - ${RESOL})^2) < sqrt((${RESOL4X3} - ${RESOL})^2))" | bc)"
+(( ${RESULTADO} == 1 )) && echo "16:9" || echo "4:3"
