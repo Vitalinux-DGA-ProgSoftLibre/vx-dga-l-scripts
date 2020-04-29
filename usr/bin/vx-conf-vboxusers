@@ -1,5 +1,6 @@
 #!/bin/bash
 # Ultima modificación: [arturo@2020-4-1]
+# Añade el grupo indicado a usuario o usuarios
 
 # Importamos las funciones:
 for FICHFUNCS in "/usr/bin/vx-funcs-bash" "/usr/bin/vx-funcs-users" ; do
@@ -7,7 +8,7 @@ for FICHFUNCS in "/usr/bin/vx-funcs-bash" "/usr/bin/vx-funcs-users" ; do
 done
 
 # Comprobamos que existe el grupo:
-GRUPO="dialout"
+GRUPO="vboxusers"
 ! vx-check_exit_groups "${GRUPO}" && \
 {
     echo "=> No existe el grupo: ${GRUPO}" ;

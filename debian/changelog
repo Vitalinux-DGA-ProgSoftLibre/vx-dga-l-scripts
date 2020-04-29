@@ -1,3 +1,10 @@
+vx-dga-l-scripts (5.0-20) unstable; urgency=low
+
+  * Añadimos vx-conf-vboxusers para configurar añadir el grupo vboxusers a usuarios
+  * Corregimos vx-conf-dialout para que si no existe el grupo se salga
+
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 29 Apr 2020 11:30:00 +0200
+
 vx-dga-l-scripts (5.0-19) unstable; urgency=low
 
   * Añadimos vx-comprobar-software-existe-repositorios para comprobar si una lista de paquetes esta en los repos
