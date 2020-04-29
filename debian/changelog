@@ -1,3 +1,21 @@
+vx-dga-l-scripts (5.0-19) unstable; urgency=low
+
+  * Añadimos vx-comprobar-software-existe-repositorios para comprobar si una lista de paquetes esta en los repos
+  * Añadimos vx-keyrings-personal-borrar.desktop para eliminar el keyring personal
+  * Añadimos vx-keyring-usuario-borrar para eliminar el keyring personal
+  * Añadimos vx-regenerar-perfil-usuario-personal.desktop para permitir regenerar el perfil personal
+  * Añadimos vx-regenerar-entorno-escritorio-personal.desktop para permitir regenerar el Escritorio personal
+  * Modificamos vx-keyrings-borrar-cli para eliminar el keyring personal o todos dependiendo del ejecutor
+  * Modificamos vx-keyrings-borrar.desktop para explicitar que se eliminan todos los keyrings
+  * Modificamos vx-regenerar-entorno-escritorio.desktop para explicitar que se regeneran todos los Escritorios
+  * Modificamos vx-regenerar-entorno-escritorio para eliminar codigos de colores de mensajes
+  * Modificamos vx-regenerar-entorno-escritorio para posibilitar regnerar todos los Escritorios o el personal
+  * Modificamos vx-regenerar-perfil-usuarios.desktop para explicitar que se regeneran todos los Perfiles
+  * Modificamos vx-regenerar-perfil-usuarios para eliminar codigos de colores de mensajes
+  * Modificamos vx-regenerar-perfil-usuarios para posibilitar regnerar todos los Perfiles o el personal
+
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 29 Apr 2020 08:30:00 +0200
+
 vx-dga-l-scripts (5.0-18) unstable; urgency=low
 
   * Añadimos vx-edit-postinst-package para poder editar ficheros de paquetes instalados

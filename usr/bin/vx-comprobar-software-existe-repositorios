@@ -1,0 +1,29 @@
+#!/bin/bash
+# last_update: arturo@2020-4-28
+
+[ -z "${1}" ] && \
+echo -e "¡¡Debes pasar al menos un parámetro ... un paquete a buscar para saber si esta disponible!!
+=> p.e: vx-comprobar-software-existe-repositorios blender sozi ...
+=> p.e: vx-comprobar-software-existe-repositorios blender,sozi,...
+" && exit 1
+
+ver_lista() {
+    for ELE in ${@} ; do
+        echo ${ELE}
+    done
+}
+
+LISTA=(${*//,/ })
+LISTA_VALIDOS=()
+LISTA_INVALIDOS=()
+for PAQUETE in ${LISTA[@]} ; do
+    (( $(apt-cache policy "${PAQUETE}" | wc -l) > 4 )) && \
+    LISTA_VALIDOS+=(${PAQUETE}) || \
+    LISTA_INVALIDOS+=(${PAQUETE})
+done
+(( ${#LISTA_VALIDOS[@]} > 0 )) && \
+echo -e "Lista de paquetes validos: ${LISTA_VALIDOS[*]}" && \
+ver_lista "${LISTA_VALIDOS[@]}"
+(( ${#LISTA_INVALIDOS[@]} > 0 )) && \
+echo -e "Lista de paquetes invalidos: ${LISTA_INVALIDOS[*]}" && \
+ver_lista "${LISTA_INVALIDOS[@]}"
