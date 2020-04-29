@@ -6,13 +6,17 @@ for FICHFUNCS in "/usr/bin/vx-funcs-bash" "/usr/bin/vx-funcs-users" ; do
     [ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 done
 
-# Comprobamos que existe el grupo dialout:
+# Comprobamos que existe el grupo:
 GRUPO="dialout"
-! vx-check_exit_groups "${GRUPO}"
+! vx-check_exit_groups "${GRUPO}" && \
+{
+    echo "=> No existe el grupo: ${GRUPO}" ;;
+    exit 1
+}
 
 EJECUTOR="$(whoami)"
 [ "${EJECUTOR}" != "root" ] && \
-echo "=> Error!! Debes ser root para asignar grupo dialout a un usuario." && \
+echo "=> Error!! Debes ser root para asignar grupo ${GRUPO} a un usuario." && \
 exit 1
 
 # Los usuarios pasados como parámetros serán los afectados. Si no hay parámetros se afectará a todos:
@@ -37,5 +41,5 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
     fi
 done
 
-echo "=> Grupo dialout asignado a: ${AFECTADOS[*]}"
+echo "=> Grupo ${GRUPO} asignado a: ${AFECTADOS[*]}"
 exit 0

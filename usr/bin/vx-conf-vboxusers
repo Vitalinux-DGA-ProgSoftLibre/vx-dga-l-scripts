@@ -9,7 +9,11 @@ done
 
 # Comprobamos que existe el grupo:
 GRUPO="vboxusers"
-! vx-check_exit_groups "${GRUPO}"
+! vx-check_exit_groups "${GRUPO}" && \
+{
+    echo "=> No existe el grupo: ${GRUPO}" ;;
+    exit 1
+}
 
 EJECUTOR="$(whoami)"
 [ "${EJECUTOR}" != "root" ] && \
