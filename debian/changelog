@@ -1,3 +1,13 @@
+vx-dga-l-scripts (4.1-13) unstable; urgency=low
+
+  * Añadimos vx-conf-libreoffice-instalar-extension para configurar extensiones en Libreoffice
+  * Corregimos vx-conf-dialout para que si no existe el grupo se salga
+  * Modificamos obtener-resolucion-pantalla para devolver 16:9 o 4:3 sin ambigüedades
+  * Modificamos vx-chrome-extensiones para salir si no hay fichero con lista de extensiones disponible
+  * Modificamos vx-firefox-extensiones para salir si no hay fichero con lista de extensiones disponible
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 30 Apr 2020 00:30:00 +0200
+
 vx-dga-l-scripts (4.1-12) unstable; urgency=low
 
   * Añadimos vx-conf-vboxusers para configurar añadir el grupo vboxusers a usuarios

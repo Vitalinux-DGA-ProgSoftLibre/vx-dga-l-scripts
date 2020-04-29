@@ -31,7 +31,12 @@ FICHEXTENSIONES="/etc/opt/chrome/policies/managed/vx-navegador-chrome-extensione
 # OFFICEONLINE="ndjpnladcallmjemlbaebfadecfhkepb"
 
 FICH_LISTA_EXTENSIONES="/usr/share/vitalinux/google-chrome-extensions/chrome-extensiones-listado"
-[ -f "${FICH_LISTA_EXTENSIONES}" ] && . "${FICH_LISTA_EXTENSIONES}"
+[ -f "${FICH_LISTA_EXTENSIONES}" ] && \
+. "${FICH_LISTA_EXTENSIONES}" || \
+{
+    echo "=> ¡¡Problemas!! No hay listado de extensiones disponible: ${FICH_LISTA_EXTENSIONES}" ;
+    exit 1
+}
 
 until [ -z "${1}" ] ; do
     EXTENSION=""
