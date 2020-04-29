@@ -10,8 +10,8 @@ done
 GRUPO="dialout"
 ! vx-check_exit_groups "${GRUPO}" && \
 {
-    echo "=> No existe el grupo: ${GRUPO}" ;;
-    exit 1
+    echo "=> No existe el grupo: ${GRUPO}" ;
+    exit 1 ;
 }
 
 EJECUTOR="$(whoami)"
