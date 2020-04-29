@@ -1,0 +1,42 @@
+#!/bin/bash
+# Ultima modificación: [arturo@2020-4-1]
+# Añade el grupo indicado a usuario o usuarios
+
+# Importamos las funciones:
+for FICHFUNCS in "/usr/bin/vx-funcs-bash" "/usr/bin/vx-funcs-users" ; do
+    [ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+done
+
+# Comprobamos que existe el grupo:
+GRUPO="vboxusers"
+! vx-check_exit_groups "${GRUPO}"
+
+EJECUTOR="$(whoami)"
+[ "${EJECUTOR}" != "root" ] && \
+echo "=> Error!! Debes ser root para asignar grupo ${GRUPO} a un usuario." && \
+exit 1
+
+# Los usuarios pasados como parámetros serán los afectados. Si no hay parámetros se afectará a todos:
+# -ug: usuario gráfico actual
+if [[ ! -z "${1}" && "${1}" == "-ug" ]] ; then
+    LISTA_USUARIOS=("$(vx-usuario-grafico)")
+    elif [[ ! -z "${1}" ]] ; then
+    LISTA_USUARIOS=("${@}")
+else
+    LISTA_USUARIOS=($(vx-usuarios-graficos))
+fi
+
+declare -a AFECTADOS
+for USUARIO in ${LISTA_USUARIOS[@]} ; do
+    ! vx-funcs-users vx-check_exit_users "${USUARIO}" && continue
+    if ! [[ "$(id -nG "${USUARIO}")" =~ ${GRUPO} ]] ; then
+        usermod -aG "${GRUPO}" "${USUARIO}" && \
+        AFECTADOS+=("${USUARIO}:ok") || \
+        AFECTADOS+=("${USUARIO}:error")
+    else
+        AFECTADOS+=("${USUARIO}:ant")
+    fi
+done
+
+echo "=> Grupo ${GRUPO} asignado a: ${AFECTADOS[*]}"
+exit 0
