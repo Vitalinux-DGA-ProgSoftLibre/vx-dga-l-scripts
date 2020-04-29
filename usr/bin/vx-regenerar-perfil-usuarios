@@ -1,34 +1,35 @@
 #!/bin/bash
 
-#Diseñado por Arturo Martín
-#Proyecto Software Libre DGA
+# last-upate: arturo@2020-4-29
+# Dependiendo del usuario ejecutor se regeneran todos los perfiles o solo el personal
+# Proyecto Software Libre DGA
 
-EJECUTOR=$(whoami)
+# EJECUTOR=$(whoami)
 
-function mensaje-error-root {
-	TEXTO="Se requiren privilegios de \"administrador\" para <b>Regenerar el perfil</b> de los usuarios del sistema ..."
-	yad --title "Regenerar Perfiles de Usuarios" \
-	--center \
-	--image vitalinux \
-	--window-icon vitalinux \
-	--text "${TEXTO}" \
-	--buttons-layout center \
-	--button "Entendido":1
-	exit 1
-}
+# function mensaje-error-root {
+#     TEXTO="Se requiren privilegios de \"administrador\" para <b>Regenerar el perfil</b> de los usuarios del sistema ..."
+#     yad --title "Regenerar Perfiles de Usuarios" \
+#     --center \
+#     --image vitalinux \
+#     --window-icon vitalinux \
+#     --text "${TEXTO}" \
+#     --buttons-layout center \
+#     --button "Entendido":1
+#     exit 1
+# }
 
-if test "${EJECUTOR}" != "root" ; then
-	mensaje-error-root
-fi
+# if test "${EJECUTOR}" != "root" ; then
+#     mensaje-error-root
+# fi
 
 (
-	vx-regenerar-perfil-usuarios-cli
-
+    vx-regenerar-perfil-usuarios-cli | sed -r -u 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
+    echo -e "\n=> Ya puedes cerrar la ventana ..."
 ) | yad --title "Regenerar Perfiles de Usuarios" --text-info \
-		--window-icon vitalinux \
-		--tail \
-		--width="620" --height="200" \
-		--center \
-		--image vitalinux \
-		--buttons-layout center \
-		--button "Cerrar":0
+--window-icon vitalinux \
+--tail \
+--width="620" --height="200" \
+--center \
+--image vitalinux \
+--buttons-layout center \
+--button "Cerrar":0

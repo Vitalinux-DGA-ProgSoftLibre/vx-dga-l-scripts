@@ -1,0 +1,22 @@
+#!/bin/bash
+# Script que borrar todos los anillos de claves que encuentre por usuario
+
+
+
+TEXTO="\tEsta utilidad permite el eliminar el almacén o Anillo de Claves del Usuario\n\t<b>¿Quieres Eliminarlo?</b>"
+
+yad --center --width 320 --question \
+--window-icon vitalinux \
+--image key-amarilla \
+--title "Eliminar Anillo de Claves Personal" \
+--text-align center --justify="center" \
+--text "${TEXTO}" \
+--fixed \
+--button="Eliminar":0 \
+--button="Cancelar":1 \
+--buttons-layout center
+if [[ ! $? -eq 0 ]] ; then
+    exit 0
+fi
+
+vx-keyrings-borrar-cli

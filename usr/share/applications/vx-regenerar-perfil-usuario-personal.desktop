@@ -1,0 +1,19 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Regenerate User Profile
+Name[en]=Regenerate User Profile
+Name[es]=Regenerar Perfil de Usuario
+Name[es_ES]=Regenerar Perfil de Usuario
+
+Comment=Regenerate User Profile by returning it to the Original State
+Comment[en]=Regenerate User Profile by returning it to the Original State
+Comment[es]=Regenerar Perfil de Usuario devolviendolo al Estado Original
+Comment[es_ES]=Regenerar Perfil de Usuario devolviendolo al Estado Original
+
+Icon=vitalinux
+Exec=/usr/bin/vx-regenerar-perfil-usuarios
+Terminal=false
+Type=Application
+Categories=Vitalinux;
+StartupNotify=true
+Hidden=false

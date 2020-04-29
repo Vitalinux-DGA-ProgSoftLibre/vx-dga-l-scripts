@@ -1,0 +1,20 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Delete User's Keyring 
+Name[en]=Delete User's Keyring 
+Name[es]=Eliminar Anillo de Claves Personal
+Name[es_ES]=Eliminar Anillo de Claves Personal
+
+Comment=Delete user's keyring
+Comment[en]=Delete user's keyring
+Comment[es]=Borrar el anillo de claves del usuario gráfico
+Comment[es_ES]=Borrar el anillo de claves del usuario gráfico
+
+Icon=key-amarilla
+Exec=/usr/bin/vx-keyring-usuario-borrar
+Terminal=false
+Type=Application
+Categories=Vitalinux;
+StartupNotify=true
+Hidden=false

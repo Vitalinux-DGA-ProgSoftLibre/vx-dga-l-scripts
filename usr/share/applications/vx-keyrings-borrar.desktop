@@ -3,8 +3,8 @@ Encoding=UTF-8
 
 Name=Delete All User's Keyring 
 Name[en]=Delete All User's Keyring 
-Name[es]=Eliminar Anillos de Claves
-Name[es_ES]=Eliminar Anillos de Claves
+Name[es]=Eliminar Todos los Anillos de Claves
+Name[es_ES]=Eliminar Todos los Anillos de Claves
 
 Comment=Delete all user's keyrings when we do not want to use them
 Comment[en]=Delete all user's keyrings when we do not want to use them

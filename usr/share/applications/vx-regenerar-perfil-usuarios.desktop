@@ -1,14 +1,14 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Regenerate User Profile
-Name[en]=Regenerate User Profile
-Name[es]=Regenerar Perfil de Usuarios
-Name[es_ES]=Regenerar Perfil de Usuarios
+Name=Regenerate All User Profiles
+Name[en]=Regenerate All User Profiles
+Name[es]=Regenerar Todos los Perfiles de Usuarios
+Name[es_ES]=Regenerar Todos los Perfiles de Usuarios
 
-Comment=Regenerate User Profile by returning it to the Original State
-Comment[en]=Regenerate User Profile by returning it to the Original State
-Comment[es]=Regenerar Perfil de Usuarios devolviendolos al Estado Original
-Comment[es_ES]=Regenerar Perfil de Usuarios devolviendolos al Estado Original
+Comment=Regenerate All User Profiles by returning it to the Original State
+Comment[en]=Regenerate All User Profiles by returning it to the Original State
+Comment[es]=Regenerar Todos los Perfiles de Usuarios devolviendolos al Estado Original
+Comment[es_ES]=Regenerar Todos los Perfiles de Usuarios devolviendolos al Estado Original
 
 Icon=vitalinux
 Exec=/usr/bin/vx-pk-regenerar-perfil-usuarios
