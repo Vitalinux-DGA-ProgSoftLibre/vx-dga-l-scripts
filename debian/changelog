@@ -1,3 +1,18 @@
+vx-dga-l-scripts (5.0-21) unstable; urgency=low
+
+  * Añadimos vx-regex-sustitucion para hacer sustituciones en grupos de líneas con python
+  * Añadimos vx-comprimir-videos para comprimir vídeos a formato MP4 aptos para WhatsApp y demás
+  * Añadimos vx-comprimir-video.svg como icono del script vx-comprimir-videos
+  * Modificamos control para añadir la dependencia con ffmpeg para poder comprimir vídeos
+  * Modificamos postinstall para modificar mimeapps.list y poder lanzar ficheros Java JAR
+  * Añadimos vx-java-jar para poder lanzar ficheros Java JAR
+  * Añadimos vx-java-jar.desktop para poder lanzar vx-java-jar
+  * Añadimos vx-java-jar.svg como icono para el lanzardor vx-java-jar.desktop
+  * Añadimos vx-videos-extraer-audio para extraer audio de vídeos
+  * Añadimos vx-video-extraer-audio.svg como icono del script vx-video-extraer-audio
+
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 29 Apr 2020 11:30:00 +0200
+
 vx-dga-l-scripts (5.0-20) unstable; urgency=low
 
   * Añadimos vx-conf-vboxusers para configurar añadir el grupo vboxusers a usuarios

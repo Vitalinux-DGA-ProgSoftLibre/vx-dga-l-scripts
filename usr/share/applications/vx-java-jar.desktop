@@ -1,0 +1,14 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Lanzar Ficheros Java JAR
+Name[es]=Lanzar Ficheros Java JAR
+Name[es_ES]=Lanzar Ficheros Java JAR
+Comment=Programa que Instala JAVA 8 en el equipo
+Comment[es]=Aplicación que ejecuta ficheros Java JAR
+Icon=vx-java-jar
+Exec=/usr/bin/vx-pk-instalar-java
+Terminal=false
+Type=Application
+Categories=Vitalinux;
+StartupNotify=true
+Hidden=false

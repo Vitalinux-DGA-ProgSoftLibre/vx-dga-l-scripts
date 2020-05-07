@@ -20,19 +20,42 @@ set -e
 
 case "$1" in
     configure)
+        
+        if test -f "/usr/bin/obtener-resolucion-pantalla" ; then
+            chmod 755 "/usr/bin/obtener-resolucion-pantalla"
+        fi
+        
+        # Configuramos mimeapps.list para poder abrir archivos Java/JAR:
+        # En resumen:
+        # [Default Applications] : asociación entre mimetype y aplicación (Desktop) que la abrirá por defecto (si se pincha doble click)
+        # [Added Associations] : asociación entre mimetypes y aplicaciones (uno o varios Desktop separados por ;) que aparecerá como opciones al pinchar con el botón derecho y elegir "abrir con"
+        # El aspecto de las secciones tiene el siguiente aspecto:
+        ## [Default Applications]
+        ## application/x-shockwave-flash=vx-firefox-swf.desktop
+        ## [Added Associations]
+        ## application/x-shockwave-flash=vx-firefox-swf.desktop;gnash.desktop;...desktop;...;
+        ARCHIVO="/usr/share/applications/mimeapps.list"
+        if [ ! -f "${ARCHIVO}" ] ; then
+            echo "=> No existe el archivo \"${ARCHIVO}\" por lo que se va a crear su estructura básica ..."
+		cat > ${ARCHIVO}<<EOF
+[Default Applications]
 
-    if test -f "/usr/bin/obtener-resolucion-pantalla" ; then
-        chmod 755 "/usr/bin/obtener-resolucion-pantalla"
-    fi
+[Added Associations]
 
-	chmod 755 /usr/bin/vx-*
-	
-	chmod u+s /usr/bin/pkexec
+EOF
+        fi
+        # Para abrir ficheros JAR: application/x-java-archive
+        crudini --set "{ARCHIVO}" "Default Applications" "application/x-java-archive" "vx-java-jar.desktop"
+        crudini --set "{ARCHIVO}" "Added Associations" "application/x-java-archive" "vx-java-jar.desktop;"
+        
+        # Damos permisos de ejecución a los scripts:
+        chmod 755 /usr/bin/vx-*
+        chmod u+s /usr/bin/pkexec
     ;;
-
+    
     abort-upgrade|abort-remove|abort-deconfigure)
     ;;
-
+    
     *)
         echo "postinst called with unknown argument \`$1'" >&2
         exit 1

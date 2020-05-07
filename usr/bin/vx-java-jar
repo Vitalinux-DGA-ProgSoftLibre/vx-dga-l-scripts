@@ -1,0 +1,21 @@
+#!/bin/bash
+# last-act: arturo@2020-5-7
+
+TEXTO="\tSelecciona el <b>Archivo Java tipo JAR</b> que deseas abrir ...\n"
+while test "$DESTINO" == "" -o -d "$DESTINO" -o -f "$DESTINO" ; do
+    ARCHIVO=$(yad \
+        --title "Abrir Archivo Java tipo JAR" \
+        --window-icon vitalinux \
+        --file --save \
+        --width 800 --height 300 --fullscreen \
+        --center \
+    --text "$TEXTO" --text-align="center")
+    TEXTO="    <b>Importante:</b> Debes indicar <span foreground='red'><b>un archivo que no exita ya en el sistema</b></span> ...\n    <b>¡¡No puedes dejar el nombre en blanco!!</b>"
+done
+
+
+if [ ! -z "${1}" ] ; then
+    java -jar "${1}"
+else
+    
+fi
