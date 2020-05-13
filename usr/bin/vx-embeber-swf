@@ -1,26 +1,63 @@
 #!/bin/bash
 
-# Obtenemos la lista de los parámetros recibidos: %F son la lista de todas las rutas absolutas de los archivos seleccionados
-NUMPARAM=$#
+seleccionar_archivo() {
+    TEXTO="\nSelecciona el <b>Archivo Flash de tipo SWF</b> que deseas abrir ...\n"
+    ICONO="vx-ficheros-swf"
+    FICHSWF="false"
+    while ! "${FICHSWF}" ; do
+        if ARCHIVO=$(yad \
+            --title "Abrir Archivo Flash tipo SWF" \
+            --window-icon vitalinux \
+            --image "${ICONO}" \
+            --file --save \
+            --width 800 --height 600 \
+            --fix \
+            --center \
+            --text "${TEXTO}" \
+            --text-align="center" \
+            --button="Seleccionar":0 \
+            --button="Cancelar":1 \
+            --buttons-layout="center") ; then
+            TEXTO="\n<b>¡¡Importante!!</b> Debes seleccionar <span foreground='red'><b>un archivo Flash de tipo SWF</b></span> ..."
+            if [[ ! -z "${ARCHIVO}" && -f "${ARCHIVO}" ]] ; then
+                TIPO="$(file --mime-type -b "${ARCHIVO}")"
+                MIMETYPE='^application/vnd.adobe.flash.movie$|^application/x-shockwave-flash$'
+                # Comprobamos si el mime-type es: application/vnd.adobe.flash.movie o application/x-shockwave-flash
+                [[ "${TIPO}" =~ ${MIMETYPE} ]] && FICHSWF="true"
+            fi
+        else
+            break
+        fi
+    done
+    "${FICHSWF}" && return 0 || return 1
+}
 
 FICHFUNCS="/usr/bin/vx-funcs-bash"
 [ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
-if (( ${#} < 1 )) ; then
-    TITULO="Error en la Llamada al Programa"
-    TEXTO="Debes Introducir al menos un parámetro: la ruta de un archivo swf"
-    vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
-fi
-
+# Obtenemos la lista de los parámetros recibidos: %F son la lista de todas las rutas absolutas de los archivos seleccionados
 # Creamos una lista con los parámetros recibidos $@.  El primer parametro es el ${PARAM[0]} ...  ${PARAM[*]} sería todos
 # Los parametros recibidos son las rutas absolutas de los archivos swf a embeber en un HTML:
+# Si no se pasan parámetros llamaremos a la función seleccionar_archivo
 declare -a PARAM
-PARAM=($@)
+ARCHIVO=""
+if (( ${#} < 1 )) ; then
+    if seleccionar_archivo ; then
+        PARAM=("${ARCHIVO}")
+    else
+        exit 1
+    fi
+else
+    PARAM=(${@})
+fi
+
+NUMPARAM=${#PARAM[@]}
+
 RESULTADO=""
 #yad --text "Se han seleccionado $# archivos y sus rutas son $*"
 
 # Extraemos el primer parametro recibido: el directorio base del primer archivo (%d)
-DIRECTORIOBASE="$(dirname "$1")"
+DIRECTORIOBASE="$(dirname "${PARAM[0]}")"
 PLANTILLA="/usr/share/vitalinux/swfs/plantilla-embeber-swf.htm"
 ICONO="/usr/share/vitalinux/swfs/vitalinux.ico"
 
@@ -31,12 +68,12 @@ INCREMENTO=$(echo 100/$NUMPARAM | bc)
 CONTADOR=0
 NARCHIVO=1
 
-(
+embeber_swf() {
     echo "#Va a empezar a embeberse los archivos SWF indicados ..."
-    until [ -z "$1" ]
-    do
-        NOMBREARCHIVO="$(vx-obtener_nombre_archivo_con_extension "${1}")"
-        NOMBREARCHIVO_SINEXT="$(vx-obtener_nombre_archivo "${1}")"
+    for FICH in ${PARAM[@]} ; do
+        DIRECTORIOBASE="$(dirname "${FICH}")"
+        NOMBREARCHIVO="$(vx-obtener_nombre_archivo_con_extension "${FICH}")"
+        NOMBREARCHIVO_SINEXT="$(vx-obtener_nombre_archivo "${FICH}")"
         echo "#Embebiendo Archivo SWF $NARCHIVO de $NUMPARAM: $NOMBREARCHIVO"
         if cat "${PLANTILLA}" | \
         sed -e "s/TITULO/${NOMBREARCHIVO_SINEXT}/g" -e "s/archivo.swf/${NOMBREARCHIVO}/g" > "${DIRECTORIOBASE}/${NOMBREARCHIVO_SINEXT}.html" ; then
@@ -51,11 +88,17 @@ NARCHIVO=1
     done
     echo "#Ok!!! Ya se ha terminado de embeber los Archivos SWF.  \nComo Resultado: $RESULTADO"
     echo "100"
-    ) | ( (( DETECGUI == 0 )) && yad --title "Generando HTML para embeber SWF:" \
+}
+
+( embeber_swf ) | ( (( DETECGUI == 0 )) && yad --title "Generando HTML para embeber SWF:" \
     --window-icon vitalinux \
     --image vx-ficheros-swf \
     --width 660 \
     --center \
 --progress --percentage=0 --button="Cerrar":0 || column )
+
+if (( ${NUMPARAM} == 1 )) && [[ -e "/usr/bin/chromium-browser" ]] ; then
+    chromium-browser --new-window "${DIRECTORIOBASE}/$(vx-obtener_nombre_archivo "${PARAM[0]}").html"
+fi
 
 exit 0

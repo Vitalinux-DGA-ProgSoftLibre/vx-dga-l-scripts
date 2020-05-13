@@ -1,0 +1,17 @@
+#!/bin/bash
+# last-act: arturo@2020-5-9
+
+uso() {
+    echo -e "=> Debes indicar como parámetro el fichero del cual quieres conocer su mime-type:
+    vx-mime-type /home/profesor/Escritorio
+    vx-mime-type /home/profesor/Documentos/midoc.odt /home/profesor/Escritorio"
+    exit 1
+}
+
+[ -z "${1}" ] && uso
+# Comprobamos que el parámetro es un fichero/directorio/link existente:
+until [ -z "${1}" ] ; do
+    [[ -e "${1}" ]] && xdg-mime query filetype "${1}" || uso
+    shift
+done
+exit 0

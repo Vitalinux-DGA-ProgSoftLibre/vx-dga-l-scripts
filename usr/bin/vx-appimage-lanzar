@@ -1,0 +1,94 @@
+#!/bin/bash
+
+seleccionar_archivo() {
+    FICHCORRECT="false"
+    while ! "${FICHCORRECT}" ; do
+        if ARCHIVO=$(yad \
+            --title "${TITULO}" \
+            --window-icon vitalinux \
+            --image "${ICONO}" \
+            --file --save \
+            --width 800 --height 600 \
+            --fixed \
+            --center \
+            --text "${TEXTO}" \
+            --text-align="center" \
+            --button="Seleccionar":0 \
+            --button="Cancelar":1 \
+            --buttons-layout="center") ; then
+            TEXTO="\n<b>¡¡Importante!!</b> Debes seleccionar un <span foreground='red'><b>${TIPO_ARCHIVO}</b></span> ..."
+            if [[ ! -z "${ARCHIVO}" && -f "${ARCHIVO}" ]] ; then
+                TIPO="$(file --mime-type -b "${ARCHIVO}")"
+                # Comprobamos el mime-type:
+                [[ "${TIPO}" =~ ${MIMETYPE} ]] && FICHCORRECT="true"
+            fi
+        else
+            break
+        fi
+    done
+    "${FICHCORRECT}" && return 0 || return 1
+}
+
+TIPO_ARCHIVO="Archivo de tipo AppImage"
+TEXTO="\nSelecciona el <b>${TIPO_ARCHIVO}</b> que deseas <b>Ejecutar</b> ...\n"
+TITULO="Ejecutar AppImage"
+ICONO="vx-appimage"
+MIMETYPE='^application/x-iso9660-appimage$|^application/vnd.appimage$|^application/x-executable$'
+
+mime-type-check() {
+    if [[ ! -z "${ARCHIVO}" && -f "${ARCHIVO}" ]] ; then
+        TIPO="$(file --mime-type -b "${ARCHIVO}")"
+        # Comprobamos el mime-type:
+        [[ "${TIPO}" =~ ${MIMETYPE} ]] && return 0 || return 1
+    else
+        return 1
+    fi
+}
+
+consultar() {
+    if yad \
+    --title "${TITULO}" \
+    --window-icon vitalinux \
+    --image "${ICONO}" \
+    --fixed \
+    --center \
+    --text "¿Quieres Ejecutar $(basename ${ARCHIVO})?" \
+    --button "Aceptar":0 \
+    --button "Cancelar":1 ; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+ejecutar_appimage() {
+    if chmod +x "${ARCHIVO}" ; then
+        "${ARCHIVO}"
+    else
+        yad --title "${TITULO}" \
+        --window-icon vitalinux \
+        --image "${ICONO}" \
+        --fixed \
+        --center \
+        --text "¡¡Problemas para dar permisos de Ejecución a $(basename ${ARCHIVO})!!" \
+        --button "Cerrar":1
+        exit 1
+    fi
+}
+
+if [ ! -z "${1}" ] ; then
+    ARCHIVO="${1}"
+    if mime-type-check ;  then
+        if [[ -x "${ARCHIVO}" ]] ; then
+            "${ARCHIVO}"
+        else
+            consultar && ejecutar_appimage
+        fi
+    fi
+else
+    if seleccionar_archivo ; then
+        ejecutar_appimage
+    fi
+fi
+
+exit 0

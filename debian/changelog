@@ -10,8 +10,17 @@ vx-dga-l-scripts (5.0-21) unstable; urgency=low
   * Añadimos vx-java-jar.svg como icono para el lanzardor vx-java-jar.desktop
   * Añadimos vx-videos-extraer-audio para extraer audio de vídeos
   * Añadimos vx-video-extraer-audio.svg como icono del script vx-video-extraer-audio
+  * Añadimos vx-mime-type para conocer el mime type de un archivo
+  * Añadimos vx-camara-show para mostrar en pantalla lo que capta la Camara Web
+  * Añadimos vx-mimetype-desktopfile-conf para configurar asociaciones entre mimetypes y desktopfiles
+  * Añadimos vx-appimage-lanzar para lanzar appimages
+  * Añadimos vx-appimage-lanzar.desktop para lanzar appimages mediante vx-appimage-lanzar
+  * Añadimos vx-appimage.svg como icono para el lanzador anterior
+  * Añadimos vx-embeber-swf.desktop para lanzar archivos SWF
+  * Modificamos vx-embeber-swf para lanzar mediante chromium el HTML con SWF embebido
+  * Modificamos postinst para tener en cuenta la asociacione de mimetypes y filedesktop
 
- -- Arturo Martín <amartinromero@gmail.com>  Wed, 29 Apr 2020 11:30:00 +0200
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 13 May 2020 11:30:00 +0200
 
 vx-dga-l-scripts (5.0-20) unstable; urgency=low
 

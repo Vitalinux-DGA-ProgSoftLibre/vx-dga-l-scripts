@@ -1,10 +1,10 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Lanzar Ficheros Java JAR
+Name=Launch Files Java JAR
 Name[es]=Lanzar Ficheros Java JAR
 Name[es_ES]=Lanzar Ficheros Java JAR
-Comment=Programa que Instala JAVA 8 en el equipo
-Comment[es]=Aplicación que ejecuta ficheros Java JAR
+Comment=Program to launch Files Java JAR
+Comment[es]=Aplicación que lanza ficheros Java JAR
 Icon=vx-java-jar
 Exec=vx-java-jar %f
 Terminal=false
@@ -12,3 +12,4 @@ Type=Application
 Categories=Vitalinux;
 StartupNotify=true
 Hidden=false
+MimeType=application/x-java-archive;application/java-archive;application/x-jar;

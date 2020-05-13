@@ -1,0 +1,15 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Launch AppImages
+Name[es]=Lanzar AppImages
+Name[es_ES]=Lanzar AppImages
+Comment=Program to launch AppImage Files
+Comment[es]=Aplicación que lanza ficheros de tipo AppImage
+Icon=vx-appimage
+Exec=vx-appimage-lanzar %f
+Terminal=false
+Type=Application
+Categories=Vitalinux;
+StartupNotify=true
+Hidden=false
+MimeType=application/x-iso9660-appimage;application/vnd.appimage;application/x-executable;

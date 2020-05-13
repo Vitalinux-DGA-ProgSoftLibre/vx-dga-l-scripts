@@ -1,0 +1,93 @@
+#!/bin/bash
+# last-act: arturo@2020-5-8
+# desc: Script que configura las secciones [Default Applications] y [Added Associations]
+# En función del ejecutor del script se configura a nivel personal o global
+
+# En resumen:
+# [Default Applications] : asociación entre mimetype y aplicación (Desktop) que la abrirá por defecto (si se pincha doble click)
+# [Added Associations] : asociación entre mimetypes y aplicaciones (uno o varios Desktop separados por ;) que aparecerá como opciones al pinchar con el botón derecho y elegir "abrir con"
+# El aspecto de las secciones tiene el siguiente aspecto:
+## [Default Applications]
+## application/x-shockwave-flash=vx-firefox-swf.desktop
+## [Added Associations]
+## application/x-shockwave-flash=vx-firefox-swf.desktop;gnash.desktop;...desktop;...;
+
+# El orden de preferencia para las asociaciones entre lanzadores FileDesktop y mimetypes:
+# 1) Fichero local/personal:
+# ${HOMEUSU}/.local/share/applications/mimeapps.list
+# ${HOME}/.config/mimeapps.list
+# 2) Fichero general para defaults:
+# /etc/xdg/lubuntu/applications/defaults.list
+# /usr/share/applications/defaults.list
+# 3) Fichero general: /usr/share/applications/mimeapps.list
+
+uso() {
+    echo -e "=> Debes pasar como primer parámetro si quieres configurar:
+    1 parámetro) [Default Applications] o [Added Associations] o --all
+    Resto parámetros) A continuación una lista de asociaciones mimetype:filedesktop
+    p.e. vx-mimetype-desktopfile-conf \"Default Applications\" \"\${LISTADO[@]}\"
+    p.e. vx-mimetype-desktopfile-conf \"Added Associations\" \"\${LISTADO[@]}\"
+    p.e. vx-mimetype-desktopfile-conf --all \"\${LISTADO[@]}\"
+    Donde LISTADO podría ser lo siguiente:
+    LISTADO=(
+    \"application/x-java-archive:vx-java-jar.desktop\"
+    \"application/java-archive:vx-java-jar.desktop\"
+    \"application/x-jar:vx-java-jar.desktop\"
+    )
+    "
+    exit 1
+}
+
+# Comprobamos el primer parámetro recibido:
+REGEX='^Default Applications$|^Added Associations$|^--all$'
+OPCION="${1}"
+LISTA_OPCIONES=()
+[[ "${OPCION}" =~ ${REGEX} ]] && \
+{
+    [[ "${OPCION}" == "--all" ]] && \
+    LISTA_OPCIONES=( "Default Applications" "Added Associations" ) || \
+    LISTA_OPCIONES=( "${OPCION}" )
+    shift ;
+} || uso
+
+EJECUTOR="$(whoami)"
+USUARIO="$(vx-usuario-grafico)"
+HOMEUSU="$(vx-home-usuario-grafico)"
+LISTA_ARCHIVOS=()
+[[ "${EJECUTOR}" == "root" ]] && \
+{
+    [[ "${OPCION}" == "Default Applications" ]] && \
+    LISTA_ARCHIVOS=( "/etc/xdg/lubuntu/applications/defaults.list" \
+        "/usr/share/applications/defaults.list" \
+    "/usr/share/applications/mimeapps.list" ) || \
+    LISTA_ARCHIVOS=( "/usr/share/applications/mimeapps.list" ) ;
+} || \
+LISTA_ARCHIVOS=( "${HOMEUSU}/.local/share/applications/mimeapps.list" \
+"${HOMEUSU}/.config/mimeapps.list" )
+
+for ARCHIVO in "${LISTA_ARCHIVOS[@]}" ; do
+    if [ ! -f "${ARCHIVO}" ] ; then
+        echo -e "=> No existe el archivo: \"${ARCHIVO}\".\n=> Se creará si hay permisos suficientes ..."
+    fi
+    for ASOCIACION in ${@} ; do
+        MIMETYPE="${ASOCIACION%:*}"
+        for ELEMENTO in "${LISTA_OPCIONES[@]}" ; do
+            if [[ "${ELEMENTO}" == "Added Associations" ]] ; then
+                if OLD_LANZADORES="$(crudini --get "${ARCHIVO}" "${ELEMENTO}" "${MIMETYPE}")" ; then
+                    # Comprobamos si la lista de lanzadores acaba en ";"
+                    REGEX='^.*;$'
+                    [[ "${OLD_LANZADORES}" =~ ${REGEX} ]] && \
+                    LANZADOR="${OLD_LANZADORES}${ASOCIACION#*:};" || \
+                    LANZADOR="${OLD_LANZADORES};${ASOCIACION#*:};"
+                else
+                    LANZADOR="${ASOCIACION#*:}"
+                fi
+            fi
+            crudini --set "${ARCHIVO}" "${ELEMENTO}" "${MIMETYPE}" "${LANZADOR}" && \
+            echo "=> ${ARCHIVO}: [${OPCION}] ${MIMETYPE} ${LANZADOR}" || \
+            echo "=> Error al configurar: ${ARCHIVO} ... ¿Falta de permisos?"
+        done
+    done
+done
+
+exit 0

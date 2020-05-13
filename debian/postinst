@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # postinst script for vx-dga-l-scripts
 #
 # see: dh_installdeb(1)
@@ -17,6 +17,22 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+conf_java_jar() {
+    # Configuramos mimeapps.list para archivos Java JAR: defaults.list y mimeapps.list
+    # Indicamos la lista de mimetypes y filedesktops que los abriran:
+    LISTADO=( "application/x-java-archive:vx-java-jar.desktop" \
+        "application/java-archive:vx-java-jar.desktop" \
+    "application/x-jar:vx-java-jar.desktop")
+    vx-mimetype-desktopfile-conf "Default Applications" "${LISTADO[@]}"
+}
+
+conf_flash_swf() {
+    # Configuramos mimeapps.list para archivos Flash SWF: defaults.list y mimeapps.list
+    # Indicamos la lista de mimetypes y filedesktops que los abriran:
+    LISTADO=( "application/vnd.adobe.flash.movie:vx-embeber-swf.desktop" \
+    "application/x-shockwave-flash:vx-embeber-swf.desktop" )
+    vx-mimetype-desktopfile-conf "Default Applications" "${LISTADO[@]}"
+}
 
 case "$1" in
     configure)
@@ -25,28 +41,9 @@ case "$1" in
             chmod 755 "/usr/bin/obtener-resolucion-pantalla"
         fi
         
-        # Configuramos mimeapps.list para poder abrir archivos Java/JAR:
-        # En resumen:
-        # [Default Applications] : asociación entre mimetype y aplicación (Desktop) que la abrirá por defecto (si se pincha doble click)
-        # [Added Associations] : asociación entre mimetypes y aplicaciones (uno o varios Desktop separados por ;) que aparecerá como opciones al pinchar con el botón derecho y elegir "abrir con"
-        # El aspecto de las secciones tiene el siguiente aspecto:
-        ## [Default Applications]
-        ## application/x-shockwave-flash=vx-firefox-swf.desktop
-        ## [Added Associations]
-        ## application/x-shockwave-flash=vx-firefox-swf.desktop;gnash.desktop;...desktop;...;
-        ARCHIVO="/usr/share/applications/mimeapps.list"
-        if [ ! -f "${ARCHIVO}" ] ; then
-            echo "=> No existe el archivo \"${ARCHIVO}\" por lo que se va a crear su estructura básica ..."
-		cat > ${ARCHIVO}<<EOF
-[Default Applications]
-
-[Added Associations]
-
-EOF
-        fi
-        # Para abrir ficheros JAR: application/x-java-archive
-        crudini --set "{ARCHIVO}" "Default Applications" "application/x-java-archive" "vx-java-jar.desktop"
-        crudini --set "{ARCHIVO}" "Added Associations" "application/x-java-archive" "vx-java-jar.desktop;"
+        # Configuramos mimetypes java_jar y flash_swf:
+        conf_java_jar
+        conf_flash_swf
         
         # Damos permisos de ejecución a los scripts:
         chmod 755 /usr/bin/vx-*
