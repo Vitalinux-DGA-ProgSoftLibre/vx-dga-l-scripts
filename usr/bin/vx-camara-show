@@ -1,0 +1,4 @@
+#!/bin/bash
+# last-act: arturo@2020-5-10
+# desc: Muestra en pantalla en miniatura lo que captura la cámara Web:
+mplayer -noborder -quiet -ontop -fps 15 -geometry 200x150+1110+560noaudio tv://

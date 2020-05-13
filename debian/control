@@ -8,7 +8,7 @@ Homepage: http://wiki.vitalinux.educa.aragon.es
 
 Package: vx-dga-l-scripts
 Architecture: all
-Depends: ${misc:Depends}, members, gnome-screenshot, imagemagick, zenity, yad, lame, ghostscript, pdftk, evince, mplayer, vx-dga-l-variables-conf, gparted, dosfstools, lxsession, vx-dga-l-menu-vitalinux, vx-dga-l-skel-usuarios (>= 2.0-1), moreutils
+Depends: ${misc:Depends}, ffmpeg, members, gnome-screenshot, imagemagick, zenity, yad, lame, ghostscript, pdftk, evince, mplayer, vx-dga-l-variables-conf, gparted, dosfstools, lxsession, vx-dga-l-menu-vitalinux, vx-dga-l-skel-usuarios (>= 2.0-1), moreutils
 Pre-depends: vx-dga-l-menu-vitalinux (>= 2.0-8)
 Replaces: vx-dga-l-actions-explorador-archivos
 Description: Scripts utiles para LVitalinux

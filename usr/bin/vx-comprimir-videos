@@ -1,0 +1,64 @@
+#!/bin/bash
+# last-act: arturo@2020-5-7
+
+# Obtenemos el número de parámetros recibidos:
+# %F en action scripts son la lista de rutas absolutas de los archivos seleccionados
+NUMPARAM=$#
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+if (( ${#} < 1 )) ; then
+    TITULO="Error en la Llamada al Programa"
+    TEXTO="Debes Introducir al menos un parámetro: la ruta de un Archivo a Comprimir"
+    vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
+fi
+
+# Creamos una lista con los parámetros recibidos $@.  El primer parametro es el ${PARAM[0]} ...  ${PARAM[*]} sería todos
+# La mitad de los parametros recibidos son las rutas absolutas de los archivos, y la otra mitad son sus extensiones
+declare -a PARAM
+PARAM=($@)
+RESULTADO=""
+#yad --text "Se han seleccionado $# archivos y sus rutas son $*"
+INCREMENTO=$(echo 100/$NUMPARAM | bc)
+CONTADOR=0
+(
+    echo "#Va a empezar a comprimirse los vídeos seleccionados en formato MP4 ..."
+    until [ -z "$1" ] ; do
+        
+        #if echo $1 | grep "[.][pP][nN][gG]" &> /dev/null ; then
+        #ARCHIVO="$(echo $1 | awk -F'/' '{ print $NF }')"
+        ARCHIVO="$(basename "${1}")"
+        NOMBRE="$(basename ${1%.${1##*.}})"
+        ARCHIVO_SALIDA="${NOMBRE}-comp.mp4"
+        DIRECTORIOBASE=$(dirname "$1")
+        
+        TEXTO="#Comprimiendo Archivo: ${ARCHIVO}\n"
+        TEXTO+="El archivo comprimido resultante: ${ARCHIVO_SALIDA}\n"
+        TEXTO+="¡¡Ten paciencia ... Comprimir un vídeo cuesta mucho tiempo!!"
+        echo "${TEXTO}"
+        
+        # dpkg -S pngnq : pngnq (se requiere ese paquete para esta utilidad)
+        if ffmpeg -i "${1}" -vcodec libx264 -acodec aac "${DIRECTORIOBASE}/${ARCHIVO_SALIDA}" > /dev/null 2>&1 ; then
+            [ -z "${RESULTADO}" ] && \
+            RESULTADO="${ARCHIVO} => ${ARCHIVO_SALIDA}" || \
+            RESULTADO="${RESULTADO}\n${ARCHIVO} => ${ARCHIVO_SALIDA}"
+        else
+            [ -z "${RESULTADO}" ] && \
+            RESULTADO="¡¡Problemas para generar ${ARCHIVO_SALIDA}!!" || \
+            RESULTADO="${RESULTADO}\n¡¡Problemas para generar ${ARCHIVO_SALIDA}!!"
+        fi
+        CONTADOR=$(expr $CONTADOR + $INCREMENTO)
+        echo $CONTADOR
+        shift
+    done
+    echo "#Ok!!! Ya se ha terminado de comprimir los Vídeos. \nComo Resultado: \n$RESULTADO"
+    echo "100"
+) | yad --title "Herramienta de compresión de Vídeos" \
+--window-icon vitalinux \
+--image vx-comprimir-video \
+--width 600 \
+--center \
+--progress --pulsate --button="Cerrar":0
+
+exit 0

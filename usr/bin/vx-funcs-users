@@ -6,6 +6,14 @@ FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 
 USUARIOGRAFICO="$(vx-usuario-grafico)"
 
+vx-check_inicio_automatico() {
+    # Devuelve 0 si esta configurado un inicio de sesión automático:
+    local FICHERO="/etc/lightdm/lightdm.conf"
+    [ ! -f "${FICHERO}" ] && return 1
+    local USUARIO="$(grep "^autologin-user=" "${FICHERO}" | cut -d"=" -f2)"
+    vx-check_exit_users "${USUARIO}" && return 0 || return 1
+}
+
 function vx-obtener_lista_usuarios() {
     # Si NºParametros=0 y Ejecutor=root: devuelve la lista completa de usuarios gráficos
     # Si NºParametros=0 y Ejecutor!=root: devuelve el ejecutor que ha llamado a la función

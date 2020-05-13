@@ -1,0 +1,48 @@
+#!/bin/bash
+# last-act: arturo@2020-5-7
+
+seleccionar_archivo() {
+    TEXTO="\nSelecciona el <b>Archivo Java de tipo JAR</b> que deseas abrir ...\n"
+    ICONO="vx-java-jar"
+    FICHJAR="false"
+    while ! "${FICHJAR}" ; do
+        if ARCHIVO=$(yad \
+            --title "Abrir Archivo Java tipo JAR" \
+            --window-icon vitalinux \
+            --image "${ICONO}" \
+            --file --save \
+            --width 800 --height 600 \
+            --fix \
+            --center \
+            --text "${TEXTO}" \
+            --text-align="center" \
+            --button="Seleccionar":0 \
+            --button="Cancelar":1 \
+            --buttons-layout="center") ; then
+            TEXTO="\n<b>¡¡Importante!!</b> Debes seleccionar <span foreground='red'><b>un archivo Java de tipo JAR</b></span> ..."
+            if [[ ! -z "${ARCHIVO}" && -f "${ARCHIVO}" ]] ; then
+                TIPO="$(file --mime-type -b "${ARCHIVO}")"
+                MIMETYPE='application/(x-)?java-archive'
+                # Comprobamos si el mime-type es: application/java-archive o application/x-java-archive
+                [[ "${TIPO}" =~ ${MIMETYPE} ]] && FICHJAR="true"
+            fi
+        else
+            break
+        fi
+    done
+    "${FICHJAR}" && return 0 || return 1
+}
+
+[ ! -z "${1}" ] && \
+ARCHIVO="${1}" || \
+ARCHIVO=""
+
+if [ ! -z "${1}" ] ; then
+    java -jar "${ARCHIVO}"
+else
+    if seleccionar_archivo ; then
+        java -jar "${ARCHIVO}"
+    fi
+fi
+
+exit 0

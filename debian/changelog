@@ -1,3 +1,30 @@
+vx-dga-l-scripts (4.1-14) unstable; urgency=low
+
+  * Añadimos vx-regex-sustitucion para hacer sustituciones en grupos de líneas con python
+  * Añadimos vx-comprimir-videos para comprimir vídeos a formato MP4 aptos para WhatsApp y demás
+  * Añadimos vx-comprimir-video.svg como icono del script vx-comprimir-videos
+  * Modificamos control para añadir la dependencia con ffmpeg para poder comprimir vídeos
+  * Modificamos postinstall para modificar mimeapps.list y poder lanzar ficheros Java JAR
+  * Añadimos vx-java-jar para poder lanzar ficheros Java JAR
+  * Añadimos vx-java-jar.desktop para poder lanzar vx-java-jar
+  * Añadimos vx-java-jar.svg como icono para el lanzardor vx-java-jar.desktop
+  * Añadimos vx-videos-extraer-audio para extraer audio de vídeos
+  * Añadimos vx-video-extraer-audio.svg como icono del script vx-video-extraer-audio
+  * Añadimos vx-mime-type para conocer el mime type de un archivo
+  * Añadimos vx-camara-show para mostrar en pantalla lo que capta la Camara Web
+  * Añadimos vx-mimetype-desktopfile-conf para configurar asociaciones entre mimetypes y desktopfiles
+  * Añadimos vx-appimage-lanzar para lanzar appimages
+  * Añadimos vx-appimage-lanzar.desktop para lanzar appimages mediante vx-appimage-lanzar
+  * Añadimos vx-appimage.svg como icono para el lanzador anterior
+  * Añadimos vx-embeber-swf.desktop para lanzar archivos SWF
+  * Modificamos vx-embeber-swf para lanzar mediante chromium el HTML con SWF embebido
+  * Modificamos postinst para tener en cuenta la asociacione de mimetypes y filedesktop
+  * Modificamos vx-funcs-users para añadir la función vx-check_inicio_automatico
+  * Añadimos /usr/share/vitalinux/keyrings/ para proporcionar un keyring abierto en claro
+  * Modificamos vx-keyrings-borrar-cli para poder crear un keyring abierto tras eliminar el indicado 
+
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 13 May 2020 11:30:00 +0200
+
 vx-dga-l-scripts (4.1-13) unstable; urgency=low
 
   * Añadimos vx-conf-libreoffice-instalar-extension para configurar extensiones en Libreoffice
