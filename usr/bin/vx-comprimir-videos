@@ -33,13 +33,20 @@ CONTADOR=0
         ARCHIVO_SALIDA="${NOMBRE}-comp.mp4"
         DIRECTORIOBASE=$(dirname "$1")
         
-        echo "#Comprimiendo Archivo : ${ARCHIVO} ...\nEl archivo comprimido resultante se llamará ${ARCHIVO_SALIDA} ..."
+        TEXTO="#Comprimiendo Archivo: ${ARCHIVO}\n"
+        TEXTO+="El archivo comprimido resultante: ${ARCHIVO_SALIDA}\n"
+        TEXTO+="¡¡Ten paciencia ... Comprimir un vídeo cuesta mucho tiempo!!"
+        echo "${TEXTO}"
         
         # dpkg -S pngnq : pngnq (se requiere ese paquete para esta utilidad)
         if ffmpeg -i "${1}" -vcodec libx264 -acodec aac "${DIRECTORIOBASE}/${ARCHIVO_SALIDA}" > /dev/null 2>&1 ; then
+            [ -z "${RESULTADO}" ] && \
+            RESULTADO="${ARCHIVO} => ${ARCHIVO_SALIDA}" || \
             RESULTADO="${RESULTADO}\n${ARCHIVO} => ${ARCHIVO_SALIDA}"
         else
-            RESULTADO="¡¡Problemas para generar ${ARCHIVO_SALIDA}!!"
+            [ -z "${RESULTADO}" ] && \
+            RESULTADO="¡¡Problemas para generar ${ARCHIVO_SALIDA}!!" || \
+            RESULTADO="${RESULTADO}\n¡¡Problemas para generar ${ARCHIVO_SALIDA}!!"
         fi
         CONTADOR=$(expr $CONTADOR + $INCREMENTO)
         echo $CONTADOR
@@ -52,6 +59,6 @@ CONTADOR=0
 --image vx-comprimir-video \
 --width 600 \
 --center \
---progress --percentage=0 --button="Cerrar":0
+--progress --pulsate --button="Cerrar":0
 
 exit 0
