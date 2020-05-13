@@ -7,10 +7,10 @@ check_and_del() {
     if vx-funcs-users vx-check_inicio_automatico ; then
         if [[ "${EJECUTOR}" == "root" ]] ; then
             USUARIO="$(vx-usuario-grafico "${1}")"
-            sudo -u "${USUARIO}" mkdir -p "${DIR}"
+            sudo -u "${USUARIO}" mkdir -m 700 -p "${DIR}"
             [[ -d "${DIR}" ]] && sudo -u "${USUARIO}" rsync -ah --chmod=600 "/usr/share/vitalinux/keyrings/" "${DIR}/"
         else
-            mkdir -p "${DIR}"
+            mkdir -m 700 -p "${DIR}"
             [[ -d "${DIR}" ]] && rsync -ah --chmod=600 "/usr/share/vitalinux/keyrings/" "${DIR}/"
         fi
     fi
