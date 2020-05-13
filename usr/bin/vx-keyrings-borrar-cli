@@ -1,17 +1,28 @@
 #!/bin/bash
 # Script que borrar todos los anillos de claves que encuentre por usuario
 
+skel_keyrings() {
+    local DIR="${1}"
+    mkdir -m 700 -p "${DIR}" && \
+    echo "=> Se ha creado el directorio vacío: ${DIR}" || \
+    echo "=> ¡¡Error!! Problema para crear el directorio: ${DIR}"
+    [[ -d "${DIR}" ]] && \
+    rsync -rl --chmod=600 "/usr/share/vitalinux/keyrings/" "${DIR}/" && \
+    echo "=> Se ha sincronizado el esqueleto del keyring en claro"
+    
+}
+
 check_and_del() {
     local DIR="${1}/.local/share/keyrings"
-    [[ -d "${DIR}" ]] && rm -Rf "${DIR}"
+    [[ -d "${DIR}" ]] && rm -Rf "${DIR}" && \
+    echo "=> Se ha eliminado: ${DIR}"
     if vx-funcs-users vx-check_inicio_automatico ; then
+        echo -e "=> El equipo inicia sesión de manera automática. Crearemos un esqueleto de keyring en claro"
         if [[ "${EJECUTOR}" == "root" ]] ; then
             USUARIO="$(vx-usuario-grafico "${1}")"
-            sudo -u "${USUARIO}" mkdir -m 700 -p "${DIR}"
-            [[ -d "${DIR}" ]] && sudo -u "${USUARIO}" rsync -ah --chmod=600 "/usr/share/vitalinux/keyrings/" "${DIR}/"
+            sudo -u "${USUARIO}" bash -c "$(declare -f skel_keyrings); skel_keyrings ${DIR}"
         else
-            mkdir -m 700 -p "${DIR}"
-            [[ -d "${DIR}" ]] && rsync -ah --chmod=600 "/usr/share/vitalinux/keyrings/" "${DIR}/"
+            skel_keyrings "${DIR}"
         fi
     fi
 }
@@ -39,6 +50,7 @@ if [[ "${EJECUTOR}" == "root" ]]; then
                 HOMEUSU="$(vx-home-usuario-grafico "${1}")"
                 check_and_del "${HOMEUSU}"
             fi
+            shift
         done
     fi
 else
