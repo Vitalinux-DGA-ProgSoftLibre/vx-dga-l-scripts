@@ -41,13 +41,14 @@ case "$1" in
             chmod 755 "/usr/bin/obtener-resolucion-pantalla"
         fi
         
+        # Damos permisos de ejecución a los scripts:
+        chmod 755 /usr/bin/vx-*
+        chmod u+s /usr/bin/pkexec
+        
         # Configuramos mimetypes java_jar y flash_swf:
         conf_java_jar
         conf_flash_swf
         
-        # Damos permisos de ejecución a los scripts:
-        chmod 755 /usr/bin/vx-*
-        chmod u+s /usr/bin/pkexec
     ;;
     
     abort-upgrade|abort-remove|abort-deconfigure)
