@@ -1,23 +1,46 @@
 #!/bin/bash
 # Script que borrar todos los anillos de claves que encuentre por usuario
 
+check_and_del() {
+    local DIR="${1}/.local/share/keyrings"
+    [[ -d "${DIR}" ]] && rm -Rf "${DIR}"
+    if vx-funcs-users vx-check_inicio_automatico ; then
+        if [[ "${EJECUTOR}" == "root" ]] ; then
+            USUARIO="$(vx-usuario-grafico "${1}")"
+            sudo -u "${USUARIO}" mkdir -p "${DIR}"
+            [[ -d "${DIR}" ]] && sudo -u "${USUARIO}" rsync -ah --chmod=600 "/usr/share/vitalinux/keyrings/" "${DIR}/"
+        else
+            mkdir -p "${DIR}"
+            [[ -d "${DIR}" ]] && rsync -ah --chmod=600 "/usr/share/vitalinux/keyrings/" "${DIR}/"
+        fi
+    fi
+}
+
 del_all_keyrings(){
     for HOMEUSU in $(vx-home-usuarios-graficos); do
-        [ -d "${HOMEUSU}" ] && \
-        find ${HOMEUSU} -name "*.keyring" -exec rm -f '{}' \;
+        check_and_del "${HOMEUSU}"
+        # [ -d "${HOMEUSU}" ] && \
+        # find ${HOMEUSU} -name "*.keyring" -exec rm -f '{}' \;
     done
 }
 
 del_personal_keyring() {
-    HOMEUSU="$(vx-home-usuario-grafico)"
-    [ -d "${HOMEUSU}" ] && \
-    find ${HOMEUSU} -name "*.keyring" -exec rm -f '{}' \;
+    local HOMEUSU="$(vx-home-usuario-grafico "${EJECUTOR}")"
+    check_and_del "${HOMEUSU}"
 }
 
-USER=$(whoami)
+EJECUTOR="$(whoami)"
 
-if [ "$USER" = "root" ]; then
-    del_all_keyrings
+if [[ "${EJECUTOR}" == "root" ]]; then
+    [[ -z "${1}" || "${1}" == "--all" ]] && del_all_keyrings
+    if [[ ! -z "${1}" && "${1}" != "--all" ]] ; then
+        until [ -z "${1}" ] ; do
+            if vx-funcs-users vx-check_exit_users "${1}" ; then
+                HOMEUSU="$(vx-home-usuario-grafico "${1}")"
+                check_and_del "${HOMEUSU}"
+            fi
+        done
+    fi
 else
     del_personal_keyring
 fi

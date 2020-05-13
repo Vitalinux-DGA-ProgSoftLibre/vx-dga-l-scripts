@@ -19,6 +19,9 @@ vx-dga-l-scripts (5.0-21) unstable; urgency=low
   * Añadimos vx-embeber-swf.desktop para lanzar archivos SWF
   * Modificamos vx-embeber-swf para lanzar mediante chromium el HTML con SWF embebido
   * Modificamos postinst para tener en cuenta la asociacione de mimetypes y filedesktop
+  * Modificamos vx-funcs-users para añadir la función vx-check_inicio_automatico
+  * Añadimos /usr/share/vitalinux/keyrings/ para proporcionar un keyring abierto en claro
+  * Modificamos vx-keyrings-borrar-cli para poder crear un keyring abierto tras eliminar el indicado 
 
  -- Arturo Martín <amartinromero@gmail.com>  Wed, 13 May 2020 11:30:00 +0200
 
