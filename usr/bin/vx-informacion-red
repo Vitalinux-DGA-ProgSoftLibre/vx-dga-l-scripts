@@ -25,6 +25,14 @@ echo -e "Información asociada al equipo Vitalinux: CID (<b><tt><span foreground
 DISTRO=$(lsb_release -a 2> /dev/null | grep "Description:" | tr -s " " " " | cut -d":" -f2)
 ARQUIDISTRO=$(getconf LONG_BIT)
 echo -e "Versión Ubuntu: <b><tt><span foreground='blue'>${DISTRO} (${ARQUIDISTRO}-bits)</span></tt></b>" >> /tmp/info-tarjetas-red
+
+# Información de la versión de la ISO instalada:
+FICHISODATE="/usr/share/vitalinux/vx-iso-date/vx-iso-date.conf"
+if [[ -f "${FICHISODATE}" ]] ; then
+    VERSIONISO="$(crudini --get "${FICHISODATE}" "ISO" "DATEISO")"
+    echo -e "Versión ISO instalada: <b><tt><span foreground='blue'>${VERSIONISO}</span></tt></b>" >> /tmp/info-tarjetas-red
+fi
+
 KERNEL="$(uname -s) $(uname -r)"
 echo -e "Kernel: <b><tt><span foreground='blue'>${KERNEL}</span></tt></b>" >> /tmp/info-tarjetas-red
 # Para saber las arquitecturas soportadas rescatamos la segunda línea de la salida de lscpu:
