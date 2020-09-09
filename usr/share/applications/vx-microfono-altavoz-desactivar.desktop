@@ -1,0 +1,21 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Turn Off Microphone to Speaker
+Name[en]=Turn Off Microphone to Speaker
+Name[es]=Desactivar Microfono a Altavoz
+Name[es_ES]=Desactivar Microfono a Altavoz
+
+Comment=Turn Off Microphone to Speaker
+Comment[en]=Turn Off Microphone to Speaker
+Comment[es]=Desactivar Microfono a Altavoz
+Comment[es_ES]=Desactivar Microfono a Altavoz
+
+Icon=vx-microfono-altavoz-desactivar
+
+Exec=/usr/bin/vx-microfono-altavoz-activar
+Terminal=false
+Type=Application
+StartupNotify=true
+Hidden=false
+Categories=Audio;AudioVideo;

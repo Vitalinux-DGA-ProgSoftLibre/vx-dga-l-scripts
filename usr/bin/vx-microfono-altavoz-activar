@@ -1,0 +1,8 @@
+#!/bin/bash
+## Info: https://www.atareao.es/aplicacion/oir-el-microfono-ubuntu/
+# Script que activa la realimentación entre el microfono y el altavoz
+
+USUARIO="$(whoami)"
+FICH="/tmp/vx-microfono-altavoz-${USUARIO}"
+CODIGO="$(pactl load-module module-loopback)"
+echo -e "[idmicroalta]\nID=${CODIGO}" > "${FICH}"

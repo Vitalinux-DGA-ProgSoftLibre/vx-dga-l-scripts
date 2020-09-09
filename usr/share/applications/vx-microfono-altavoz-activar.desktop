@@ -1,0 +1,21 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Activate Microphone to Speaker
+Name[en]=Activate Microphone to Speaker
+Name[es]=Activar Microfono a Altavoz
+Name[es_ES]=Activar Microfono a Altavoz
+
+Comment=Activate Microphone to Speaker
+Comment[en]=Activate Microphone to Speaker
+Comment[es]=Activar Microfono a Altavoz
+Comment[es_ES]=Activar Microfono a Altavoz
+
+Icon=vx-microfono-altavoz-activar
+
+Exec=/usr/bin/vx-microfono-altavoz-activar
+Terminal=false
+Type=Application
+StartupNotify=true
+Hidden=false
+Categories=Audio;AudioVideo;

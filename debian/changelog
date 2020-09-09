@@ -1,3 +1,10 @@
+vx-dga-l-scripts (4.1-15) unstable; urgency=low
+
+  * Añadimos vx-microfono-altavor-activar para unir la entrada del micrófono al altavoz
+  * Añadimos vx-microfono-altavor-desactivar para desunir la entrada del micrófono al altavoz
+
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 9 Sep 2020 10:30:00 +0200
+
 vx-dga-l-scripts (4.1-14) unstable; urgency=low
 
   * Añadimos vx-regex-sustitucion para hacer sustituciones en grupos de líneas con python
