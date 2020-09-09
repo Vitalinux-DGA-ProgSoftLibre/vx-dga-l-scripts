@@ -1,0 +1,8 @@
+#!/bin/bash
+## Info: https://www.atareao.es/aplicacion/oir-el-microfono-ubuntu/
+# Script que desactiva la realimentación entre el microfono y el altavoz
+
+USUARIO="$(whoami)"
+FICH="/tmp/vx-microfono-altavoz-${USUARIO}"
+CODIGO="$(crudini --get "${FICH}" "idmicroalta" "ID")"
+pactl unload-module "${CODIGO}"

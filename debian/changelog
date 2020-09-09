@@ -1,3 +1,10 @@
+vx-dga-l-scripts (5.0-23) unstable; urgency=low
+
+  * Añadimos vx-microfono-altavor-activar para unir la entrada del micrófono al altavoz
+  * Añadimos vx-microfono-altavor-desactivar para desunir la entrada del micrófono al altavoz
+
+ -- Arturo Martín <amartinromero@gmail.com>  Wed, 9 Sep 2020 10:30:00 +0200
+
 vx-dga-l-scripts (5.0-22) unstable; urgency=low
 
   * Modificamos vx-informacion-red información versión de la ISO
