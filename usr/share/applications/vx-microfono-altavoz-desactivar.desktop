@@ -11,9 +11,9 @@ Comment[en]=Turn Off Microphone to Speaker
 Comment[es]=Desactivar Microfono a Altavoz
 Comment[es_ES]=Desactivar Microfono a Altavoz
 
-Icon=microphone-to-speaker-desactivar
+Icon=vx-microfono-altavoz-desactivar
 
-Exec=/usr/bin/vx-microfono-altavoz-activar
+Exec=/usr/bin/vx-microfono-altavoz-desactivar
 Terminal=false
 Type=Application
 StartupNotify=true

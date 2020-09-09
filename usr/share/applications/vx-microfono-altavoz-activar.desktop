@@ -11,7 +11,7 @@ Comment[en]=Activate Microphone to Speaker
 Comment[es]=Activar Microfono a Altavoz
 Comment[es_ES]=Activar Microfono a Altavoz
 
-Icon=microphone-to-speaker-activar
+Icon=vx-microfono-altavoz-activar
 
 Exec=/usr/bin/vx-microfono-altavoz-activar
 Terminal=false
