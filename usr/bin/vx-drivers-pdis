@@ -70,7 +70,7 @@ function seleccionar-modelo-pdi {
 		--entry \
 		--text "Selecciona tu PDI:" \
 		--entry-text \
-		"No driver" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard" "Approx")
+		"Sin Driver - Solo OpenBoard" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard" "Approx")
 }
 
 function comprobar-md5 {
@@ -469,7 +469,7 @@ COMMENT
 	if yad --center --title "Drivers PDIs" --question \
 		--window-icon vitalinux \
 		--image pdi \
-		--text "   Deseas (se recomienda) instalar <b>Open-Board(64bits recomendado)/Open-Sankore</b>   " \
+		--text "   Deseas instalar <b>Open-Board(64bits)/Open-Sankore(32 bits)</b>   " \
 		--width="350" --center \
 		--justify="center" --text-align="center" \
 		--button="Continuar":0 --button="Cancelar":1 ;  then
