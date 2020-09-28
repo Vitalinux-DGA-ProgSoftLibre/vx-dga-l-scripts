@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-24) unstable; urgency=low
+
+  * Modificamos vx-set-paginicio-navegadores para tener en cuenta la ruta de Chromium
+
+ -- Arturo Martín <amartinromero@gmail.com>  Mon, 28 Sep 2020 10:30:00 +0200
+
 vx-dga-l-scripts (5.0-23) unstable; urgency=low
 
   * Añadimos vx-microfono-altavor-activar para unir la entrada del micrófono al altavoz

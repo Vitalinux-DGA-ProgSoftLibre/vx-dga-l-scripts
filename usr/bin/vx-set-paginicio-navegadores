@@ -1,5 +1,5 @@
 #!/bin/bash
-# Versiones: [arturo@2019-12-16]
+# Versiones: [arturo@2020-9-28] [arturo@2019-12-16]
 
 uso() {
     echo "¡¡Importante!! Para configurar las paginas de inicio de navegadores:
@@ -24,6 +24,7 @@ FICHCONF="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 [ -f "${FICHCONF}" ] && . "${FICHCONF}"
 
 FICHCONFCHROME="/etc/opt/chrome/policies/managed/vx-paginicio-chrome.json"
+FICHCONFCHROMIUM="/etc/chromium/policies/managed/vx-paginicio-chrome.json"
 FICHCONFFIREFOX="/usr/lib/firefox/browser/defaults/preferences/vx-paginicio-firefox.js"
 
 #NUEVAPAGINICIOG='"https://www.google.es","https://aplicaciones.aragon.es/sigaddweb/login"'
@@ -57,20 +58,23 @@ until [[ -z "${1}" || -z "${2}" ]] ; do
         ;;
         "chrome" )
             NUEVAPAGINICIOG="${2}"
-            # Configuración de páginas de inicio de Google Chrome:
-            echo "=> Configuración de páginas de inicio de Google Chrome: ${NUEVAPAGINICIOG}"
-            if [ -f "${FICHCONFCHROME}" ] ; then
-                if ! grep -qE "${NUEVAPAGINICIOG}" "${FICHCONFCHROME}" ; then
-                    sed --follow-symlinks -i "s#\[.*\]#\[${NUEVAPAGINICIOG}\]#g" "${FICHCONFCHROME}" && \
-                    echo "=> Ok!! Configuradas en Google Chrome!!" || \
-                    echo "=> Error!! Problemas para configurar Google Chrome"
+            # Configuración de páginas de inicio de Google Chrome y Chromium:
+            FICHCONFCHROMIUM
+            echo "=> Configuración de páginas de inicio de Chromium y Google Chrome: ${NUEVAPAGINICIOG}"
+            for FICHCONF in "${FICHCONFCHROMIUM}" "${FICHCONFCHROME}" ; do
+                if [ -f "${FICHCONF}" ] ; then
+                    if ! grep -qE "${NUEVAPAGINICIOG}" "${FICHCONF}" ; then
+                        sed --follow-symlinks -i "s#\[.*\]#\[${NUEVAPAGINICIOG}\]#g" "${FICHCONF}" && \
+                        echo "=> Ok!! Configuradas en Google Chrome y Chromium!!" || \
+                        echo "=> Error!! Problemas para configurar Google Chrome y Chromium"
+                    else
+                        echo "=> Ya estaban configuradas las Pag Inicio en Chrome y Chromium!!"
+                    fi
                 else
-                    echo "=> Ya estaban configuradas las Pag Inicio en Chrome!!"
+                    echo "=> Error!! No existe el fichero de configuración de Chrome y Chromium"
+                    exit 1
                 fi
-            else
-                echo "=> Error!! No existe el fichero de configuración de Chrome"
-                exit 1
-            fi
+            done
         ;;
         * ) uso
         ;;
