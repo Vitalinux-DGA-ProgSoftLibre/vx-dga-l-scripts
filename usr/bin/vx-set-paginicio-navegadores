@@ -65,13 +65,13 @@ until [[ -z "${1}" || -z "${2}" ]] ; do
                 if [ -f "${FICHCONF}" ] ; then
                     if ! grep -qE "${NUEVAPAGINICIOG}" "${FICHCONF}" ; then
                         sed --follow-symlinks -i "s#\[.*\]#\[${NUEVAPAGINICIOG}\]#g" "${FICHCONF}" && \
-                        echo "=> Ok!! Configuradas en Google Chrome!!" || \
-                        echo "=> Error!! Problemas para configurar Google Chrome"
+                        echo "=> Ok!! Configuradas en Google Chrome y Chromium!!" || \
+                        echo "=> Error!! Problemas para configurar Google Chrome y Chromium"
                     else
-                        echo "=> Ya estaban configuradas las Pag Inicio en Chrome!!"
+                        echo "=> Ya estaban configuradas las Pag Inicio en Chrome y Chromium!!"
                     fi
                 else
-                    echo "=> Error!! No existe el fichero de configuración de Chrome"
+                    echo "=> Error!! No existe el fichero de configuración de Chrome y Chromium"
                     exit 1
                 fi
             done
