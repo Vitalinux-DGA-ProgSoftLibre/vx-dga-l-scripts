@@ -3,7 +3,7 @@ vx-dga-l-scripts (5.0-26) unstable; urgency=low
   * Añadimos vx-conf-nopasswdlogin para evitar password en el login de usuarios
   * Añadimos vx-conf-epoptes-ip-servidor para poder configurar la ip del servidor epoptes en clientes
 
- -- Arturo Martín <amartinromero@gmail.com>  Mon, 28 Sep 2020 10:30:00 +0200
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 29 Sep 2020 10:30:00 +0200
 
 vx-dga-l-scripts (5.0-25) unstable; urgency=low
 
