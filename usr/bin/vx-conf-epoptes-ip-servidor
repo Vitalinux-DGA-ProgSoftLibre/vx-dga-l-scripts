@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# last-act: arturo@2020-9-29
+# desc: Configura en el epoptes-client la ip del servidor pasada como parámetro
+
+[ -z "${1}" ] && {
+    echo "=> ¡¡Error!! Debe indicarse la IP del servidor Epoptes a configurar en el cliente" ;
+    exit 0 ;
+}
+SERVIDOR="${1}"
+FICHCONF="/etc/default/epoptes-client"
+
+# Comprobamos que no se trata del equipo servidor epoptes:
+if dpkg -l | grep -q "vx-dga-l-epoptes-cliente" && \
+[ -f "${FICHCONF}" ] && \
+! grep -q "SERVER=${SERVIDOR}" "${FICHCONF}" ; then
+    sed --follow-symlinks -i "s/.*SERVER=.*/SERVER=${SERVIDOR}/g" "${FICHCONF}" && \
+    echo "=> Nueva ip del servidor epoptes: ${FICHCONF}:${SERVIDOR}"
+    # Matamos el proceso actual de epoptes. Para buscarlo en cadena extendida se usa el -f
+    pkill -f epoptes
+    if test -f /usr/sbin/epoptes-client ; then
+        /sbin/start-stop-daemon --start --oknodo --quiet -b --exec /usr/sbin/epoptes-client
+    fi
+    # Dejamos un LOG de la ejecución:
+    FICHLOG="/var/log/vitalinux/falla-servername-epoptes.log"
+    [[ ! -d /var/log/vitalinux ]] && mkdir /var/log/vitalinux
+    echo "$(date) - Nueva ip del servidor epoptes: ${FICHCONF}:${SERVIDOR}" > "${FICHLOG}"
+fi
+
+exit 0

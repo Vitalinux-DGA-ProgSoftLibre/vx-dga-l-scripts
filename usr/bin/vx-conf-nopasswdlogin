@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# last-act: arturo@2020-9-29
+# desc: Evita el password en el login de las cuentas indicadas como parámetros
+
+until [ -z "${1}" ] ; do
+    USUARIO="${1}"
+    if getent passwd "${USUARIO}" &> /dev/null && \
+    ! ( id "${USUARIO}" | grep -q "nopasswdlogin" ) ; then
+        usermod -aG "nopasswdlogin" "${USUARIO}" && \
+        echo "=> No requerirá password en el login: ${USUARIO}"
+    fi
+    shift
+done
