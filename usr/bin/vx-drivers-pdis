@@ -82,7 +82,7 @@ function seleccionar-modelo-pdi {
 		--entry \
 		--text "Selecciona tu PDI:" \
 		--entry-text \
-		"No driver" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard")
+		"Sin Driver - Solo OpenBoard" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard")
 }
 
 function comprobar-md5 {
@@ -220,7 +220,7 @@ function descargar-software-pdi {
 			if lsusb | grep "1477:0008" > /dev/null 2>&1 ; then
 				HITACHITRIO="1"
 				yad --title "Instalación de Software de la PDI $PDI" \
-					--text " La pizarra conectada parece que es un modelo <b>HITACHI TRIO</b>. Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador\n La instalación implica un proceso de descarga que puede ser costoso en tiempo: Se recomienda tener conexión a red por cable " \
+					--text " La pizarra conectada parece que es un modelo <b>HITACHI TRIO</b>. Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador.\n La instalación implica un proceso de descarga que puede ser costoso en tiempo: Se recomienda tener conexión a red por cable " \
 					--window-icon vitalinux \
 					--image pdi \
 					--width="400" --height="100" \
@@ -248,9 +248,17 @@ function descargar-software-pdi {
 		;;
 
 		"Interwrite")
-		## Test
-			FILESPDI="/pdis/Interwrite/WorkSpace_Ubuntu_6.5.0.24 \
-				/pdis/Interwrite/DeviceManager_Ubuntu_7.7.0.5"
+			yad --title "Instalación de Software de la PDI $PDI" \
+					--text " Las pizarras Interwrite requieren dockerizar la aplicación para que funcionen. Ésto implica un proceso de descarga que es <b>costoso en tiempo</b>:\n\n Se recomienda tener conexión a <b>red por cable</b> antes de continuar... "\
+					--window-icon vitalinux \
+					--image pdi \
+					--width="400" --height="100" \
+					--center --justify="center" --text-align="center" \
+					--button="Continuar ":0 \
+					--button="Salir":1
+			if [ "$?" != "0" ]; then
+				return 1
+			fi
 		;;
 
 		"IQBoard")
@@ -273,10 +281,38 @@ function descargar-software-pdi {
 		;;
 
 		"Multiclass")
+			yad --title "Instalación de Software de la PDI $PDI" \
+				--text " Las pizarras Multiclass son funcionales para VX-2.0 (driver) pero no la Aplicación.\n Deberás usar openboard por ejemplo (el asistente te permitirá instalarlo después si lo deseas).\n\n Recuerda que para <b>calibrar</b> la pizarra es necesario usar la aplicación llamada <b>iwbdriver</b>. Más información en la <a href='https://wiki.vitalinux.educa.aragon.es/index.php/Vitalinux/Pizarras_Digitales_Interactivas#Multiclass'>wiki de Vitalinux</a> "\
+				--window-icon vitalinux \
+				--image pdi \
+				--width="400" --height="100" \
+				--center --justify="center" --text-align="center" \
+				--button="Continuar ":0 \
+				--button="Cancelar":1
+			if [ "$?" != "0" ]; then
+				return 1
+			fi
 			FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_$ARCHSO.deb"
 		;;
 
 		"Promethean")
+		# Primero es obligatorio hacer un downgrade a 4.15 pues el driver solo funciona para dicho kernel, no para 5.x
+		if [[ ! "$(uname -r)" =~ 4.15. ]]; then
+			yad --title "Instalación de Software de la PDI $PDI" \
+			--text " Las pizarras Promethen requieren tener instalado y en ejecución un <b>kernel 4.15</b>\n\n Se va a proceder a su instalación... pero después deberás usar la aplicación <b>grub-customizer</b> (se lanzará sola) para configurar el arranque por defecto en kernel 4.15:\n 1. Pestaña de Configuración General\n 2. Entrada predeterminada => Linux 4.15.xxx-generic\n3. Guardar y Salir\n\n Reinicia con el nuevo kernel y vuelve a arranar el asistente. Si no cambia el núcleo, no podré continuar... "\
+			--window-icon vitalinux \
+			--image pdi \
+			--width="400" --height="100" \
+			--center --justify="center" --text-align="center" \
+			--button="Continuar ":0 \
+			--button="Cancelar":1
+			if [ "$?" != "0" ]; then
+				return 1
+			fi
+			apt-get  --assume-yes --force-yes install --install-recommends linux-generic-hwe-16.04 xserver-xorg-hwe-16.04 xserver-xorg-input-all-hwe-16.04 xserver-xorg-video-all-hwe-16.04 xserver-xorg-input-wacom-hwe-16.04 xserver-xorg-video-intel-hwe-16.04 xserver-xorg-video-qxl-hwe-16.04 xfonts-scalable xinput xserver-xorg-input-wacom-hwe-18.04 xserver-xorg-video-nouveau-hwe-16.04 xserver-xorg-input-all-hwe-16.04 xserver-xorg-input-evdev-hwe-16.04 xserver-xorg-input-joystick-hwe-16.04 xserver-xorg-input-synaptics-hwe-16.04 xserver-xorg-video-radeon-hwe-16.04
+			which grub-customizer > /dev/null && grub-customizer
+			return 1
+		fi
 		# Faltará 32 bits...de momento no se publica dicha versión
 			if [ "$ARCHSO" = "64" ] ; then
 			FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activaid_2.0.1~Ubuntu~1804_amd64.deb \
@@ -302,67 +338,17 @@ function descargar-software-pdi {
 		# La solución ahora se basa en aplicación dockerizada por Lliurex
 		# Ojo, SOLO 64 bits. Suponemos que los paquetes de 32 habría que probar, pero de momento no hay ARC-32
 			yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Las pizarras SmartBoard requieren dockerizar la aplicación para que funcionen. Ésto implica un proceso de descarga que puede ser costoso en tiempo: Se recomienda tener conexión a red por cable "\
+				--text " Las pizarras SmartBoard requieren dockerizar la aplicación para que funcionen. Ésto implica un proceso de descarga que es <b>costoso en tiempo</b>:\n\n Se recomienda tener conexión a <b>red por cable</b> antes de continuar...  "\
 				--window-icon vitalinux \
 				--image pdi \
 				--width="400" --height="100" \
 				--center --justify="center" --text-align="center" \
 				--button="Continuar ":0 \
-				--button="Cancelar":1 \
+				--button="Cancelar":1
+			if [ "$?" != "0" ]; then
+				return 1
+			fi
 		
-		# # Lo primero es saber si es una SmartBoard480 o no:
-		# if lsusb | grep "0b8c:0090" > /dev/null 2>&1 ; then
-		# 	SB480="1"
-		# else
-		# 	SB480="0"
-		# fi
-		# if [ "$ARCHSO" = "64" ] && [ "$SB480" = "1" ]  ; then
-		# 	yad --title "Instalación de Software de la PDI $PDI" \
-		# 		--text " Lo sentimos pero de momento SmartBoard NO facilita controladores para 64 bits "\
-		# 		--window-icon vitalinux \
-		# 		--image pdi \
-		# 		--width="400" --height="100" \
-		# 		--center --justify="center" --text-align="center" --button="gtk-ok":0
-		# 	return 1
-		# elif [ "$ARCHSO" = "64" ] ; then
-		# 	# Si la arquitectura es de 64 bits, pero no es la 480, podría funcionar el software...no lo sabemos
-		# 	yad --title "Instalación de Software de la PDI $PDI" \
-		# 		--text " Su sistema es de 64 bits. Es posible que el software que se instale no funcione adecuadamente...si es así hable con Soporte Vitalinux "\
-		# 		--window-icon vitalinux \
-		# 		--image pdi \
-		# 		--width="400" --height="100" \
-		# 		--center --justify="center" --text-align="center" \
-		# 		--button="Continuar instalación":0 \
-		# 		--button="Cancelar":1 \
-
-		# 	if [ "$?" != "0" ]; then
-		# 		return 1
-		# 	fi
-		# else
-		# 	# No sabemos si funcionará
-		# 	yad --title "Instalación de Software de la PDI $PDI" \
-		# 		--text " Su PDI parece ser una SmartBoard 480...pero no sabemos si la versión publicada sea compatible con Ubuntu bionic. Si tiene problemas contacte con Soporte Vitalinux "\
-		# 		--window-icon vitalinux \
-		# 		--image pdi \
-		# 		--width="400" --height="100" \
-		# 		--center --justify="center" --text-align="center" \
-		# 		--button="Continuar instalación manual":0 \
-		# 		--button="Cancelar":1 \
-
-		# 	if [ "$?" != "0" ]; then
-		# 		return 1
-		# 	fi
-		# fi
-
-		# FILESPDI="/pdis/SmartBoard/smart_board/nwfermi-0.6.5.1_i386.deb \
-		# 	/pdis/SmartBoard/smart_board/smart-activation_1.1.2066.1-1_i386.deb \
-		# 	/pdis/SmartBoard/smart_board/smart-common_10.3.2171.1-1_i386.deb \
-		# 	/pdis/SmartBoard/smart_board/smart-gallerysetup_1.3.6235.1-1_i386.deb \
-		# 	/pdis/SmartBoard/smart_board/smart-hwr_11.3.2121.1-1_i386.deb \
-		# 	/pdis/SmartBoard/smart_board/smart-languagesetup_2.2.2060.4-1_i386.deb \
-		# 	/pdis/SmartBoard/smart_board/smart-notebook_11.0.7511.0-1_i386.deb \
-		# 	/pdis/SmartBoard/smart_board/smart-product-drivers_11.3.2121.1-1_i386.deb \
-		# 	/pdis/SmartBoard/smart_board/xf86-input-nextwindow-trusty_0.3.4~trusty1_i386.deb"
 		;;
 
 	esac
@@ -421,12 +407,11 @@ function instalar-software-pdi {
 	;;
 
 	"Interwrite")
-		[ -f WorkSpace_Ubuntu_6.5.0.24 ] && \
-			chmod +x WorkSpace_Ubuntu_6.5.0.24 && \
-			./WorkSpace_Ubuntu_6.5.0.24
-		[ -f DeviceManager_Ubuntu_7.7.0.5 ] && \
-			chmod +x DeviceManager_Ubuntu_7.7.0.5 && \
-			./DeviceManager_Ubuntu_7.7.0.5
+		apt-get --assume-yes install vx-dga-l-pdi-interwrite
+		# Precarga de la imagen...
+		echo "Descargando la imagen docker de la aplicación...PACIENCIA y ESPERA A QUE SE INDIQUE"
+		sudo /usr/bin/vx-interwrite -download &
+		esperando
 	;;
 
 	"IQBoard")
@@ -506,7 +491,7 @@ function instalar-software-pdi {
 	if ! dpkg -l | grep -q openboard 2>/dev/null && yad --center --title "Drivers PDIs" --question \
 		--window-icon vitalinux \
 		--image pdi \
-		--text "   Deseas (se recomienda) instalar <b>Open-Board( llamado antes Open-Sankore)</b>   " \
+		--text "   Deseas instalar <b>Open-Board(64 bits)/Open-Sankore(32 bits))</b>   " \
 		--width="350" --center \
 		--justify="center" --text-align="center" \
 		--button="Continuar":0 --button="Cancelar":1 ;  then
@@ -519,10 +504,10 @@ function instalar-software-pdi {
 			comprobar-archivos "/pdis/openboard_ubuntu_18.04_1.5.3_amd64.deb"
 			dpkg -i /opt/pkgs/pdis/openboard_ubuntu_18.04_1.5.3_amd64.deb
 			apt-get -f --assume-yes --force-yes install
-		# else
-		# 	comprobar-archivos "/pdis/Open-Sankore_2.5.1_i386.deb"
-		# 	dpkg -i /opt/pkgs/pdis/Open-Sankore_2.5.1_i386.deb
-		# 	apt-get -f --assume-yes --force-yes install
+		else
+			comprobar-archivos "/pdis/Open-Sankore_2.5.1_i386.deb"
+			dpkg -i /opt/pkgs/pdis/Open-Sankore_2.5.1_i386.deb
+			apt-get -f --assume-yes --force-yes install
 		fi
 
 	fi
@@ -568,7 +553,7 @@ seleccionar-modelo-pdi && descargar-software-pdi && instalar-software-pdi
 
 
 yad --title "Instalación de Software de la PDI $PDI" \
-	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Si no se han detectado errores o se ha cancelado la operación, debería estar todo configurado... "\
+	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Recuerde que es posible que sea necesario un <b>reinicio del sistema</b> "\
 	--window-icon vitalinux \
 	--image pdi \
 	--width="400" --height="100" \

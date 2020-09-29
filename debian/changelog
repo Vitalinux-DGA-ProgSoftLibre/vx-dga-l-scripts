@@ -1,3 +1,12 @@
+vx-dga-l-scripts (5.0-25) unstable; urgency=low
+
+  * Drivers PDI mensaje no driver
+  * Driver y App PDI Promethean. Downgrade kernel
+  * Driver y App Interwrite (Docker)
+  * App Multiclass no funcional
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Mon, 28 Sep 2020 15:30:00 +0200
+
 vx-dga-l-scripts (5.0-24) unstable; urgency=low
 
   * Modificamos vx-set-paginicio-navegadores para tener en cuenta la ruta de Chromium
