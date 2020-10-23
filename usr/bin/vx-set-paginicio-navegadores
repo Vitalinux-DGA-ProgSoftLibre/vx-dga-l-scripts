@@ -1,5 +1,5 @@
 #!/bin/bash
-# Versiones: [arturo@2019-12-16]
+# Versiones: [arturo@2020-9-28] [arturo@2019-12-16]
 
 uso() {
     echo "¡¡Importante!! Para configurar las paginas de inicio de navegadores:
@@ -59,7 +59,6 @@ until [[ -z "${1}" || -z "${2}" ]] ; do
         "chrome" )
             NUEVAPAGINICIOG="${2}"
             # Configuración de páginas de inicio de Google Chrome y Chromium:
-            FICHCONFCHROMIUM
             echo "=> Configuración de páginas de inicio de Chromium y Google Chrome: ${NUEVAPAGINICIOG}"
             for FICHCONF in "${FICHCONFCHROMIUM}" "${FICHCONFCHROME}" ; do
                 if [ -f "${FICHCONF}" ] ; then

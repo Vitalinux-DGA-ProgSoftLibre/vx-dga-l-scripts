@@ -1,0 +1,2 @@
+# Permiso para regenerar la sesión gráfica Lubuntu:
+ALL ALL=(ALL) NOPASSWD: /usr/bin/vx-regenerar-sesion-grafica-lubuntu
