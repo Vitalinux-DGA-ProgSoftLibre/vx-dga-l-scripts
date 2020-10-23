@@ -1,0 +1,77 @@
+#!/bin/bash
+# lastact: arturo@2020-10-9
+# desc: Script de configuración de atajos en openbox (fichero rc.xml)
+function add_atajo() {
+    # Para añadir un atajo de teclado se necesita agregar un código como el siguiente:
+    #<keybind key="F1">
+    # <action name="Execute">
+    #  <command>vx-help-desk</command>
+    # </action>
+    #</keybind>
+    # Por lo que se neceistan dos parametros: 1) La key y 2) el command
+    # El tercer parámetro puede ser el fichero a configurar:
+    CLAVE="${1}"
+    COMANDO="${2}"
+    for FILERCXML in "${LISTA_ARCHIVOS[@]}" ; do
+        if [ -f "${FILERCXML}" ] && ! xmlstarlet sel -T -t -m "/_:openbox_config/_:keyboard/_:keybind[@key='${CLAVE}']" -v "value" -n "${FILERCXML}" >/dev/null 2>&1; then
+            xmlstarlet ed -L -s "/_:openbox_config/_:keyboard" -t elem -n "keybindTMP" -v " " "${FILERCXML}"
+            xmlstarlet ed -L -i "/_:openbox_config/_:keyboard/_:keybindTMP" -t attr -n "key" -v "${CLAVE}" "${FILERCXML}"
+            xmlstarlet ed -L -s "/_:openbox_config/_:keyboard/_:keybindTMP" -t elem -n "action" -v " " "${FILERCXML}"
+            xmlstarlet ed -L -i "/_:openbox_config/_:keyboard/_:keybindTMP/_:action" -t attr -n name -v "Execute" "${FILERCXML}"
+            xmlstarlet ed -L -s "/_:openbox_config/_:keyboard/_:keybindTMP/_:action" -t elem -n "command" -v "${COMANDO}" "${FILERCXML}"
+            xmlstarlet ed -L -r "/_:openbox_config/_:keyboard/_:keybindTMP" -v "keybind" "${FILERCXML}"
+        fi
+    done
+}
+function del_atajo() {
+    CLAVE="${1}"
+    COMANDO="${2}"
+    for FILERCXML in "${LISTA_ARCHIVOS[@]}" ; do
+        # xmlstarlet sel -T -t -m "/_:openbox_config/_:keyboard/_:keybind[@key='${CLAVE}']" -v "value" -n "${FILERCXML}" >/dev/null 2>&1
+        PATHXML="/_:openbox_config/_:keyboard/_:keybind[@key='${CLAVE}']/_:action[@name]/_:command"
+        if [[ "$(xmlstarlet sel -T -t -v "${PATHXML}"  -n "${FILERCXML}")" == "${COMANDO}" ]] && \
+        [ -f "${FILERCXML}" ] ; then
+            xmlstarlet ed -L -d "/_:openbox_config/_:keyboard/_:keybind[@key='${CLAVE}']" "${FILERCXML}"
+        fi
+    done
+}
+
+function help_atajo() {
+    echo -e "=> Ejemplos de uso de vx-conf-atajos-teclado:
+    1) Añadir Atajo: vx-conf-atajos-teclado add \"C-A-F4\" \"comando-a-ejecutar\"
+    2) Eliminar Atajo: vx-conf-atajos-teclado del \"C-A-F4\" \"comando-a-ejecutar\"
+    3) Eliminar Atajo: vx-conf-atajos-teclado del \"C-A-F4\" \"comando-a-ejecutar\"
+    4) Opcionalmente se puede añadir al final la ruta del archivo XML donde configurar el atajo.
+    vx-conf-atajos-teclado del \"C-A-F4\" \"comando-a-ejecutar\" \"/<dir>/rc.xml\""
+}
+
+# Comprobamos si queremos añadir (add) o eliminar (del) un atajo: ACCION
+ACCION="${1}"
+# Establecemos la lista de archivos sobre la que actuar: ~/.config/openbox/lubuntu-rc.xml
+if [ -f "${4}" ] ; then
+    LISTA_ARCHIVOS=("${4}")
+else
+    USUARIO="$(whoami)"
+    [[ "${USUARIO}" == "root" ]] && \
+    LISTA_ARCHIVOS=("/usr/share/lubuntu/openbox/rc.xml" "$(vx-home-usuario-grafico)/.config/openbox/lubuntu-rc.xml") || \
+    LISTA_ARCHIVOS=("$(vx-home-usuario-grafico)/.config/openbox/lubuntu-rc.xml")
+fi
+shift 1
+case "${ACCION}" in
+    "add" )
+    # Comprobamos que se envían el número de parámetros necesario: 
+    (( ${#} < 2 )) && \
+    echo "=> Faltan parámetros en la llamada al script: add keybind command" && \
+    help_atajo && exit 1
+    add_atajo "${@}"
+    ;;
+    "del" )
+    (( ${#} < 1 )) && \
+    echo "=> Faltan parámetros en la llamada al script: del keybind" && \
+    help_atajo && exit 1
+    del_atajo "${@}"
+    ;;
+    * ) help_atajo
+    ;;
+esac
+exit 0

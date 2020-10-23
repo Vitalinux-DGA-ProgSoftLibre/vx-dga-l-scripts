@@ -1,3 +1,16 @@
+vx-dga-l-scripts (5.0-27) unstable; urgency=low
+
+  * Moficicamos control para añadir la dependencia con xmlstarlet para vx-conf-atajos-teclado
+  * Modificamos vx-regenerar-entorno-escritorio-cli para regenerar el tipo de sesión gráfica por defecto: Lubuntu
+  * Modificamos vx-set-paginicio-navegadores y quitamos la referencia inadecuada FICHCONFCHROMIUM
+  * Añadimos usr/share/vitalinux/sudoers.d/vx-regenerar-sesion-grafica-lubuntu para dar permisos de sudo
+  * Añadimos vx-regenerar-sesion-grafica-lubuntu para poder regenerar el tipo de sesión gráfica por defecto: Lubuntu
+  * Añadimos vx-conf-atajos-teclado para poder configurar atajos de manera sencilla
+  * Añadimos vx-conf-virtualbox-extension-pack para instalar el Extension Pack de Virtualbox
+  * Añadimos vx-conf-power-manager para poder configurar la gestion de energía de forma personalizada
+
+ -- Arturo Martín <amartinromero@gmail.com>  Tue, 29 Sep 2020 10:30:00 +0200
+
 vx-dga-l-scripts (5.0-26) unstable; urgency=low
 
   * Añadimos vx-conf-nopasswdlogin para evitar password en el login de usuarios

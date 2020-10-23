@@ -1,0 +1,29 @@
+#!/bin/bash
+# lastact: arturo@2020-10-20
+# desc: Configurar las opciones del gestor de energía xfce en Vitalinux
+# issue: https://soporte.vitalinux.educa.aragon.es/issues/2737 Mantener pantalla sin apagar
+
+# Fichero de opciones de configuración de energia: /usr/share/vitalinux/power-manager/power-manager.ini
+FICHCONF="/usr/share/vitalinux/power-manager/vx-power-manager.ini"
+
+[ ! -f "${FICHCONF}" ] && exit 1
+
+# Recogemos como parámetro la sección del fichero de configuración que queremos aplicar:
+# Valores posibles: Power-Manager-General Power-Manager-Etiqueta ...
+[ -z "${1}" ] && exit 2 || SECCION="${1}"
+
+LISTA=(/xfce4-power-manager/blank-on-ac
+    /xfce4-power-manager/dpms-on-ac-off
+    /xfce4-power-manager/dpms-on-ac-sleep
+    /xfce4-power-manager/power-button-action
+/xfce4-power-manager/show-tray-icon)
+
+for PARAM in "${LISTA[@]}" ; do
+    # Recuperamos el valor deseado:
+    VALOR="$(crudini --get "${FICHCONF}" "${SECCION}" "${PARAM}")"
+    [ -z "${VALOR}" ] && continue
+    # Asignamos el valor:
+    xfconf-query -c xfce4-power-manager -p "${PARAM}" -s "${VALOR}"
+done
+
+exit 0

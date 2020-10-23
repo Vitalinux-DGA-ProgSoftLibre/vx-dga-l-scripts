@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Para saber la versión del extensión pack instalada:
+FICHMANAGE="/usr/bin/VBoxManage"
+[ ! -f "${FICHMANAGE}" ] && \
+echo "=> VirtualBox parece no estar instalado en el equipo" && exit 1
+
+VERSIONVIRTUALBOX="$(dpkg -l | grep virtualbox | tr -s " " ":" | cut -d":" -f2 | cut -d"-" -f2)"
+VERSIONEXTPACK="$(VBoxManage list extpacks | grep Version: | tr -d " " | cut -d":" -f2)"
+[[ ! -z "${VERSIONVIRTUALBOX}" && ! -z "${VERSIONEXTPACK}" ]] && \
+[[ "${VERSIONEXTPACK}" =~ ^${VERSIONVIRTUALBOX} ]] && \
+echo "=> Versión de Extensión Pack correcta: Virtualbox ${VERSIONVIRTUALBOX} & ExtPack ${VERSIONEXTPACK}" && \
+exit 0
+
+USU="$(vx-usuario-grafico)"
+if getent group vboxusers >& /dev/null && \
+! id "${USU}" | grep -q vboxusers ; then
+    # for USU in $(vx-usuarios-graficos) ; do
+    /usr/sbin/usermod -aG vboxusers "${USU}"
+    # done
+fi
+
+# Miramos si es trusty (VX1.0) o bionic (VX2.0):
+VITAL=$(lsb_release -cs) || exit 1
+
+if ! test -d /var/log/vitalinux ; then
+    mkdir /var/log/vitalinux
+fi
+cd /usr/share/vitalinux
+EXTENSIONPACKFILE=""
+if [ "$VITAL" = "trusty" ]; then
+    if dpkg -l | grep virtualbox-5.1 &>/dev/null; then
+        EXTENSIONPACKFILE="Oracle_VM_VirtualBox_Extension_Pack-5.1.18-114002.vbox-extpack"
+        elif dpkg -l | grep virtualbox-5.2 &>/dev/null; then
+        EXTENSIONPACKFILE="Oracle_VM_VirtualBox_Extension_Pack-5.2.22.vbox-extpack"
+        elif dpkg -l | grep virtualbox-6.0 &>/dev/null; then
+        EXTENSIONPACKFILE="Oracle_VM_VirtualBox_Extension_Pack-6.0.4.vbox-extpack"
+    else
+        echo "$(date) - Éste equipo no tienen virtualbox instalado...salimos" >> /var/log/vitalinux/falla-extpack-virtualbox.log
+        exit 0
+    fi
+    elif [ "$VITAL" = "bionic" ]; then
+    if dpkg -l | grep virtualbox-6.1 &>/dev/null; then
+        EXTENSIONPACKFILE="Oracle_VM_VirtualBox_Extension_Pack-6.1.14.vbox-extpack"
+        elif dpkg -l | grep virtualbox-6.0 &>/dev/null; then
+        EXTENSIONPACKFILE="Oracle_VM_VirtualBox_Extension_Pack-6.0.14.vbox-extpack"
+        # Salimos...ya que vamos a actualizar a 6.1
+        exit 0
+        elif dpkg -l | grep virtualbox &>/dev/null; then
+        EXTENSIONPACKFILE="Oracle_VM_VirtualBox_Extension_Pack-5.2.34.vbox-extpack"
+    else
+        echo "$(date) - Éste equipo no tienen virtualbox instalado...salimos" >> /var/log/vitalinux/falla-extpack-virtualbox.log
+        exit 0
+    fi
+else
+    echo "No se puede identificar la versión de Linux" >> /var/log/vitalinux/falla-extpack-virtualbox.log
+    exit 0
+fi
+
+if [ ! -f  "${EXTENSIONPACKFILE}" ] ; then
+    wget -c "http://migasfree.educa.aragon.es/cosas-centros/vbox/${EXTENSIONPACKFILE}" &> /dev/null
+fi
+###
+### Instalar Extension Pack (se ha tenido que descargar antes, sino no se instalará)
+###
+if [ -f /usr/bin/VBoxManage ] && (dpkg -l | grep "virtualbox-" &>/dev/null) && [ -f "${EXTENSIONPACKFILE}" ]; then
+    if [ "$EXTENSIONPACKFILE" = "Oracle_VM_VirtualBox_Extension_Pack-6.1.14.vbox-extpack" ]; then
+        LICENSE="33d7284dc4a0ece381196fda3cfe2ed0e1e8e7ed7f27b9a9ebc4ee22e24bd23c"
+    else
+        LICENSE="56be48f923303c8cababb0bb4c478284b688ed23f16d775d729b89a2e8e5f9eb"
+    fi
+    if (/usr/bin/VBoxManage extpack install "${EXTENSIONPACKFILE}" --accept-license=${LICENSE} >/dev/null 2>&1) ; then
+        echo "$(date) - Se ha configurado el extension pack ..." >> /var/log/vitalinux/falla-extpack-virtualbox.log
+        rm -f "${EXTENSIONPACKFILE}"
+    fi
+fi

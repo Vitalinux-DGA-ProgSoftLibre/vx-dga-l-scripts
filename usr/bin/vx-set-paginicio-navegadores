@@ -59,7 +59,6 @@ until [[ -z "${1}" || -z "${2}" ]] ; do
         "chrome" )
             NUEVAPAGINICIOG="${2}"
             # Configuración de páginas de inicio de Google Chrome y Chromium:
-            FICHCONFCHROMIUM
             echo "=> Configuración de páginas de inicio de Chromium y Google Chrome: ${NUEVAPAGINICIOG}"
             for FICHCONF in "${FICHCONFCHROMIUM}" "${FICHCONFCHROME}" ; do
                 if [ -f "${FICHCONF}" ] ; then

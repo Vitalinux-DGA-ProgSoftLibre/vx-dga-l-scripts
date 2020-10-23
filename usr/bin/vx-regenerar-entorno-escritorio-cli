@@ -110,6 +110,9 @@ FICHGREETER="/etc/lightdm/lightdm-gtk-greeter.conf"
 [[ -f "${FICHGREETER}" && "${EJECUTOR}" == "root" ]] && rm -f "${FICHGREETER}" && \
 vx-colorear_echo "verde" "=> Eliminamos personalizaciones del Greeter: ${FICHGREETER}"
 
+# 5) Regeneramos el tipo de sesión gráfica por defecto: Lubuntu
+sudo vx-regenerar-sesion-grafica-lubuntu
+
 # Mensaje de terminación:
 vx-colorear_echo "azul" "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"
 vx-colorear_echo "azul" "=> Comprobar que todo esta Ok!!"

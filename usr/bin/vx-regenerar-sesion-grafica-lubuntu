@@ -1,0 +1,14 @@
+#!/bin/bash
+
+USUARIO="$(whoami)"
+[[ "${USUARIO}" != "root" ]] && \
+echo "=> Necesitas permisos de root para regenerar la sesión gráfica Lubuntu" && \
+exit 1
+
+for FICH in /var/lib/AccountsService/users/* ; do
+    crudini --set "${FICH}" "User" "XSession" "Lubuntu"
+done
+DIR="/var/lib/lightdm/.cache"
+[ -d "${DIR}" ] && rm -Rf "${DIR}"
+
+exit 0
