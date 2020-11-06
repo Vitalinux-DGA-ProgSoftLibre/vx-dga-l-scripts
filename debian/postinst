@@ -51,7 +51,7 @@ case "$1" in
         
         FICHGREETERORI="/etc/alternatives/lightdm-gtk-greeter-config-derivative"
         FICHGREETERDES="/etc/lightdm/lightdm-gtk-greeter.conf"
-        [ ! -h "${FICHGREETERDES}" ] && \
+        [[ -e "${FICHGREETERORI}" && ! -e "${FICHGREETERDES}" ]] && \
         ln -s "${FICHGREETERORI}" "${FICHGREETERDES}"
     ;;
     
