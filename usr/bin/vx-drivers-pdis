@@ -213,14 +213,14 @@ function descargar-software-pdi {
 					--center --justify="center" --text-align="center" --button="gtk-ok":0
 				return 1
 			fi
-			FILESPDI="/pdis/eBeam/eBeam-Interact_3.6-0_bionic_amd64.deb"
+			FILESPDI="/pdis/eBeam/eBeam-Interact_3.6.0-5_bionic_amd64.deb"
 		;;
 
 		"Hitachi") 
 			if lsusb | grep "1477:0008" > /dev/null 2>&1 ; then
 				HITACHITRIO="1"
 				yad --title "Instalación de Software de la PDI $PDI" \
-					--text " La pizarra conectada parece que es un modelo <b>HITACHI TRIO</b>. Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador.\n La instalación implica un proceso de descarga que puede ser costoso en tiempo: Se recomienda tener conexión a red por cable " \
+					--text " La pizarra conectada parece que es un modelo <b>HITACHI TRIO</b>.\n\n Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador.\n\n La instalación implica un proceso de descarga que puede ser costoso en tiempo: Se recomienda tener conexión a red por cable " \
 					--window-icon vitalinux \
 					--image pdi \
 					--width="400" --height="100" \
@@ -233,7 +233,7 @@ function descargar-software-pdi {
 			else
 				HITACHITRIO="0"
 				yad --title "Instalación de Software de la PDI $PDI" \
-					--text " La pizarra conectada parece que es un modelo <b>HITACHI DUO</b>. Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador " \
+					--text " La pizarra conectada parece que NO es un modelo <b>HITACHI TRIO</b>.\n\n Puede ser una <b>HITACHI DUO</b> o la nueva <b>FX79</b>\n\n Si no es así, cancela la operación, conecta la pizarra y vuelve a arrancar el instalador " \
 					--window-icon vitalinux \
 					--image pdi \
 					--width="400" --height="100" \
@@ -373,7 +373,7 @@ function instalar-software-pdi {
 
 	"eBeam")
 		apt-get --assume-yes --force-yes install libusb-dev yasm libvpx. libx264. kazam onboard libboost-all-dev libboost-thread-dev
-		dpkg -i eBeam-Interact_3.6-0_bionic_amd64.deb
+		dpkg -i eBeam-Interact_3.6.0-5_bionic_amd64.deb
 		apt-get -f --assume-yes --force-yes install
 	;;
 

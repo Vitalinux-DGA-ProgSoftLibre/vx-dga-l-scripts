@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-29) unstable; urgency=low
+
+  * Nuevo Driver y software funcional para la pizarra eBeam en Bionic
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Fri, 13 Nov 2020 10:30:00 +0200
+
 vx-dga-l-scripts (5.0-28) unstable; urgency=low
 
   * Movemos usr/share/vitalinux/sudoers.d/vx-regenerar-sesion-grafica-lubuntu a etc/sudoers.d/
