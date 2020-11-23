@@ -204,9 +204,9 @@ function descargar-software-pdi {
 
 		"eBeam")
 		## Test
-			if [ "$ARCHSO" = "64" ] ; then
+			if [ "$ARCHSO" = "32" ] ; then
 				yad --title "Instalación de Software de la PDI $PDI" \
-					--text " Lo sentimos pero de momento eBeam NO facilita controladores para 64 bits "\
+					--text " Lo sentimos pero de momento eBeam NO facilita controladores para 32 bits "\
 					--window-icon vitalinux \
 					--image pdi \
 					--width="400" --height="100" \
