@@ -7,7 +7,7 @@ FICHFUNCS="/usr/bin/vx-funcs-bash"
 
 uso() {
     echo -e "${1}
-# El script debe recibir como primer parametro: --crear|--borrar.
+# El script debe recibir como primer parametro: --crear|--borrar|--copiar.
 # En el caso de --crear un nuevo lanzador deben indicarse los siguientes parámetros:
     1) El nombre del fichero: p.e. vx-mi-lanzador.desktop
     2) El Name del descriptor Desktop: p.e. Google Docs
@@ -32,7 +32,10 @@ uso() {
     \"1001;1002;profesor;1010;user10\" \\
     \"1001;grupo1;1010;grupo15;2002\"
 # En el caso de --borrar un lanzador debe indicarse como parámetro el nombre del lanzador:
-    Ej. vx-conf-lanzadores-desktop --borrar mi_lanzador.desktop"
+    Ej. vx-conf-lanzadores-desktop --borrar mi_lanzador.desktop
+# En el caso de --copiar un lanzador simplemente se indica el lanzador, se busca en usr/share/applications y lo copia al Escritorio:
+    Ej. vx-conf-lanzadores-desktop --copiar mi_lanzador.desktop
+    Ej. vx-conf-lanzadores-desktop --copiar /usr/share/vitalinux/mi_lanzador.desktop"
 }
 
 function crear-lanzador-desktop {
@@ -61,10 +64,10 @@ MENSAJE="¡¡Debes ser usuario root para ejecutar este script de gestión de lan
 [[ "$(whoami)" != "root" ]] && \
 uso "${MENSAJE}" && exit 1
 
-# Comprobamos que el primer parámetro es --crear o --borrar:
-MENSAJE="¡¡El primer parámetro debe ser --crear o --borrar!!"
+# Comprobamos que el primer parámetro es --crear|--borrar|--copiar:
+MENSAJE="¡¡El primer parámetro debe ser --crear|--borrar|--copiar!!"
 OPCION="${1}"
-! [[ "${OPCION}" =~ ^--crear$|^--borrar$ ]] && uso "${MENSAJE}" && exit 1
+! [[ "${OPCION}" =~ ^--crear$|^--borrar|^--copiar$ ]] && uso "${MENSAJE}" && exit 1
 shift
 
 USUARIO="$(vx-usuario-grafico)"
@@ -93,6 +96,37 @@ MENSAJE="¡¡El segundo parámetro debe ser el nombre de un fichero *.desktop!!"
 }
 
 case "${OPCION}" in
+    "--copiar" )
+        # Comprobamos la existencia del lanzador y lo copiamos:
+        # El lanzador se puede pasar en ruta relativa a applications o absoluta:
+        [[ -f "${LANZADOR}" ]] && \
+        RUTA="${LANZADOR}" || \
+        RUTA="$(find "/usr/share/applications" -name "${LANZADOR}")"
+        # Extraemos el nombre del lanzador:
+        LANZADOR="$(basename "${LANZADOR}")"
+        # Comprobamos que en el caso de buscar el lanzador no quede la busqueda vacía (no lo haya encontrado):
+        [[ -z "${RUTA}" ]] && \
+        {
+            echo "=> No se ha encontrado el lanzador a copiar: ${LANZADOR}" && \
+            exit 1 ;
+        } || \
+        echo "=> Se ha encontrado el lanzador ${LANZADOR}: ${RUTA}, se va a copiar ..."
+        # Recorremos los directorios donde copiar el lanzador:
+        for DIR in "${HOMEUSUARIO}/Escritorio" \
+        "${HOMEUSUARIO}/Desktop" ; do
+            echo "=> Comprobamos si ya existe antes de copiarlo en: ${DIR}/${LANZADOR}"
+            [ -d "${DIR}" && ! -f "${DIR}/${LANZADOR}" ] && \
+            {
+                rsync -ah --chown="${USUARIO}" --chmod=644 "${RUTA}" "${DIR}/${LANZADOR}" && \
+                echo "=> Se ha copiado el lanzador ${RUTA}: ${DIR}/${LANZADOR}" ;
+            } || \
+            echo "=> Ya existe el lanzador: ${DIR}/${LANZADOR}"
+        done
+        DIR="/etc/skel/Escritorio"
+        [ -d "${DIR}" && ! -f "${DIR}/${LANZADOR}" ] && \
+        cp "${RUTA}" "${DIR}/${LANZADOR}" && \
+        echo "=> Se ha copiado el lanzador ${RUTA}: ${DIR}/${LANZADOR}"
+    ;;
     "--crear" )
         # Comprobamos que se le han pasado 8 parametros para crear el lanzador:
         MENSAJE="¡¡Además del nombre del lanzador deben pasarse al menos 7 parámetros más para crearlo!!"
@@ -108,6 +142,8 @@ case "${OPCION}" in
         EN_ESCRITORIO="${9:-"true"}"
         UIDS="${10:-"all"}"
         GIDS="${11:-"all"}"
+        AGRUPADO_EN_DIR="${12:-"false"}"
+        NOMBRE_DIR="${13:-"null"}"
         
         getent group "${USUARIO}" > /dev/null 2>&1 && \
         PROPIETARIO="${USUARIO}:${USUARIO}" || \
@@ -146,18 +182,34 @@ case "${OPCION}" in
                 for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch"; do
                     [ -d "${HOMEUSUARIO}/${DIR}" ] && \
                     {
-                        crear-lanzador-desktop "${HOMEUSUARIO}/${DIR}/${LANZADOR}" && \
-                        chown "${PROPIETARIO}" "${HOMEUSUARIO}/${DIR}/${LANZADOR}" && \
-                        echo "=> Se ha creado el lanzador: ${HOMEUSUARIO}/${DIR}/${LANZADOR}"
+                        if [[ "${AGRUPADO_EN_DIR}" && "${NOMBRE_DIR}" != "null" ]] ; then
+                            RUTA_BASE="${HOMEUSUARIO}/${DIR}/${NOMBRE_DIR}"
+                            [[ ! -d "${RUTA_BASE}" ]] && \
+                            mkdir "${RUTA_BASE}" && chown "${PROPIETARIO}" "${RUTA_BASE}"
+                        else
+                            RUTA_BASE="${HOMEUSUARIO}/${DIR}"
+                        fi
+                        crear-lanzador-desktop "${RUTA_BASE}/${LANZADOR}" && \
+                        chown "${PROPIETARIO}" "${RUTA_BASE}/${LANZADOR}" && \
+                        echo "=> Se ha creado el lanzador: ${RUTA_BASE}/${LANZADOR}"
                     }
                 done
+                # Lo copiamos en el Escritorio del esqueleto:
+                DIR="/etc/skel/Escritorio"
+                if [[ "${AGRUPADO_EN_DIR}" && "${NOMBRE_DIR}" != "null" ]] ; then
+                    RUTA_BASE="${DIR}/${NOMBRE_DIR}"
+                    [[ ! -d "${RUTA_BASE}" ]] && \
+                    mkdir "${RUTA_BASE}"
+                else
+                    RUTA_BASE="${DIR}"
+                fi
+                
+                [ -d "${RUTA_BASE}" ] && \
+                {
+                    crear-lanzador-desktop "${RUTA_BASE}/${LANZADOR}" && \
+                    echo "=> Se ha creado el lanzador: ${RUTA_BASE}/${LANZADOR}"
+                }
             fi
-            DIR="/etc/skel/Escritorio"
-            [ -d "${DIR}" ] && \
-            {
-                crear-lanzador-desktop "${DIR}/${LANZADOR}" && \
-                echo "=> Se ha creado el lanzador: ${DIR}/${LANZADOR}"
-            }
         fi
         
         # Creamos el lanzador accesible para todos los usuarios:
