@@ -36,6 +36,21 @@ echo -e "Versión de OpenGL: <b><tt><span foreground='blue'>${VEROPENGL}</span><
 [[ -d "/sys/firmware/efi" ]] && TIPOBIOS="BIOS UEFI" || TIPOBIOS="BIOS Legacy"
 echo -e "Tipo de BIOS: <b><tt><span foreground='blue'>${TIPOBIOS}</span></tt></b>" >> /tmp/info-tarjetas-red
 
+# Información Epoptes:
+EPOPTES="false"
+if dpkg -l | grep -q "vx-dga-l-epoptes-servidor" ; then
+    EPOPTES="true"
+    TIPOEPOPTES="Servidor - Controlador de Equipos de Aula"
+fi
+if dpkg -l | grep -q "vx-dga-l-epoptes-cliente" ; then
+    EPOPTES="true"
+    FICHCONFEPOPTES="/etc/default/epoptes-client"
+    SERVIDOR_EPOPTES="$(grep "SERVER=" "${FICHCONFEPOPTES}" | awk -F "SERVER=" '{print $2}')"
+    TIPOEPOPTES="Cliente controlado por el Servidor de Aula ${SERVIDOR_EPOPTES}"
+fi
+"${EPOPTES}" && \
+echo -e "Epoptes: <b><tt><span foreground='blue'>${TIPOEPOPTES}</span></tt></b>" >> /tmp/info-tarjetas-red
+
 FICH="/tmp/migasfree.tags"
 if test -f "${FICH}" ; then
     ETIQUETAS="$(cat "${FICH}")"
@@ -74,6 +89,17 @@ echo "  =>  Dirección IP del Servidor Caché: <b><tt><span foreground='blue'>$I
 if [[ -f /etc/migasfree.conf ]] && ( grep ^Server /etc/migasfree.conf &> /dev/null ) ; then
     SERVIDORMIGASFREE="$(grep "^Server" /etc/migasfree.conf | cut -d'=' -f2)"
     echo "  =>  Servidor Migasfree: <b><tt><span foreground='blue'>$SERVIDORMIGASFREE</span></tt></b>" >> /tmp/info-tarjetas-red
+    # La frecuencia puede ser: 0:daily_every_sessions|7:daily|1:weekly
+    FICHCONFCRONMIGASFREE="/etc/default/vx-dga-variables/vx-dga-l-migasfree-launcher-cron.conf"
+    if [[ -f "${FICHCONFCRONMIGASFREE}" ]] ; then
+        FRECUENCIA="$(crudini --get "${FICHCONFCRONMIGASFREE}" "Configuration" "FRECUENCY")"
+        case "${FRECUENCIA}" in
+            "0" ) FRECUENCIAMIGASFREE="Todos los inicios de sesión" ;;
+            "1" ) FRECUENCIAMIGASFREE="Una vez a la semana" ;;
+            "7" ) FRECUENCIAMIGASFREE="Una vez al día" ;;
+        esac
+        echo "  =>  Frecuencia Actualización Migasfree: <b><tt><span foreground='blue'>${FRECUENCIAMIGASFREE}</span></tt></b>" >> /tmp/info-tarjetas-red
+    fi
 fi
 
 IPPUBLICA=$(wget http://ipinfo.io/ip -qO - 2> /dev/null)

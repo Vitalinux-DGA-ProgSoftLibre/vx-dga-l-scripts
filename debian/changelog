@@ -1,3 +1,11 @@
+vx-dga-l-scripts (4.1-22) unstable; urgency=low
+
+  * Añadimos en vx-informacion-red la información de la frecuencia de actualización Migasfree
+  * Modificamos vx-conf-lanzadores-desktop para poder copiar lanzadores
+  * Modificamos vx-conf-lanzadores-desktop para poder agrupar lanzadores en un directorio del Escritorio
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 26 Nov 2020 01:30:00 +0200
+
 vx-dga-l-scripts (4.1-21) unstable; urgency=low
 
   * Solucinamos problema en el postinst con lightdm-gtk-greeter.conf
