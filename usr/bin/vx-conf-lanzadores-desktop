@@ -115,7 +115,7 @@ case "${OPCION}" in
         for DIR in "${HOMEUSUARIO}/Escritorio" \
         "${HOMEUSUARIO}/Desktop" ; do
             echo "=> Comprobamos si ya existe antes de copiarlo en: ${DIR}/${LANZADOR}"
-            [ -d "${DIR}" && ! -f "${DIR}/${LANZADOR}" ] && \
+            [ -d "${DIR}" ] && [ ! -f "${DIR}/${LANZADOR}" ] && \
             {
                 rsync -ah --chown="${USUARIO}" --chmod=644 "${RUTA}" "${DIR}/${LANZADOR}" && \
                 echo "=> Se ha copiado el lanzador ${RUTA}: ${DIR}/${LANZADOR}" ;
