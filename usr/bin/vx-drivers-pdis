@@ -296,41 +296,15 @@ function descargar-software-pdi {
 		;;
 
 		"Promethean")
-		# Primero es obligatorio hacer un downgrade a 4.15 pues el driver solo funciona para dicho kernel, no para 5.x
-		if [[ ! "$(uname -r)" =~ 4.15. ]]; then
-			yad --title "Instalación de Software de la PDI $PDI" \
-			--text " Las pizarras Promethen requieren tener instalado y en ejecución un <b>kernel 4.15</b>\n\n Se va a proceder a su instalación... pero después deberás usar la aplicación <b>grub-customizer</b> (se lanzará sola) para configurar el arranque por defecto en kernel 4.15:\n 1. Pestaña de Configuración General\n 2. Entrada predeterminada => Linux 4.15.xxx-generic\n3. Guardar y Salir\n\n Reinicia con el nuevo kernel y vuelve a arranar el asistente. Si no cambia el núcleo, no podré continuar... "\
-			--window-icon vitalinux \
-			--image pdi \
-			--width="400" --height="100" \
-			--center --justify="center" --text-align="center" \
-			--button="Continuar ":0 \
-			--button="Cancelar":1
-			if [ "$?" != "0" ]; then
-				return 1
-			fi
-			apt-get  --assume-yes --force-yes install --install-recommends linux-generic-hwe-16.04 xserver-xorg-hwe-16.04 xserver-xorg-input-all-hwe-16.04 xserver-xorg-video-all-hwe-16.04 xserver-xorg-input-wacom-hwe-16.04 xserver-xorg-video-intel-hwe-16.04 xserver-xorg-video-qxl-hwe-16.04 xfonts-scalable xinput xserver-xorg-input-wacom-hwe-18.04 xserver-xorg-video-nouveau-hwe-16.04 xserver-xorg-input-all-hwe-16.04 xserver-xorg-input-evdev-hwe-16.04 xserver-xorg-input-joystick-hwe-16.04 xserver-xorg-input-synaptics-hwe-16.04 xserver-xorg-video-radeon-hwe-16.04
-			which grub-customizer > /dev/null && grub-customizer
-			return 1
-		fi
 		# Faltará 32 bits...de momento no se publica dicha versión
-			if [ "$ARCHSO" = "64" ] ; then
-			FILESPDI="/pdis/Promethean/bionic/promethean64_bionic/activaid_2.0.1~Ubuntu~1804_amd64.deb \
-				/pdis/Promethean/bionic/promethean64_bionic/activdriver_5.18.18-0~Ubuntu~1804_amd64.deb \
-				/pdis/Promethean/bionic/promethean64_bionic/activinspire_2.18.68238-1.amd64_amd64.deb \
-				/pdis/Promethean/bionic/promethean64_bionic/activinspire-32bitdependsfor64bit_2.18.68238-1.i386_i386.deb \
-				/pdis/Promethean/bionic/promethean64_bionic/activinspire-help-es_1.0.2-14_all.deb \
-				/pdis/Promethean/bionic/promethean64_bionic/activ-meta-es_2.0.0-71_amd64.deb \
-				/pdis/Promethean/bionic/promethean64_bionic/activresources-core-es_1.0.1-147_all.deb \
-				/pdis/Promethean/bionic/promethean64_bionic/activtools_5.18.18-0~Ubuntu~1804_amd64.deb"
-			else
-			FILESPDI="/pdis/Promethean/xenial_last/promethean32_xenial/activaid_2.0.1~Ubuntu~1604_i386.deb \
-				/pdis/Promethean/xenial_last/promethean32_xenial/activhwr-es_1.0.1-79_all.deb \
-				/pdis/Promethean/xenial_last/promethean32_xenial/activinspire-help-es_1.0.2-14_all.deb \
-				/pdis/Promethean/xenial_last/promethean32_xenial/activtools_5.17.14-0~Ubuntu~1604_i386.deb \
-				/pdis/Promethean/xenial_last/promethean32_xenial/activdriver_5.17.14-0~Ubuntu~1604_i386.deb \
-				/pdis/Promethean/xenial_last/promethean32_xenial/activinspire_2.14.67304-1.i386_i386.deb \
-				/pdis/Promethean/xenial_last/promethean32_xenial/activ-meta-es_2.0.0-71_i386.deb"
+			if [ "$ARCHSO" = "32" ] ; then
+				yad --title "Instalación de Software de la PDI $PDI" \
+					--text " Lo sentimos pero de momento NO se da soporte a Promethean 32 bits "\
+					--window-icon vitalinux \
+					--image pdi \
+					--width="400" --height="100" \
+					--center --justify="center" --text-align="center" --button="gtk-ok":0
+				return 1
 			fi
 		;;
 
@@ -448,8 +422,8 @@ function instalar-software-pdi {
 
 		# Primero instalamos los complementos de drivers gráficos necesarios para que no haga downgrade
 		apt-get --assume-yes install xserver-xorg-input-evdev-hwe-18.04
-		dpkg -i /opt/pkgs/pdis/activ*.deb
-		apt-get -f --assume-yes --force-yes install
+		
+		apt-get install activdriver activtools activ-meta-es
 	;;
 
 	"Smartboard")
@@ -534,7 +508,7 @@ if [ "$ARCHSO" != "32" ] && [ "$ARCHSO" != "64" ] ; then
 	exit 1
 fi
 
-log_xsession -o drivers-pdis
+log_xsession -o drivers-pdis.log
 
 yad --center --title "Drivers PDIs" --question \
 	--window-icon vitalinux \
@@ -551,14 +525,24 @@ fi
 
 seleccionar-modelo-pdi && descargar-software-pdi && instalar-software-pdi
 
-
-yad --title "Instalación de Software de la PDI $PDI" \
+if [ "$?" != "0" ]; then
+	yad --title "Instalación de Software de la PDI $PDI" \
+	 --text "   Algo ha podido salir mal   \n   Revise la ventana de logs para poder detectar el problema. \n\n Puede solicitar ayuda mandano un mail a soporte.vitalinux@educa.aragon.es adjuntando el texto de la traza  "\
+	--window-icon vitalinux \
+	--image pdi \
+	--width="400" --height="100" \
+	--center --justify="center" --text-align="center" --button="gtk-ok":0
+else 
+	yad --title "Instalación de Software de la PDI $PDI" \
 	 --text "   Ya se han realizado todas las tareas solicitadas   \n   Recuerde que es posible que sea necesario un <b>reinicio del sistema</b> "\
 	--window-icon vitalinux \
 	--image pdi \
 	--width="400" --height="100" \
 	--center --justify="center" --text-align="center" --button="gtk-ok":0
- if [ -n "$YAD_LOG" ] && ps -p "$YAD_LOG" > /dev/null; then 
-    	kill -s SIGUSR1 "$YAD_LOG"
- fi
- exit 0
+fi
+
+
+if [ -n "$YAD_LOG" ] && ps -p "$YAD_LOG" > /dev/null; then 
+   	kill -s SIGUSR1 "$YAD_LOG"
+fi
+exit 0

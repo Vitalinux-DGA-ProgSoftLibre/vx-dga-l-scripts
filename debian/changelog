@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-34) unstable; urgency=low
+
+  * Soporte para pizarras Promethean, kernel 5.x
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Thu, 3 Dec 2020 13:31:00 +0200
+
 vx-dga-l-scripts (5.0-33) unstable; urgency=low
 
   * Soluciona seguno error en copia de lanzadores de conf-centro
