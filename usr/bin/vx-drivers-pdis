@@ -78,11 +78,16 @@ function seleccionar-modelo-pdi {
 	PDI=$(yad --center --width 300 --title "Seleccionar PDI" \
 		--window-icon vitalinux \
 		--image pdi \
-		--button="Continuar":0 --button="Canelar":1 \
 		--entry \
 		--text "Selecciona tu PDI:" \
 		--entry-text \
-		"Sin Driver - Solo OpenBoard" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard")
+		"Sin Driver - Solo OpenBoard" "eBeam" "Hitachi" "Interwrite" "IQBoard" "Multiclass" "Promethean" "Smartboard" \
+		--button="Continuar":0 \
+		--button="Cancelar":1
+		)
+	if [ "$?" != "0" ]; then
+		return 69
+	fi
 }
 
 function comprobar-md5 {
@@ -158,13 +163,12 @@ function descargar-archivos {
 		--text "   Hubo un problema a la hora de descargar el software o ha sido cancelada la operación por el usuario...deseas reintentar la descarga?   " \
 		--width="350" --center \
 		--justify="center" --text-align="center" \
-		--button="Continuar":0 --button="Cancelar":1 ;  then
-			
+		--button="Continuar":0 --button="Cancelar":1 ;  then	
 			descargar-archivos $@
 			return $?
 		else
 			
-			return 1
+			return 69
 		fi 
 	fi
 	return 0
@@ -228,7 +232,7 @@ function descargar-software-pdi {
 					--button="Continuar":0 \
 					--button="Salir":1
 				if [ "$?" != "0" ]; then
-					return 1
+					return 69
 				fi
 			else
 				HITACHITRIO="0"
@@ -241,7 +245,7 @@ function descargar-software-pdi {
 					--button="Continuar":0 \
 					--button="Salir":1
 				if [ "$?" != "0" ]; then
-					return 1
+					return 69
 				fi
 			fi
 			#FILESPDI="/pdis/HITACHI/StarBoardSoftware_9.63_ubuntu16_amd64.deb"
@@ -257,7 +261,7 @@ function descargar-software-pdi {
 					--button="Continuar ":0 \
 					--button="Salir":1
 			if [ "$?" != "0" ]; then
-				return 1
+				return 69
 			fi
 		;;
 
@@ -290,7 +294,7 @@ function descargar-software-pdi {
 				--button="Continuar ":0 \
 				--button="Cancelar":1
 			if [ "$?" != "0" ]; then
-				return 1
+				return 69
 			fi
 			FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_$ARCHSO.deb"
 		;;
@@ -320,7 +324,7 @@ function descargar-software-pdi {
 				--button="Continuar ":0 \
 				--button="Cancelar":1
 			if [ "$?" != "0" ]; then
-				return 1
+				return 69
 			fi
 		
 		;;
@@ -524,8 +528,9 @@ if [ "$?" != "0" ]; then
 fi
 
 seleccionar-modelo-pdi && descargar-software-pdi && instalar-software-pdi
-
-if [ "$?" != "0" ]; then
+RESUL="$?"
+## RESUL 69 es cancelación...pero no lo informamos....
+if [ "${RESUL}" != "0" ] &&  [ "${RESUL}" != "69" ] ; then
 	yad --title "Instalación de Software de la PDI $PDI" \
 	 --text "   Algo ha podido salir mal   \n   Revise la ventana de logs para poder detectar el problema. \n\n Puede solicitar ayuda mandano un mail a soporte.vitalinux@educa.aragon.es adjuntando el texto de la traza  "\
 	--window-icon vitalinux \
