@@ -472,7 +472,7 @@ function instalar-software-pdi {
 		--text "   Deseas instalar <b>Open-Board(64 bits)/Open-Sankore(32 bits))</b>   " \
 		--width="350" --center \
 		--justify="center" --text-align="center" \
-		--button="Continuar":0 --button="Cancelar":1 ;  then
+		--button="Continuar":0 --button="Cancelar":69 ;  then
 
 		cd /opt/pkgs/pdis || return 1
 
