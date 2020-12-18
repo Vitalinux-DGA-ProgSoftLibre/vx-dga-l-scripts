@@ -50,11 +50,15 @@ case "${OPCION}" in
         [[ "${PROPIETARIO}" == "null" ]] && \
         COMANDO=( "/usr/bin/rsync" "-ah" '--out-format="[%t]:%o:%f:Last Modified %M"' ) || \
         COMANDO=( "/usr/bin/rsync" "-ah" "--chown=${PROPIETARIO}" '--out-format="[%t]:%o:%f:Last Modified %M"' )
+        shift
         
-        DESTINO="${2}"
+        # El siguiente parámetro es el directorio destino:
+        DESTINO="${1}"
+        shift
+        # El resto de parámetros son los ficheros o directorios origen a copiar:
+        ORIGENES=( ${@} )
         [[ ! -d "${DESTINO}" ]] && \
-        echo "=> El directorio de destino ${DESTINO} no existe ... salimos" && uso && exit 2
-        shift 2
+        echo "=> El directorio de destino \"${DESTINO}\" no existe ... salimos" && uso && exit 2
         until [ -z "${1}" ] ; do
             [[ -f "${1}" || -d "${1}" ]] && \
             echo "=> Se va copiar ${1} => ${DESTINO}" && \
