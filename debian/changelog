@@ -1,3 +1,10 @@
+vx-dga-l-scripts (5.0-35) unstable; urgency=low
+
+  * Añadimos vx-archivos-directorios para copiar y borrar archivos y directorios desde el paquete de centro
+  * Corregimos vx-conf-lanzadores-desktop para que al eliminar un lanzador lo haga sólo del usuario gráfico, no de todos
+
+ -- Arturo Martín <amartinromero@gmail.com>  Fri, 18 Dec 2020 01:30:00 +0200
+
 vx-dga-l-scripts (5.0-34) unstable; urgency=low
 
   * Soporte para pizarras Promethean, kernel 5.x

@@ -1,0 +1,75 @@
+#!/bin/bash
+# Última Modificación: [arturo@2020-12-18]
+
+uso() {
+    echo -e "${1}
+# El script debe recibir como primer parametro: copiar o borrar => cp|rm.
+# Ejemplos de uso:
+vx-archivos-directorios cp propietario destino origen1 origen2 ...
+vx-archivos-directorios rm file1 file2 dir1 dir2 ...
+    "
+}
+
+# Comprobamos que el usuario que ha lanzado el script es root:
+MENSAJE="¡¡Debes ser usuario root para ejecutar este script de gestión de archivos y directorios!!"
+[[ "$(whoami)" != "root" ]] && \
+uso "${MENSAJE}" && exit 1
+
+# Importamos las funciones generales:
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+# Comprobamos que el primer parámetro es --crear|--borrar|--copiar:
+MENSAJE="¡¡El primer parámetro debe ser copiar o borrar \"cp|rm\"!!"
+OPCION="${1}"
+! [[ "${OPCION}" =~ ^cp$|^rm$ ]] && uso "${MENSAJE}" && exit 1
+shift
+
+USUARIO="$(vx-usuario-grafico)"
+UIDUSUARIO="$(id -u "${USUARIO}")"
+HOMEUSUARIO="$(vx-home-usuario-grafico)"
+
+case "${OPCION}" in
+    "cp" )
+        # En la opción cp el siguiente parámetro es el propietario de la copia resultante:
+        if [[ "${1}" =~ ^[[:alnum:]]*:[[:alnum:]]*$ ]] ; then
+            USU="${1%%:*}"
+            GRP="${1##*:}"
+            if vx-funcs-users vx-check_exit_users "${USU}" && \
+            vx-funcs-users vx-check_exit_groups "${GRP}" ; then
+                PROPIETARIO="${1}"
+            else
+                vx-funcs-users vx-check_exit_users "${USU}" && \
+                PROPIETARIO="${USU}:sudo"
+            fi
+        else
+            vx-funcs-users vx-check_exit_users "${1}" && \
+            PROPIETARIO="${1}:sudo" || \
+            PROPIETARIO="null"
+        fi
+        [[ "${PROPIETARIO}" == "null" ]] && \
+        COMANDO=( "/usr/bin/rsync" "-ah" '--out-format="[%t]:%o:%f:Last Modified %M"' ) || \
+        COMANDO=( "/usr/bin/rsync" "-ah" "--chown=${PROPIETARIO}" '--out-format="[%t]:%o:%f:Last Modified %M"' )
+        
+        DESTINO="${2}"
+        [[ ! -d "${DESTINO}" ]] && \
+        echo "=> El directorio de destino ${DESTINO} no existe ... salimos" && uso && exit 2
+        shift 2
+        until [ -z "${1}" ] ; do
+            [[ -f "${1}" || -d "${1}" ]] && \
+            echo "=> Se va copiar ${1} => ${DESTINO}" && \
+            "${COMANDO[@]}" "${1}" "${DESTINO}"
+            shift
+        done
+    ;;
+    "rm" )
+        until [ -z "${1}" ] ; do
+            [[ -f "${1}" || -d "${1}" ]] && \
+            echo "=> Se va a eliminar el archivo o directorio: ${1}" && \
+            rm -Rf "${1}"
+            shift
+        done
+    ;;
+esac
+
+exit 0

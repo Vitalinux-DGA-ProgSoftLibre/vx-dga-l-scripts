@@ -227,7 +227,8 @@ case "${OPCION}" in
         "${HOMEUSUARIO}/Desktop" \
         "/etc/skel/Escritorio" \
         "/usr/share/applications" \
-        $(echo $(eval echo {$(vx-home-usuarios-graficos | tr -s "\n" " " | sed -e 's/[ \t]*$//;s/[[:space:]]/,/g')}"/.local/share/applications")); do
+        "$(vx-home-usuario-grafico)/.local/share/applications" ; do
+            #$(echo $(eval echo {$(vx-home-usuarios-graficos | tr -s "\n" " " | sed -e 's/[ \t]*$//;s/[[:space:]]/,/g')}"/.local/share/applications")); do
             echo "=> Comprobamos si existe: ${DIR}/${LANZADOR}"
             [ -f "${DIR}/${LANZADOR}" ] && \
             {
