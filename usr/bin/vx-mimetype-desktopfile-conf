@@ -1,5 +1,5 @@
 #!/bin/bash
-# last-act: arturo@2020-5-8
+# last-act: arturo@2021-1-7 arturo@2020-5-8
 # desc: Script que configura las secciones [Default Applications] y [Added Associations]
 # En función del ejecutor del script se configura a nivel personal o global
 
@@ -19,7 +19,9 @@
 # 2) Fichero general para defaults:
 # /etc/xdg/lubuntu/applications/defaults.list
 # /usr/share/applications/defaults.list
-# 3) Fichero general: /usr/share/applications/mimeapps.list
+# 3) Fichero general para asociaciones:
+# /etc/xdg/lubuntu/applications/mimeapps.list
+# /usr/share/applications/mimeapps.list
 
 uso() {
     echo -e "=> Debes pasar como primer parámetro si quieres configurar:
@@ -33,6 +35,9 @@ uso() {
     \"application/x-java-archive:vx-java-jar.desktop\"
     \"application/java-archive:vx-java-jar.desktop\"
     \"application/x-jar:vx-java-jar.desktop\"
+    LISTADO=(
+    \"application/x-java-archive;application/java-archive;application/x-jar:vx-java-jar.desktop;vx-java-jar.desktop\"
+    \"application/tipo1;application/tipo2;application/tipo3:vx-app1.desktop;vx-app2.desktop\"
     )
     "
     exit 1
@@ -53,39 +58,64 @@ LISTA_OPCIONES=()
 EJECUTOR="$(whoami)"
 USUARIO="$(vx-usuario-grafico)"
 HOMEUSU="$(vx-home-usuario-grafico)"
+VER_VITALINUX=$(lsb_release -cs) || exit 1
 LISTA_ARCHIVOS=()
 [[ "${EJECUTOR}" == "root" ]] && \
 {
-    [[ "${OPCION}" == "Default Applications" ]] && \
-    LISTA_ARCHIVOS=( "/etc/xdg/lubuntu/applications/defaults.list" \
-        "/usr/share/applications/defaults.list" \
-    "/usr/share/applications/mimeapps.list" ) || \
+    [[ "${VER_VITALINUX}" == "bionic" ]] && \
+    LISTA_ARCHIVOS=( "/etc/xdg/lubuntu/applications/mimeapps.list" ) || \
     LISTA_ARCHIVOS=( "/usr/share/applications/mimeapps.list" ) ;
 } || \
-LISTA_ARCHIVOS=( "${HOMEUSU}/.local/share/applications/mimeapps.list" \
-"${HOMEUSU}/.config/mimeapps.list" )
+{
+    [[ "${VER_VITALINUX}" == "bionic" ]] && \
+    LISTA_ARCHIVOS=( "${HOMEUSU}/.config/mimeapps.list" ) || \
+    LISTA_ARCHIVOS=( "${HOMEUSU}/.local/share/applications/mimeapps.list" ) ;
+}
+echo "==> Lista de archivos a configurar: ${LISTA_ARCHIVOS[*]}"
 
 for ARCHIVO in "${LISTA_ARCHIVOS[@]}" ; do
     if [ ! -f "${ARCHIVO}" ] ; then
         echo -e "=> No existe el archivo: \"${ARCHIVO}\".\n=> Se creará si hay permisos suficientes ..."
+        DIR_BASE="$(dirname "${ARCHIVO}")"
+        [ ! -d "${DIR_BASE}" ] && mkdir -p "${DIR_BASE}" && \
+        echo "=> Se ha creado el directorio base: ${DIR_BASE}"
+        echo -e "[Default Applications]\n[Added Associations]\n" > "${ARCHIVO}"
     fi
-    for ASOCIACION in ${@} ; do
-        MIMETYPE="${ASOCIACION%:*}"
-        for ELEMENTO in "${LISTA_OPCIONES[@]}" ; do
-            if [[ "${ELEMENTO}" == "Added Associations" ]] ; then
-                if OLD_LANZADORES="$(crudini --get "${ARCHIVO}" "${ELEMENTO}" "${MIMETYPE}")" ; then
-                    # Comprobamos si la lista de lanzadores acaba en ";"
-                    REGEX='^.*;$'
-                    [[ "${OLD_LANZADORES}" =~ ${REGEX} ]] && \
-                    LANZADOR="${OLD_LANZADORES}${ASOCIACION#*:};" || \
-                    LANZADOR="${OLD_LANZADORES};${ASOCIACION#*:};"
-                else
-                    LANZADOR="${ASOCIACION#*:}"
-                fi
-            fi
-            crudini --set "${ARCHIVO}" "${ELEMENTO}" "${MIMETYPE}" "${LANZADOR}" && \
-            echo "=> ${ARCHIVO}: [${OPCION}] ${MIMETYPE} ${LANZADOR}" || \
-            echo "=> Error al configurar: ${ARCHIVO} ... ¿Falta de permisos?"
+    for ASOCIACION in "${@}" ; do
+        MIMETYPES="${ASOCIACION%:*}"
+        LISTA_MIMETYPES=(${MIMETYPES//;/ })
+        for MIMETYPE in "${LISTA_MIMETYPES[@]}" ; do
+            for ELEMENTO in "${LISTA_OPCIONES[@]}" ; do
+                # Obtenemos la lista de lanzadores recibidos para la asociación:
+                LANZADORES="${ASOCIACION#*:}"
+                LISTA_LANZADORES=(${LANZADORES//;/ })
+                for LANZADOR in "${LISTA_LANZADORES[@]}" ; do
+                    # Comprobamos que la asociación no exista ya:
+                    EXISTE="false"
+                    if OLD_LANZADORES="$(crudini --get "${ARCHIVO}" "${ELEMENTO}" "${MIMETYPE}")" ; then
+                        REGEX="${LANZADOR};|${LANZADOR}$"
+                        [[ ${OLD_LANZADORES} =~ ${REGEX} ]] && EXISTE="true" && \
+                        echo "=> Ya existe la asociación ${ARCHIVO}: [${OPCION}] ${MIMETYPE} ${LANZADOR}"
+                    fi
+                    if ! "${EXISTE}" ; then
+                        # Si se trata de añadir una asociación añadiremos el lanzador a lista de lanzadores que ya haya, teniendo en cuenta el posible ;
+                        if [[ "${ELEMENTO}" == "Added Associations" && ! -z "${OLD_LANZADORES}" ]] ; then
+                            # Comprobamos si la lista de lanzadores acaba en ";"
+                            REGEX='^.*;$'
+                            [[ "${OLD_LANZADORES}" =~ ${REGEX} ]] && \
+                            NEW_LANZADORES="${OLD_LANZADORES}${LANZADOR};" || \
+                            NEW_LANZADORES="${OLD_LANZADORES};${LANZADOR};"
+                        else
+                            [[ "${ELEMENTO}" == "Added Associations" ]] && \
+                            NEW_LANZADORES="${LANZADOR};" || \
+                            NEW_LANZADORES="${LANZADOR}"
+                        fi
+                        crudini --set "${ARCHIVO}" "${ELEMENTO}" "${MIMETYPE}" "${NEW_LANZADORES}" && \
+                        echo "=> ${ARCHIVO}: [${OPCION}] ${MIMETYPE} ${NEW_LANZADORES}" || \
+                        echo "=> Error al configurar: ${ARCHIVO} ... ¿Falta de permisos?"
+                    fi
+                done
+            done
         done
     done
 done

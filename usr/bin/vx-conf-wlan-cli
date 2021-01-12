@@ -1,0 +1,19 @@
+#!/bin/bash
+# lastact: arturo@2021-1-11
+# desc: script que habilita (unblock) o inhabilita (block) las interfaz wireless mediante rfkill
+
+# Recogemos la opción a aplicar: block | unblock
+OPCION="${1}"
+[[ ! "${OPCION}" =~ ^block$|^unblock$ ]] && \
+echo "=> Debe pasarse como primer parámtero: block|unblock" && \
+exit 1
+# OPCION 1) Buscamos todas las interfaz wireless que pueda haber:
+# LISTA_IFWLAN=( $(rfkill list wlan | grep -E "^[[:digit:]]" | cut -d":" -f1 ) )
+LISTA_IFWLAN=( $(rfkill list | grep -E "^[[:digit:]]" | grep -E "Wireless LAN" | cut -d":" -f1 ) )
+for DISPOSITIVO in "${LISTA_IFWLAN[@]}" ; do
+    rfkill "${ACCION}" "${DISPOSITIVO}"
+done
+# OPCION 2) rfill nos permite bloquear o desbloquear por TYPE (wlan bluetooth uwb wimax wwan gps fm nfc):
+# Válido para bionic:
+# rfkill "${ACCION}" wlan
+exit 0

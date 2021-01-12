@@ -1,3 +1,18 @@
+vx-dga-l-scripts (5.0-37) unstable; urgency=low
+
+  * Revisamos vx-mimetype-desktopfile-conf para tener en cuenta las asociaciones entre mime-types y ficheros desktop
+  * Modificamos postinst para tener en cuenta lo siguiente:
+  * 1) Quitamos las asociaciones de mimetypes con java-jar y flash-swf para llevarlo al paquete vx-dga-l-mimetypes
+  * 2) Eliminamos la policy o restricción de convert para pasar a formato PDF
+  * Añadimos vx-conf-wlan-cli para poder activar o desactivar la wifi vía rfkill
+  * Añadimos vx-conf-wlan para vía yad poder hacer uso de vx-conf-wlan-cli
+  * Añadimos vx-pk-conf-wlan para ejecutar vx-conf-wlan vía pkexec como root
+  * Moficiamos /usr/share/polkit-1/actions/sistema.pkexec.sistema.policy para poder ejecutar el script anterior como root
+  * Añadimos vx-conf-wlan.desktop para hacer uso del script anterior
+  * Añadimos vx-wlan.svg como icono para el file desktop vx-conf-wlan.desktop
+
+ -- Arturo Martín <amartinromero@gmail.com>  Thu, 7 Jan 2021 01:30:00 +0200
+
 vx-dga-l-scripts (5.0-36) unstable; urgency=low
 
   * Revisamos vx-archivos-directorios para copiar y borrar archivos y directorios desde el paquete de centro
