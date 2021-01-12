@@ -1,0 +1,46 @@
+#!/bin/bash
+USER=$(whoami)
+TITULO="Gestionar Wifi: Activar o Desactivar"
+
+if test "${USER}" != "root" ; then
+    yad --title "${TITULO}" \
+    --text "No tienes privilegios para \n <b>Gestionar la Wifi</b> del Equipo" \
+    --window-icon "vitalinux" \
+    --image "vx-wlan" \
+    --width="350" --height="100" \
+    --center \
+    --justify="center" \
+    --text-align="center" \
+    --buttons-layout center \
+    --button="Cerrar":1
+    exit 1
+fi
+
+TEXTO="Indica que quieres hacer hacer:"
+if RESULTADO=$(yad --title "${TITULO}" \
+    --fixed \
+    --center \
+    --justify "center" \
+    --text-align="fill" \
+    --text "${TEXTO}" \
+    --window-icon "vitalinux" \
+    --image "vx-wlan" \
+    --list --radiolist \
+    --column Opción:RD --column "Acciones Posibles":TEXT \
+    "FALSE" "Activar la red Wifi del Equipo" \
+    "FALSE" "Desactivar la red Wifi del Equipo" \
+    --buttons-layout center \
+    --button="<b>Aplicar</b>":0 \
+    --button="No hacer nada":1) ; then
+    
+    OPCION="$(echo "${RESULTADO}" | cut -d'|' -f2)"
+    case "${OPCION}" in
+        "Activar la red Wifi del Equipo" )
+            vx-conf-wlan-cli unblock
+        ;;
+        "Desactivar la red Wifi del Equipo" )
+            vx-conf-wlan-cli block
+        ;;
+    esac
+fi
+exit 0
