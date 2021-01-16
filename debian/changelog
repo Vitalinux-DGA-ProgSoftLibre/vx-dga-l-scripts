@@ -1,3 +1,10 @@
+vx-dga-l-scripts (5.0-38) unstable; urgency=low
+
+  * Añadimos vx-regex-buscar-patron para manejar patrones regex de busqueda potentes
+  * xxx
+
+ -- Arturo Martín <amartinromero@gmail.com>  Fri, 15 Jan 2021 01:30:00 +0200
+
 vx-dga-l-scripts (5.0-37) unstable; urgency=low
 
   * Revisamos vx-mimetype-desktopfile-conf para tener en cuenta las asociaciones entre mime-types y ficheros desktop
