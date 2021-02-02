@@ -1,0 +1,89 @@
+#!/usr/bin/python3
+# _*_ coding: utf-8 _*_
+# lastact: arturo@2021-1-15
+# desc: busca el patrón regex en la entrada estandar o arhivo pasado como segundo parámetro
+
+import re
+import sys
+import os
+
+
+def salir_error(otro_texto):
+    texto = "¡¡Error!! El script busca el patrón regex en la entrada estándar o fichero:\n"
+    texto += "Sintaxis: vx-regex-buscar-patron 'patron-regex' '[grupo]' '[fichero-filtrar]'\n"
+    texto += "Ej. cat fichero | vx-regex-buscar-patron 'patron-regex' '2'\n"
+    texto += "Ej. vx-regex-buscar-patron 'patron-regex' '0' 'fichero-filtrar'\n"
+    texto += 'Ejemplo de Regex: \
+        regex = rf"({VAR} (connected|disconnected).*\\n)( [\s\S]+?)\\n[\w]" \n\
+        1) Podemos usar variables encerrándolas entre {VAR} \n\
+        2) Entre paréntesis y separados por |, (...|...), podemos definir alternativas \n\
+        3) Importante usar caracteres especiales (entre ellos): \n\
+            \s => Equivalente a cualquier caracter unicode de tipo espacio en blanco [ \\t\\n\\r\\f\\v] \n\
+            \S => Conjunto de caracteres contrario a \s \n\
+            \w => [a-zA-Z0-9_] \W => [^a-zA-Z0-9_] \n\
+            \d => Digitos \D => No digitos \n\
+            [\s\S] => Cualquier caracter, incluidos los saltos de línea \n\
+            (*, +, …)? => Reluctance Regex \n\
+            () => Mediante los paréntesis formamos grupos que luego podemos rescatar'
+    if (otro_texto != ""):
+        texto += "\n" + otro_texto
+    print(texto)
+    os._exit(1)
+
+
+def listToString(s):
+    str1 = ""
+    for ele in s:
+        str1 += str(ele)
+    return str1
+
+
+# Comprobamos los parámetros pasados como parámetros:
+# sys.argv[0] => El primer parámetro es nombre del programa
+try:
+    if len(sys.argv) < 2:
+        salir_error("")
+except:
+    salir_error("")
+
+# sys.argv[1] => Es el patrón regex de busqueda
+# miregex = rf"({sys.argv[1]} (connected|disconnected).*\n)( [\s\S]+?)\n[\w]"
+miregex = sys.argv[1]
+
+# En caso de formar grupos, como segundo parámetro se puede indicar que grupo mostrar por salida:
+# Comprobamos si existe el segundo parámetro mediante [2:]
+if sys.argv[2:]:
+    grupo = sys.argv[2]
+    print("El grupo a imprimir será: " + grupo)
+else:
+    grupo = 0
+
+# sys.argv[3] => Si existe ese patrón será el archivo donde buscar
+# sys.argv[3] => Si NO existe ese patrón buscará en la entrada estándar
+if sys.argv[3:]:
+    try:
+        # print("El segundo parámetro es: " + sys.argv[2])
+        mifile = sys.argv[3]
+        fichero = open(mifile)
+        contenido = fichero.read()
+        fichero.close()
+    except:
+        salir_error("=> El fichero indicado " + mifile +
+                    "NO existe o no se puede leer!!")
+else:
+    # Si no le pasamos un segundo argumento lee por defecto de la entrada estandar o tubería:
+    contenido = sys.stdin.readlines()
+    # print("Stdin se recoge en un array, una componente por línea" + len(contenido))
+    contenido = listToString(contenido)
+
+# print(contenido)
+# os._exit(0)
+
+if re.search(miregex, contenido):
+    # print("Encontrado el patrón!!")
+    busqueda = re.search(miregex, contenido)
+    print(busqueda.group(int(grupo)))
+    os._exit(0)
+else:
+    print("=> No existe ese patrón regex de búsqueda")
+    os._exit(1)

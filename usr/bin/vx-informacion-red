@@ -36,6 +36,14 @@ echo -e "Versión de OpenGL: <b><tt><span foreground='blue'>${VEROPENGL}</span><
 [[ -d "/sys/firmware/efi" ]] && TIPOBIOS="BIOS UEFI" || TIPOBIOS="BIOS Legacy"
 echo -e "Tipo de BIOS: <b><tt><span foreground='blue'>${TIPOBIOS}</span></tt></b>" >> /tmp/info-tarjetas-red
 
+# Información del Usuario de inicio de sesión automática:
+FICH="/etc/lightdm/lightdm.conf"
+if [ -f "${FICH}" ] && \
+grep -q "^autologin-user=" "${FICH}" ; then
+USUINI="$(grep '^autologin-user=' "${FICH}" | cut -d "=" -f2)"
+echo -e "Usuario Inicio Sesión Automática: <b><tt><span foreground='blue'>${USUINI}</span></tt></b>" >> /tmp/info-tarjetas-red
+fi
+
 # Información Epoptes:
 EPOPTES="false"
 if dpkg -l | grep -q "vx-dga-l-epoptes-servidor" ; then

@@ -1,6 +1,6 @@
 #!/bin/bash
-USER=$(whoami)
-ACTUAL=$(grep 'autologin-user=' /etc/lightdm/lightdm.conf | cut -d "=" -f2)
+USER="$(whoami)"
+ACTUAL="$(grep '^autologin-user=' /etc/lightdm/lightdm.conf | cut -d "=" -f2)"
 TEXTO1="  Actualmente el equipo inicia sesión automática con el usuario: <b>$ACTUAL</b>  \n\n  Selecciona el Usuario con quien deseas que el equipo inicie <b>Sesión de manera Automática</b>:  "
 TEXTO2="  Actualmente el equipo <b>NO</b> inicia Sesión Automática con ningún usuario.  \n\n  Selecciona el Usuario con quien deseas que el equipo inicie <b>Sesión de manera Automática</b>:  "
 USERDEFINITIVO=""
@@ -94,8 +94,9 @@ function decidir-usuario-inicio-sesion {
 	--entry \
 	--text "$1" \
 	--entry-text \
+	"${ACTUAL}" \
 	"Sin-Inicio-Sesion-Automático" \
-	$(awk -F ":" '{if ( $3 > 999 && $6~/\/home\/.*/) {print $1}}' /etc/passwd) \
+	$(awk -F ":" '{if ( $3 > 999 && $6~/\/home\/.*/) {print $1}}' /etc/passwd | grep -v "${ACTUAL}") \
 	"Usuario LDAP" \
 	"Usuario Nuevo a Crear" \
 	--button="gtk-ok:0" --button="gtk-cancel:1")
