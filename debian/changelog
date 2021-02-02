@@ -3,6 +3,8 @@ vx-dga-l-scripts (5.0-38) unstable; urgency=low
   * Añadimos vx-regex-buscar-patron para manejar patrones regex de busqueda potentes
   * Modificamos vx-conf-wlan.desktop y corregimos el Icon vx-wlan
   * Desbloquear instalación del software promethean
+  * Modificamos vx-autologin para que la primera opción del select sea el usuario actual
+  * Modificamos vx-informacion-red para mostrar el usuario de inicio de sesión automática 
 
  -- Arturo Martin <amartinromero@gmail.com>  Tue, 2 Feb 2021 00:15:06 +0200
 

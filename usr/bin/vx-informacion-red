@@ -12,12 +12,12 @@ echo "" > /tmp/info-tarjetas-red
 CID=""
 if [ -f "/tmp/.cid.html" ] ; then
     CID="$(cat "/tmp/.cid.html"  | \
-        grep -E "<h1>.*</h1>" | \
-        sed -e "s#\(<h1>\)\(.*\)\(</h1>\)#\2#g" | \
-        tr -d '[:space:]')"
+    grep -E "<h1>.*</h1>" | \
+    sed -e "s#\(<h1>\)\(.*\)\(</h1>\)#\2#g" | \
+tr -d '[:space:]')"
 fi
 if (( ${#CID} == 0 )) && [ -f "/usr/bin/migasfree-cid" ] ; then
-    CID="$(migasfree-cid)"
+CID="$(migasfree-cid)"
 fi
 
 NOMBRE="${HOSTNAME}"
@@ -29,8 +29,8 @@ echo -e "Versión Ubuntu: <b><tt><span foreground='blue'>${DISTRO} (${ARQUIDISTR
 # Información de la versión de la ISO instalada:
 FICHISODATE="/usr/share/vitalinux/vx-iso-date/vx-iso-date.conf"
 if [[ -f "${FICHISODATE}" ]] ; then
-    VERSIONISO="$(crudini --get "${FICHISODATE}" "ISO" "DATEISO")"
-    echo -e "Versión ISO instalada: <b><tt><span foreground='blue'>${VERSIONISO}</span></tt></b>" >> /tmp/info-tarjetas-red
+VERSIONISO="$(crudini --get "${FICHISODATE}" "ISO" "DATEISO")"
+echo -e "Versión ISO instalada: <b><tt><span foreground='blue'>${VERSIONISO}</span></tt></b>" >> /tmp/info-tarjetas-red
 fi
 
 KERNEL="$(uname -s) $(uname -r)"
@@ -44,6 +44,14 @@ echo -e "Versión de OpenGL: <b><tt><span foreground='blue'>${VEROPENGL}</span><
 # Información sobre el tipo de BIOS del equipo: BIOS Legacy o UEFI
 [[ -d "/sys/firmware/efi" ]] && TIPOBIOS="BIOS UEFI" || TIPOBIOS="BIOS Legacy"
 echo -e "Tipo de BIOS: <b><tt><span foreground='blue'>${TIPOBIOS}</span></tt></b>" >> /tmp/info-tarjetas-red
+
+# Información del Usuario de inicio de sesión automática:
+FICH="/etc/lightdm/lightdm.conf"
+if [ -f "${FICH}" ] && \
+grep -q "^autologin-user=" "${FICH}" ; then
+USUINI="$(grep '^autologin-user=' "${FICH}" | cut -d "=" -f2)"
+echo -e "Usuario Inicio Sesión Automática: <b><tt><span foreground='blue'>${USUINI}</span></tt></b>" >> /tmp/info-tarjetas-red
+fi
 
 # Información Epoptes:
 EPOPTES="false"
