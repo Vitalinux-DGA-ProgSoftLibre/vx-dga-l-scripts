@@ -94,7 +94,7 @@ function decidir-usuario-inicio-sesion {
 	--entry \
 	--text "$1" \
 	--entry-text \
-	"${ACTUAL}"
+	"${ACTUAL}" \
 	"Sin-Inicio-Sesion-Automático" \
 	$(awk -F ":" '{if ( $3 > 999 && $6~/\/home\/.*/) {print $1}}' /etc/passwd | grep -v "${ACTUAL}") \
 	"Usuario LDAP" \
