@@ -427,7 +427,7 @@ function instalar-software-pdi {
 		# Primero instalamos los complementos de drivers gráficos necesarios para que no haga downgrade
 		apt-get --assume-yes install xserver-xorg-input-evdev-hwe-18.04
 		
-		apt-get install activdriver activtools activ-meta-es
+		apt-get --assume-yes install activdriver activtools activ-meta-es
 	;;
 
 	"Smartboard")

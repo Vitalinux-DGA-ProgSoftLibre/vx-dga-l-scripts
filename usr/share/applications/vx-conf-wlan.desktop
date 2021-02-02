@@ -10,7 +10,7 @@ Comment=Application that allows Manage the wireless network
 Comment[en]=Application that allows Manage the wireless network
 Comment[es]=Aplicación que permite Gestionar la red Wifi del Equipo
 
-Icon=vx-conf-wlan
+Icon=vx-wlan
 
 Exec=/usr/bin/vx-pk-conf-wlan
 Terminal=false

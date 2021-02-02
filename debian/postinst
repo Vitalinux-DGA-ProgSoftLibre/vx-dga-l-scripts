@@ -35,6 +35,7 @@ case "$1" in
                 sudo sed -i 's/rights="none" pattern="'${FORMATO}'"/rights="read|write" pattern="'${FORMATO}'"/g' "${FICHERO}"
             done
         fi
+        
     ;;
     
     abort-upgrade|abort-remove|abort-deconfigure)
