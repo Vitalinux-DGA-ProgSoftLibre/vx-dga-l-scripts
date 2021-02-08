@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-39) unstable; urgency=low
+
+  * Actualización de instalación driver y software iqboard para bionic
+
+ -- Ignacio Sancho <sannacho@gmail.com>  Mon, 8 Feb 2021 15:15:06 +0200
+
 vx-dga-l-scripts (5.0-38) unstable; urgency=low
 
   * Añadimos vx-regex-buscar-patron para manejar patrones regex de busqueda potentes

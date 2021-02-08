@@ -280,7 +280,7 @@ function descargar-software-pdi {
 			)
 			[ "$MODELOIQ" = "" ] && return 1
 			
-			FILESPDI="/pdis/IQBoard/IQBoard_$ARCHSO/iqboard.deb /pdis/IQBoard/iqboard_driver_bionic/$MODELOIQ/x$ARCHSO/rsboardep.deb"
+			FILESPDI="/pdis/IQBoard/iqboard_${ARCHSO}_soft_bionic/iqboard.deb /pdis/IQBoard/iqboard_driver_bionic/${MODELOIQ}/x${ARCHSO}/rsboardep.deb"
 			
 		;;
 
@@ -404,11 +404,13 @@ function instalar-software-pdi {
 				echo "Borrando driver instalado..."
 				dpkg -P rsboardep
 			fi
+			# iqboard depende de la librería libpng version 12, pero no está indicada la dependencia
+			apt-get --assume-yes install libpng12-0
 			dpkg -i /opt/pkgs/pdis/rsboardep.deb
 			dpkg -i /opt/pkgs/pdis/iqboard.deb
-			if test -f /usr/share/gnome/autostart/RSBoardEPStart.desktop ; then
-			cp /usr/share/gnome/autostart/RSBoardEPStart.desktop /etc/xdg/autostart/
-			fi
+			# El service también podría ser RSBoardEP_Server.desktop
+			[ -f /usr/share/gnome/autostart/RSBoardEPStart.desktop ] && \
+			  cp /usr/share/gnome/autostart/RSBoardEPStart.desktop /etc/xdg/autostart/
 
 		fi
 	;;
