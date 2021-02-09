@@ -103,7 +103,7 @@ function confimpresora {
     # Comprobamos si existe el directorio de destino de los PPDs
     [[ ! -d "${DIR}" ]] && mkdir -p "${DIR}"
     # Comprobamos si existe el PPD de destino:
-    if [[ ! -f "${DESTINO}" ]] ; then
+    if [[ ! -f "${DESTINO}" && "${DESTINO}" != "null" ]] ; then
         wget "${PPD}" -P "${DIR}" || return 1
     else
         echo "=> El PPD ya esta disponible: ${DESTINO}"
