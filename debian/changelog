@@ -1,14 +1,9 @@
-vx-dga-l-scripts (5.0-42) unstable; urgency=low
+vx-dga-l-scripts (5.0-43) unstable; urgency=low
 
   * Ajustamos vx-conf-impresoras para que no trate de descargar el PPD si es null el primer parámetro
+  * Reescribimos vx-conf-impresoras para que no de errores al llegar un PPD null
 
- -- Arturo Martin <amartinromero@gmail.com>  Tue, 9 Feb 2021 00:17:06 +0200
-
-vx-dga-l-scripts (5.0-41) unstable; urgency=low
-
-  * Ajustamos vx-conf-impresoras para que no trate de descargar el PPD si es null
-
- -- Arturo Martin <amartinromero@gmail.com>  Tue, 9 Feb 2021 00:16:06 +0200
+ -- Arturo Martin <amartinromero@gmail.com>  Tue, 9 Feb 2021 00:18:06 +0200
 
 vx-dga-l-scripts (5.0-40) unstable; urgency=low
 
