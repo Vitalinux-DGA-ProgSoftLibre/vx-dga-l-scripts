@@ -54,10 +54,12 @@ function confimpresora {
     echo "=> Ya existe una impresora configurada con ese nombre: ${2}" && \
     return 1
     
-    PPD="${1}"
-    NOMBREPPD="$(basename "${PPD}")"
-    DIR="/usr/share/cups/model/vitalinux"
-    DESTINO="${DIR}/${NOMBREPPD}"
+    if [ "${1}" != "null" ] ; then
+        PPD="${1}"
+        NOMBREPPD="$(basename "${PPD}")"
+        DIR="/usr/share/cups/model/vitalinux"
+        DESTINO="${DIR}/${NOMBREPPD}"
+    fi
     NOMBRE="${2}"
     CONEXION="${3}"
     IP="$(echo "${CONEXION}" | awk -F "//" '{ print $2 }' | cut -d":" -f1)"
