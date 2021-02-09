@@ -108,10 +108,17 @@ function confimpresora {
     else
         echo "=> El PPD ya esta disponible: ${DESTINO}"
     fi
-    lpadmin -E -v "${CONEXION}" -p "${NOMBRE}" -P "${DESTINO}" \
-    -o pdftops-renderer-default=pdftocairo && \
-    echo "=> Se ha configurado la impresora: ${NOMBRE}" || \
-    echo "=> ¡¡Error!! Problemas para configurar la impresora: ${NOMBRE}"
+    # Configuramos la impresora indicada:
+    if [ "${DESTINO}" == "null" ] ; then
+        lpadmin -p "${NOMBRE}" -E -v "${CONEXION}" && \
+        echo "=> Se ha configurado la impresora: ${NOMBRE}" || \
+        echo "=> ¡¡Error!! Problemas para configurar la impresora: ${NOMBRE}"
+    else
+        lpadmin -E -v "${CONEXION}" -p "${NOMBRE}" -P "${DESTINO}" \
+        -o pdftops-renderer-default=pdftocairo && \
+        echo "=> Se ha configurado la impresora: ${NOMBRE}" || \
+        echo "=> ¡¡Error!! Problemas para configurar la impresora: ${NOMBRE}"
+    fi
     # Comprobamos si queremos que sea la impresora predeterminada:
     if test "${PREDETERMINADA}" -eq 1 ; then
         lpadmin -d "${NOMBRE}" && \
