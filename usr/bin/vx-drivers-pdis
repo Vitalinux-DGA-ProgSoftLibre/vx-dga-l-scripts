@@ -405,7 +405,8 @@ function instalar-software-pdi {
 				dpkg -P rsboardep
 			fi
 			# iqboard depende de la librería libpng version 12, pero no está indicada la dependencia
-			apt-get --assume-yes install libpng12-0
+			# Con la nueva versión, no es necesario
+			# apt-get --assume-yes install libpng12-0
 			dpkg -i /opt/pkgs/pdis/rsboardep.deb
 			dpkg -i /opt/pkgs/pdis/iqboard.deb
 			# El service también podría ser RSBoardEP_Server.desktop
@@ -421,6 +422,9 @@ function instalar-software-pdi {
 		else
 		dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_32.deb
 		fi
+		# La versión actual 7.0 parece romper en algunos equipos el acceso a udev
+		# Por confirmar (de todas formas, 7.0 NO es funcional)
+		#apt-get --assume-yes install libudev0
 
 	;;
 

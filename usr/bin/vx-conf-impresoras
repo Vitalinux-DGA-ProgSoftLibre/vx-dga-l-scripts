@@ -59,6 +59,8 @@ function confimpresora {
         NOMBREPPD="$(basename "${PPD}")"
         DIR="/usr/share/cups/model/vitalinux"
         DESTINO="${DIR}/${NOMBREPPD}"
+    else
+        DESTINO="null"
     fi
     NOMBRE="${2}"
     CONEXION="${3}"
@@ -109,7 +111,7 @@ function confimpresora {
         # Descargamos el PPD
         wget "${PPD}" -P "${DIR}" || return 1
     else
-        echo "=> El PPD ya esta disponible: ${DESTINO}"
+        echo "=> El PPD ya esta disponible o es nulo: ${DESTINO}"
     fi
     # Configuramos la impresora indicada:
     if [ "${DESTINO}" == "null" ] ; then
