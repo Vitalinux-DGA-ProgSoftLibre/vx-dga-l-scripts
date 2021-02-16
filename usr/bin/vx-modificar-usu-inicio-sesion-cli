@@ -43,9 +43,24 @@ function configurar-usuario-inicio-automatico-lightdm {
     fi
 }
 
-USER=$(whoami)
+FICHCONF="/etc/lightdm/lightdm.conf"
+USER="$(whoami)"
 [ "${USER}" != "root" ] && salir "Debes ser root para ejecutar este script" "1"
+
+# El parametro que se le pase tiene que corresponderse con:
+# 1) "null": le indicamos que no queremos inicio de sesión automático
+# 2) "nombre-usuario": un nombre de usuario válido en el sistema. Lo configurará como usuario de inicio de sesión automática.
 [ -z "${1}" ] && salir "Debes pasar como parametro el usuario de inicio de sesión" "1"
+if [[ "${1}" == "null" && -f "${FICHCONF}" ]] ; then
+    grep -q "^autologin-user" "${FICHCONF}" && \
+    {
+        sed --follow-symlinks -i "/^autologin-user=.*/d" "${FICHCONF}"
+        echo "=> Se ha eliminado el Autologin en la sesión gráfica del equipo" ;
+    } || \
+    echo "=> El equipo ya esta configurado para que NO inicie la sesión gráfica de manera automática"
+    exit 0
+fi
+
 USU="${1}"
 checkusername "${USU}" || salir "El nombre de usuario indicado no es valido" "1"
 
