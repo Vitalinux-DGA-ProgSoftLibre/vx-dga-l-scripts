@@ -54,10 +54,14 @@ function confimpresora {
     echo "=> Ya existe una impresora configurada con ese nombre: ${2}" && \
     return 1
     
-    PPD="${1}"
-    NOMBREPPD="$(basename "${PPD}")"
-    DIR="/usr/share/cups/model/vitalinux"
-    DESTINO="${DIR}/${NOMBREPPD}"
+    if [ "${1}" != "null" ] ; then
+        PPD="${1}"
+        NOMBREPPD="$(basename "${PPD}")"
+        DIR="/usr/share/cups/model/vitalinux"
+        DESTINO="${DIR}/${NOMBREPPD}"
+    else
+        DESTINO="null"
+    fi
     NOMBRE="${2}"
     CONEXION="${3}"
     IP="$(echo "${CONEXION}" | awk -F "//" '{ print $2 }' | cut -d":" -f1)"
@@ -81,7 +85,7 @@ function confimpresora {
         "NOMBREPRINT=${NOMBREPRINT}" \
         "LOCKEDRICOHNX=${LOCKEDRICOHNX}" \
         "SHOWUSERCODEPRINT=${SHOWUSERCODEPRINT}" \
-        "SHOWNOMBREPRINT=${SHOWNOMBREPRINT}"; then
+        "SHOWNOMBREPRINT=${SHOWNOMBREPRINT}" ; then
             echo "=> Se han configurado las opciones de tea4cups deseadas ..."
         else
             echo "=> Problemas para configurar las opciones de tea4cups deseadas ..."
@@ -100,18 +104,26 @@ function confimpresora {
         echo "=> No se han modificado las opciones de tea4cups ..."
     fi
     
-    # Comprobamos si existe el directorio de destino de los PPDs
-    [[ ! -d "${DIR}" ]] && mkdir -p "${DIR}"
     # Comprobamos si existe el PPD de destino:
-    if [[ ! -f "${DESTINO}" ]] ; then
+    if [[ ! -f "${DESTINO}" && "${DESTINO}" != "null" ]] ; then
+        # Comprobamos si existe el directorio de destino de los PPDs
+        [[ ! -d "${DIR}" ]] && mkdir -p "${DIR}"
+        # Descargamos el PPD
         wget "${PPD}" -P "${DIR}" || return 1
     else
-        echo "=> El PPD ya esta disponible: ${DESTINO}"
+        echo "=> El PPD ya esta disponible o es nulo: ${DESTINO}"
     fi
-    lpadmin -E -v "${CONEXION}" -p "${NOMBRE}" -P "${DESTINO}" \
-    -o pdftops-renderer-default=pdftocairo && \
-    echo "=> Se ha configurado la impresora: ${NOMBRE}" || \
-    echo "=> ¡¡Error!! Problemas para configurar la impresora: ${NOMBRE}"
+    # Configuramos la impresora indicada:
+    if [ "${DESTINO}" == "null" ] ; then
+        lpadmin -p "${NOMBRE}" -E -v "${CONEXION}" && \
+        echo "=> Se ha configurado la impresora: ${NOMBRE}" || \
+        echo "=> ¡¡Error!! Problemas para configurar la impresora: ${NOMBRE}"
+    else
+        lpadmin -E -v "${CONEXION}" -p "${NOMBRE}" -P "${DESTINO}" \
+        -o pdftops-renderer-default=pdftocairo && \
+        echo "=> Se ha configurado la impresora: ${NOMBRE}" || \
+        echo "=> ¡¡Error!! Problemas para configurar la impresora: ${NOMBRE}"
+    fi
     # Comprobamos si queremos que sea la impresora predeterminada:
     if test "${PREDETERMINADA}" -eq 1 ; then
         lpadmin -d "${NOMBRE}" && \

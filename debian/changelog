@@ -1,3 +1,9 @@
+vx-dga-l-scripts (4.1-27) unstable; urgency=low
+
+  * Modificamos vx-conf-impresoras para tener en cuenta el valor null del PPD en impresoras compartidas
+
+ -- Arturo Martin <amartinromero@gmail.com>  Tue, 16 Feb 2021 00:15:06 +0200
+
 vx-dga-l-scripts (4.1-26) unstable; urgency=low
 
   * Añadimos vx-regex-buscar-patron para manejar patrones regex de busqueda potentes
