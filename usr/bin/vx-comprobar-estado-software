@@ -1,52 +1,59 @@
 #!/bin/bash
 USER=$(whoami)
-ESTADO1=1
-ESTADO2=1
+ESTADO=1
+export fpipe=$(mktemp -u --tmpdir dpkgapt.XXXXXX)
+mkfifo "$fpipe"
+trap "rm -f $fpipe" EXIT
+
 if test $USER = "root"
 then
-		yad --title "Información" --info --text "Se Va a Comprobar y Reparar el Software del Equipo" \
-		--window-icon vitalinux \
-		--image application-check \
-		--width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
-		--button=Continuar:0
-
-		(
-		echo "--> Va a empezar a comprobarse y reparar el software ..."
-		echo "--> ¡¡No cierres la ventana!! Espera a que un mensaje te lo indique ..."
-		echo "..."
-		if dpkg --configure -a ; then
-			echo "--> Ok - Todo el software del equipo esta correctamente configurado ..."
-			ESTADO1=0
-		fi
-		if apt-get install -f ; then
-			echo "--> Ok - Todos las dependencias estan correctamente instaladas ..."
-			ESTADO2=0
-		fi
-		echo "..."
-		echo "--> Ya puedes cerrar la ventana ..."
-		) | yad --title "Comprobando ..." --text-info \
-			--image application-check \
-			--window-icon vitalinux \
-			--tail \
-			--center --width="600" --height="500" --button="Cerrar Ventana":0
-
-		if test $ESTADO1 -eq 0 -a $ESTADO2 -eq 0 ;  then
-			yad --title "Completado" --info \
-			--image application-check \
-			--text "La Comprobación y Reparación del Software se ha Completado" --center \
-			--window-icon vitalinux \
-			--width="350" --height="100" --timeout=7 --text-align="center"
-		else
-			yad --title "Problemas ..." --info \
-			--image application-check \
-			--text " Es posible que haya habido problemas con \n la Comprobación y Reparación del Sotware" \
-			--window-icon vitalinux \
-			--center --width="350" --height="100" --timeout=7 --text-align="center"
-		fi
+    yad --title "Información" --info --text "Se Va a Comprobar y Reparar el Software del Equipo" \
+    --window-icon vitalinux \
+    --image application-check \
+    --width="350" --height="100" --justify="center" --center --text-align="center" --timeout=5 \
+    --button=Continuar:0
+    
+    {
+        FIN=0
+        echo "--> Va a empezar a comprobarse y reparar el software ..."
+        echo "--> ¡¡No cierres la ventana!! Espera a que un mensaje te lo indique ..."
+        echo "..."
+        if dpkg --configure -a ; then
+            echo "--> Ok - Todo el software del equipo esta correctamente configurado ..."
+        else
+            FIN=1
+        fi
+        if apt-get install -f ; then
+            echo "--> Ok - Todos las dependencias estan correctamente instaladas ..."
+        else
+            FIN=1
+        fi
+        echo "$FIN" > $fpipe &
+        echo "..."
+        echo "--> Ya puedes cerrar la ventana ..."
+    } | yad --title "Comprobando ..." --text-info \
+    --image application-check \
+    --window-icon vitalinux \
+    --tail \
+    --center --width="600" --height="500" --button="Cerrar Ventana":0
+    read -r ESTADO < "$fpipe"
+    if [ "$ESTADO" = "0" ] ;  then
+        yad --title "Completado" --info \
+        --image application-check \
+        --text "La Comprobación y Reparación del Software se ha Completado" --center \
+        --window-icon vitalinux \
+        --width="350" --height="100" --timeout=7 --text-align="center"
+    else
+        yad --title "Problemas ..." --info \
+        --image application-check \
+        --text " Es posible que haya habido problemas con \n la Comprobación y Reparación del Sotware" \
+        --window-icon vitalinux \
+        --center --width="350" --height="100" --timeout=7 --text-align="center"
+    fi
 else
-		yad --title "Comprobar y Reparar el Software" \
-			--image application-check \
-			--info --text "No tiene permiso para ejecutar el programa" \
-			--window-icon vitalinux \
-			--width="400" --height="100" --center --justify="center" --timeout=7 --text-align="center"
+    yad --title "Comprobar y Reparar el Software" \
+    --image application-check \
+    --info --text "No tiene permiso para ejecutar el programa" \
+    --window-icon vitalinux \
+    --width="400" --height="100" --center --justify="center" --timeout=7 --text-align="center"
 fi

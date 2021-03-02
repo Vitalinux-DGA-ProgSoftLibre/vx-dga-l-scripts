@@ -1,3 +1,9 @@
+vx-dga-l-scripts (4.1-29) unstable; urgency=low
+
+  * Mensaje correcto en la comprobación de software
+
+ --Ignacio Sancho <sannacho@gmail.com>  Tue, 2 Mar 2021 00:19:06 +0200
+
 vx-dga-l-scripts (4.1-28) unstable; urgency=low
 
   * Reescribimos vx-modificar-usu-inicio-sesion-cli para que al recibir un valor null elimine la configuración de inicio de sesión automático
