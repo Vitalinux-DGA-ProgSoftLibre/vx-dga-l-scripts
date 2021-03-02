@@ -1,7 +1,10 @@
 #!/bin/bash
 USER=$(whoami)
-ESTADO1=1
-ESTADO2=1
+ESTADO=1
+export fpipe=$(mktemp -u --tmpdir dpkgapt.XXXXXX)
+mkfifo "$fpipe"
+trap "rm -f $fpipe" EXIT
+
 if test $USER = "root"
 then
     yad --title "Información" --info --text "Se Va a Comprobar y Reparar el Software del Equipo" \
@@ -11,17 +14,21 @@ then
     --button=Continuar:0
     
     {
+        FIN=0
         echo "--> Va a empezar a comprobarse y reparar el software ..."
         echo "--> ¡¡No cierres la ventana!! Espera a que un mensaje te lo indique ..."
         echo "..."
         if dpkg --configure -a ; then
             echo "--> Ok - Todo el software del equipo esta correctamente configurado ..."
-            ESTADO1=0
+        else
+            FIN=1
         fi
         if apt-get install -f ; then
             echo "--> Ok - Todos las dependencias estan correctamente instaladas ..."
-            ESTADO2=0
+        else
+            FIN=1
         fi
+        echo "$FIN" > $fpipe &
         echo "..."
         echo "--> Ya puedes cerrar la ventana ..."
     } | yad --title "Comprobando ..." --text-info \
@@ -29,8 +36,8 @@ then
     --window-icon vitalinux \
     --tail \
     --center --width="600" --height="500" --button="Cerrar Ventana":0
-    
-    if test $ESTADO1 -eq 0 -a $ESTADO2 -eq 0 ;  then
+    read -r ESTADO < "$fpipe"
+    if [ "$ESTADO" = "0" ] ;  then
         yad --title "Completado" --info \
         --image application-check \
         --text "La Comprobación y Reparación del Software se ha Completado" --center \
