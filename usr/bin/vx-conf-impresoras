@@ -52,7 +52,7 @@ function confimpresora {
     (( ${#} < 3 )) && mensaje "${MENSAJE}" && return 1
     lpstat -v | grep -q "${2}:" && \
     echo "=> Ya existe una impresora configurada con ese nombre: ${2}" && \
-    return 1
+    exit 0
     
     if [ "${1}" != "null" ] ; then
         PPD="${1}"
@@ -211,7 +211,9 @@ fi
 
 case "${OPCION}" in
     "instalar" )
-        confimpresora "$@"
+        confimpresora "$@" && \
+        echo "=> Se ha terminado de configurar la impresora: ${2}" || \
+        exit 3
     ;;
     "eliminar" )
         eliminar_impresoras "$@"

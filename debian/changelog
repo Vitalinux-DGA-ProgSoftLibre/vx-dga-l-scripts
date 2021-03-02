@@ -1,3 +1,12 @@
+vx-dga-l-scripts (5.0-46) unstable; urgency=low
+
+  * Ajustamos vx-conf-impresoras para que sólo se reinicie cups en caso de ser necesario
+  * Mensaje de ayuda actualizado para la SmartBoard 480
+  * Multiclass antiguas usan mrpdi
+  * vx-comprobar-estado-software indica resultado correcto
+
+ -- Arturo Martin <amartinromero@gmail.com>  Mon, 1 Mar 2021 00:18:06 +0200
+
 vx-dga-l-scripts (5.0-45) unstable; urgency=low
 
   * Reescribimos vx-modificar-usu-inicio-sesion-cli para que al recibir un null no configure el inicio de sesión automático

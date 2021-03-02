@@ -285,18 +285,36 @@ function descargar-software-pdi {
 		;;
 
 		"Multiclass")
-			yad --title "Instalación de Software de la PDI $PDI" \
-				--text " Las pizarras Multiclass son funcionales para VX-2.0 (driver) pero no la Aplicación.\n Deberás usar openboard por ejemplo (el asistente te permitirá instalarlo después si lo deseas).\n\n Recuerda que para <b>calibrar</b> la pizarra es necesario usar la aplicación llamada <b>iwbdriver</b>. Más información en la <a href='https://wiki.vitalinux.educa.aragon.es/index.php/Vitalinux/Pizarras_Digitales_Interactivas#Multiclass'>wiki de Vitalinux</a> "\
-				--window-icon vitalinux \
-				--image pdi \
-				--width="400" --height="100" \
-				--center --justify="center" --text-align="center" \
-				--button="Continuar ":0 \
-				--button="Cancelar":1
-			if [ "$?" != "0" ]; then
-				return 69
+			if lsusb | grep -i "10c4:ea60" > /dev/null 2>&1 ; then
+				# Ésta pizarra es puerto serie, y funcionará con la solución de lliurex mrpdi
+				MULTICLASSOLD="1"
+				yad --title "Instalación de Software de la PDI $PDI" \
+					--text " Éste modelo de pizarra puede funcionar con una solución genérica basada en un software desarrollado para <b>Lliurex</b>\n Multiclass no proporciona aplicaición para sistema modernos, así que <b>deberás usar openboard por ejemplo </b>(el asistente te permitirá instalarlo después si lo deseas).\n\n Al terminar ésta instalación te saltará la configutación para poder <b>calibrar</b> la pizarra. Si no está enchufada la próxima vez que se detecte la pizarra la saltará la calibración (puede ser necesario un reinicio después de conectar la pizarra)  "\
+					--window-icon vitalinux \
+					--image pdi \
+					--width="400" --height="100" \
+					--center --justify="center" --text-align="center" \
+					--button="Continuar ":0 \
+					--button="Cancelar":1
+				if [ "$?" != "0" ]; then
+					return 69
+				fi
+			else
+				MULTICLASSOLD="0"
+				yad --title "Instalación de Software de la PDI $PDI" \
+					--text " Las pizarras Multiclass son funcionales para VX-2.0 (driver) pero no la Aplicación.\n Deberás usar openboard por ejemplo (el asistente te permitirá instalarlo después si lo deseas).\n\n Recuerda que para <b>calibrar</b> la pizarra es necesario usar la aplicación llamada <b>iwbdriver</b>. Más información en la <a href='https://wiki.vitalinux.educa.aragon.es/index.php/Vitalinux/Pizarras_Digitales_Interactivas#Multiclass'>wiki de Vitalinux</a> "\
+					--window-icon vitalinux \
+					--image pdi \
+					--width="400" --height="100" \
+					--center --justify="center" --text-align="center" \
+					--button="Continuar ":0 \
+					--button="Cancelar":1
+				if [ "$?" != "0" ]; then
+					return 69
+				fi
+				FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_$ARCHSO.deb"
 			fi
-			FILESPDI="/pdis/multiCLASS/multiCLASS_Book_Ubuntu_$ARCHSO.deb"
+			
 		;;
 
 		"Promethean")
@@ -417,11 +435,19 @@ function instalar-software-pdi {
 	;;
 
 	"Multiclass")
-		if [ "$ARCHSO" = "64" ] ; then
-		dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_64.deb
+		if [ "${MULTICLASSOLD}" = "1" ]; then
+			# Elminamos posibles instalaciones antiguas
+			dpkg --purge multiclass 2> /dev/null
+			apt-get --assume-yes --force-yes install vx-dga-l-pdi-multiclass-mrpdi
 		else
-		dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_32.deb
+			if [ "$ARCHSO" = "64" ] ; then
+				dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_64.deb
+			else
+				dpkg -i /opt/pkgs/pdis/multiCLASS_Book_Ubuntu_32.deb
+			fi
 		fi
+
+		
 		# La versión actual 7.0 parece romper en algunos equipos el acceso a udev
 		# Por confirmar (de todas formas, 7.0 NO es funcional)
 		#apt-get --assume-yes install libudev0
@@ -454,16 +480,17 @@ function instalar-software-pdi {
 		if [ "$SB480" = "1" ]  ; then
 			# Avisar de que se deben seguir las instrucciones para que funcione
 			yad --title "Instalación de Software de la PDI $PDI" \
-			--text " Tu pizarra es la S480. Puede requerir las siguientes acciones para funcionar:\n
-			   Navega hasta las Opciones y \n \
-			   -> Configuración del ratón y movimiento\n \
-			   - Habilita modo de uso simultáneo del ratón\n \
-			   - Deshabilita la Función de uso único del ratón\n \
-			   - Deshabilita los mensajes emergentes "\
+			--text " Tu pizarra es la S480. Requerie las siguientes acciones para funcionar:\n
+			   Clicka en el icono de la barra de tareas (junto al reloj) -> Configuración de SMART\n \
+			   - Configuración del Hardware de SMART (a la izda)
+			     -> Selecciona la Configuración del ratón y de los gestos\n \
+			     - Habilita modo multitáctil\n \
+			     - Deshabilita los Gestos de un solo toque\n \
+			     - Deshabilita Activar mensajes emergentes "\
 			--window-icon vitalinux \
 			--image pdi \
-			--width="400" --height="100" \
-			--center --justify="center" --text-align="center" \
+			--width="600" --height="100" \
+			--fixed --center --justify="center" --text-align="center" \
 			--button="OK":0
 		fi
 	;;
