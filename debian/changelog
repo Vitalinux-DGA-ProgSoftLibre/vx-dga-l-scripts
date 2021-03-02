@@ -2,7 +2,7 @@ vx-dga-l-scripts (4.1-29) unstable; urgency=low
 
   * Mensaje correcto en la comprobación de software
 
- --Ignacio Sancho <sannacho@gmail.com>  Tue, 2 Mar 2021 00:19:06 +0200
+ --Ignacio Sancho <sannacho@gmail.com>  Tue, 2 Mar 2021 10:19:06 +0200
 
 vx-dga-l-scripts (4.1-28) unstable; urgency=low
 
@@ -570,4 +570,3 @@ vx-dga-l-scripts (3.0-15) unstable; urgency=low
   * 2016-11-7: En el script de deshabilitar migasfree se ha tenido en cuenta migasfree-indicator.desktop
  
  -- Arturo Martín <amartinromero@gmail.com>  Mon, 6 Jun 2016 00:10:00 +0200
-
