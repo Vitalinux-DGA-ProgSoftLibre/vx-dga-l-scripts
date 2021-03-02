@@ -289,7 +289,7 @@ function descargar-software-pdi {
 				# Ésta pizarra es puerto serie, y funcionará con la solución de lliurex mrpdi
 				MULTICLASSOLD="1"
 				yad --title "Instalación de Software de la PDI $PDI" \
-					--text " Éste modelo de pizarra puede funcionar con una solución genérica basada en un software desarrollado para <b>Lliurex</b>\n Multiclass no proporciona aplicaición para sistema modernos, así que <b>deberás usar openboard por ejemplo </b>(el asistente te permitirá instalarlo después si lo deseas).\n\n Al terminar ésta instalación te saltará la configutación para poder <b>calibrar</b> la pizarra. Si no está enchufada la próxima vez que se detecte la pizarra la saltará la calibración (puede ser necesario un reinicio después de conectar la pizarra)  "\
+					--text " Éste modelo de pizarra puede funcionar con una solución genérica basada en un software desarrollado para <b>Lliurex</b>\n\n Multiclass no proporciona aplicación en ningún caso para sistema modernos, así que <b>deberás usar openboard por ejemplo </b>(el asistente te permitirá instalarlo después si lo deseas).\n\n Al terminar ésta instalación se inciará la <b>calibración</b> de la pizarra. Si no se lleva a cabo, se intentará en próximos reinicios"\
 					--window-icon vitalinux \
 					--image pdi \
 					--width="400" --height="100" \
