@@ -1,11 +1,11 @@
 #!/bin/bash
 
 function crear-lanzador() {
-
-	FICH="${1}"
-	NOMBRE="${2}"
-	SELECCION="${3}"
-
+    
+    FICH="${1}"
+    NOMBRE="${2}"
+    SELECCION="${3}"
+    
 	cat > "${FICH}" << EOF
 [Desktop Entry]
 Version=1.0
@@ -18,77 +18,77 @@ Categories=;
 Type=Application
 Terminal=false
 EOF
-
-	## Para personalizar el lanzador, su icono, etc.: lxshorcut
-	# lxshortcut -i "${desktopFileName}"
-	[ -d "${SELECCION}" ] && echo "Icon=folder_color_pink" >> "${FICH}"
-	[ -f "${SELECCION}" ] && echo "Icon=lanzador" >> "${FICH}"	
-
-	if [ -f "${FICH}" ] ; then
-		LANZADORES+=("${FICH}")
-		RESULTADO="${RESULTADO}=> Ok: Se ha creado correctamente el enlace a ${NOMBRE}\n"
-	else
-		RESULTADO="${RESULTADO}=> Error: Problemas para crear el enlace a ${NOMBRE}\n"
-	fi
+    
+    ## Para personalizar el lanzador, su icono, etc.: lxshorcut
+    # lxshortcut -i "${desktopFileName}"
+    [ -d "${SELECCION}" ] && echo "Icon=folder_color_pink" >> "${FICH}"
+    [ -f "${SELECCION}" ] && echo "Icon=lanzador" >> "${FICH}"
+    
+    if [ -f "${FICH}" ] ; then
+        LANZADORES+=("${FICH}")
+        RESULTADO="${RESULTADO}=> Ok: Se ha creado correctamente el enlace a ${NOMBRE}\n"
+    else
+        RESULTADO="${RESULTADO}=> Error: Problemas para crear el enlace a ${NOMBRE}\n"
+    fi
 }
 
 function crear-acceso-directo-en-escritorio() {
-	# Obtenemos la lista de los parámetros recibidos:
-	# Lista de directorios a crear un acceso o lanzador en Escritorio
-	# Si procede de un "Custom Action": %F son la lista de todas las rutas absolutas de los directorios seleccionados
-	NUMPARAM="${#}"
-
-	INCREMENTO="$(echo 100/$NUMPARAM | bc)"
-	PORCENTAJE="$(( 0 + ${INCREMENTO} ))"
-	NARCHIVO=1
-
-	RESULTADO=""
-	# Comprobamos:
-	# 1) Que hay parámetros
-	# 2) Que los parámetros son ficheros existentes
-	until test -z "${1}" ; do
-		echo "${PORCENTAJE}"
-		[[ "${1}" =~ ^/.* ]] && SELECCION="${1}" || SELECCION="$(pwd)/${1}"
-		! ( [ -d "${SELECCION}" ] || [ -f "${SELECCION}" ] ) && \
-			RESULTADO="${RESULTADO}=> Error: Problemas con ${SELECCION} ...\n" && \
-			echo "${RESULTADO}" && shift && continue
-
-		NOMBRE="$(basename "${1}")"
-		HOMEUSU="$(vx-home-usuario-grafico)"
-		
-		## Obtenemos el directorio que hace de Escritorio en el usuario:
-		# DIRDESKTOP=$(xdg-user-dir DESKTOP)
-		[ -f "${HOMEUSU}/.config/user-dirs.dirs" ] && \
-			. "${HOMEUSU}/.config/user-dirs.dirs" || \
-			echo "#=> Error: Problemas para obtener el Escritorio de $(vx-usuario-grafico) ...\n"
-		
-		DIRDESKTOP="$(basename ${XDG_DESKTOP_DIR})"
-		# Definimos el nombre del fichero sustituyendo posibles espacios en blanco por _:
-		FICH="${HOMEUSU}/${DIRDESKTOP}/vx-acceso-directo-${NOMBRE// /_}.desktop"
-		echo "#=> Va a crearse el acceso a: ${FICH}"
-
-		crear-lanzador "${FICH}" "${NOMBRE}" "${SELECCION}"
-
-		((++NARCHIVO))
-		PORCENTAJE="$(( ${PORCENTAJE} + ${INCREMENTO} ))"
-		shift
-	done
-	echo "${RESULTADO}"
-	# Guardamos los lanzadores creados en un archivo temporal:
-	FICH="/tmp/tmp-vx-crear-acceso-directo-escritorio"
-	printf "%s\n" "${LANZADORES[@]}" > "${FICH}"
+    # Obtenemos la lista de los parámetros recibidos:
+    # Lista de directorios a crear un acceso o lanzador en Escritorio
+    # Si procede de un "Custom Action": %F son la lista de todas las rutas absolutas de los directorios seleccionados
+    NUMPARAM="${#}"
+    
+    INCREMENTO="$(echo 100/$NUMPARAM | bc)"
+    PORCENTAJE="$(( 0 + ${INCREMENTO} ))"
+    NARCHIVO=1
+    
+    RESULTADO=""
+    # Comprobamos:
+    # 1) Que hay parámetros
+    # 2) Que los parámetros son ficheros existentes
+    until test -z "${1}" ; do
+        echo "${PORCENTAJE}"
+        [[ "${1}" =~ ^/.* ]] && SELECCION="${1}" || SELECCION="$(pwd)/${1}"
+        ! ( [ -d "${SELECCION}" ] || [ -f "${SELECCION}" ] ) && \
+        RESULTADO="${RESULTADO}=> Error: Problemas con ${SELECCION} ...\n" && \
+        echo "${RESULTADO}" && shift && continue
+        
+        NOMBRE="$(basename "${1}")"
+        HOMEUSU="$(vx-home-usuario-grafico)"
+        
+        ## Obtenemos el directorio que hace de Escritorio en el usuario:
+        # DIRDESKTOP=$(xdg-user-dir DESKTOP)
+        [ -f "${HOMEUSU}/.config/user-dirs.dirs" ] && \
+        . "${HOMEUSU}/.config/user-dirs.dirs" || \
+        echo "#=> Error: Problemas para obtener el Escritorio de $(vx-usuario-grafico) ...\n"
+        
+        DIRDESKTOP="$(basename ${XDG_DESKTOP_DIR})"
+        # Definimos el nombre del fichero sustituyendo posibles espacios en blanco por _:
+        FICH="${HOMEUSU}/${DIRDESKTOP}/vx-acceso-directo-${NOMBRE// /_}.desktop"
+        echo "#=> Va a crearse el acceso a: ${FICH}"
+        
+        crear-lanzador "${FICH}" "${NOMBRE}" "${SELECCION}"
+        
+        ((++NARCHIVO))
+        PORCENTAJE="$(( ${PORCENTAJE} + ${INCREMENTO} ))"
+        shift
+    done
+    echo "${RESULTADO}"
+    # Guardamos los lanzadores creados en un archivo temporal:
+    FICH="/tmp/tmp-vx-crear-acceso-directo-escritorio"
+    printf "%s\n" "${LANZADORES[@]}" > "${FICH}"
 }
 
 FICHFUNCS="/usr/bin/vx-funcs-bash"
-[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+# [ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
 if [[ -z "${1}" ]] || \
-	! ( [[ -d "${1}" ]] || [[ -f "${1}" ]] ) || \
-	! vx-check-if-not-is-in-desktop-dir "${1}" >& /dev/null ; then
-
-	TITULO="Error en la Llamada al Programa"
-	TEXTO="Debes Introducir al menos un parámetro: la ruta de un Directorio o Archivo"
-	vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
+! ( [[ -d "${1}" ]] || [[ -f "${1}" ]] ) || \
+! vx-check-if-not-is-in-desktop-dir "${1}" >& /dev/null ; then
+    
+    TITULO="Error en la Llamada al Programa"
+    TEXTO="Debes Introducir al menos un parámetro: la ruta de un Directorio o Archivo"
+    "${FICHFUNCS}" vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
 fi
 
 # Definimos una lista que albergará los lanzadores a directorios creados:
@@ -96,33 +96,33 @@ declare -a LANZADORES
 TITULO="Crear Acceso Directo"
 export RESULTADO="#"
 
-if vx-detectar_gui ; then
-	(
-		crear-acceso-directo-en-escritorio "$@"
-	) | yad --title "${TITULO}" \
-			--window-icon vitalinux \
-			--image md5 \
-			--width 660 \
-			--center \
-			--progress --percentage=0 --button="Cerrar":0
+if "${FICHFUNCS}" vx-detectar_gui ; then
+    (
+        crear-acceso-directo-en-escritorio "$@"
+    ) | yad --title "${TITULO}" \
+    --window-icon vitalinux \
+    --image md5 \
+    --width 660 \
+    --center \
+    --progress --percentage=0 --button="Cerrar":0
 else
-	echo -e "\n${TITULO}:"
-	crear-acceso-directo-en-escritorio "$@"
+    echo -e "\n${TITULO}:"
+    crear-acceso-directo-en-escritorio "$@"
 fi
 
-if vx-check_escritorio_congelado ; then
-	# Leemos los lanzadores creados guardados en el archivo temporal:
-	FICH="/tmp/tmp-vx-crear-acceso-directo-escritorio"
-	LANZADORES=()
-	while read LINEA ; do
-			LANZADORES+=("${LINEA}")
-	done < "${FICH}"
-
-	vx-mensaje "Información Vitalinux" "\nTienes el <b>Escritorio Congelado</b>, \nmantendremos congelados los accesos recien creados ..." && \
-	if vx-detectar_gui ; then
-		vx-pk-congelacion-gestionar-escritorio add "${LANZADORES[@]}"
-	else
-		sudo vx-congelacion-gestionar-escritorio-cli add "${LANZADORES[@]}"
-	fi
+if "${FICHFUNCS}" vx-check_escritorio_congelado ; then
+    # Leemos los lanzadores creados guardados en el archivo temporal:
+    FICH="/tmp/tmp-vx-crear-acceso-directo-escritorio"
+    LANZADORES=()
+    while read LINEA ; do
+        LANZADORES+=("${LINEA}")
+    done < "${FICH}"
+    
+    "${FICHFUNCS}" vx-mensaje "Información Vitalinux" "\nTienes el <b>Escritorio Congelado</b>, \nmantendremos congelados los accesos recien creados ..." && \
+    if "${FICHFUNCS}" vx-detectar_gui ; then
+        vx-pk-congelacion-gestionar-escritorio add "${LANZADORES[@]}"
+    else
+        sudo vx-congelacion-gestionar-escritorio-cli add "${LANZADORES[@]}"
+    fi
 fi
 

@@ -1,3 +1,11 @@
+vx-dga-l-scripts (4.1-30) unstable; urgency=low
+
+  * Revisamos vx-check-if-is-in-desktop-dir y su llamada a vx-funcs-bash
+  * Revisamos vx-check-if-not-is-in-desktop-dir y su llamada a vx-funcs-bash
+  * Revisamos vx-crear-acceso-directo-escritorio y su llamada a vx-funcs-bash
+
+ -- Arturo Martin <amartinromero@gmail.com>  Mon, 6 Apr 2021 00:18:06 +0200
+
 vx-dga-l-scripts (4.1-29) unstable; urgency=low
 
   * Script de comprobación

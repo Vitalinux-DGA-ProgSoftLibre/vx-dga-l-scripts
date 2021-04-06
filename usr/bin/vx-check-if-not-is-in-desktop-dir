@@ -4,13 +4,13 @@
 ## Escritorio del usuario
 
 FICHFUNCS="/usr/bin/vx-funcs-bash"
-[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+# [ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
 function salir() {
     TITULO="Error en la Llamada al Programa"
-	TEXTO="${1:-"Debes tener una sesión gráfica abierta e introducir al menos un parámetro: la ruta de un Directorio o Archivo"}"
-    if ! vx-detectar_gui ; then
-	    vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
+    TEXTO="${1:-"Debes tener una sesión gráfica abierta e introducir al menos un parámetro: la ruta de un Directorio o Archivo"}"
+    if ! "${FICHFUNCS}" vx-detectar_gui ; then
+        "${FICHFUNCS}" vx-mensaje_y_salir "${TITULO}" "${TEXTO}" "1" "info" "salir"
     fi
     exit 1
 }
@@ -21,8 +21,8 @@ HOMEUSU="$(vx-home-usuario-grafico)"
 ## Obtenemos el directorio que hace de Escritorio en el usuario:
 # DIRDESKTOP=$(xdg-user-dir DESKTOP)
 [ -f "${HOMEUSU}/.config/user-dirs.dirs" ] && \
-    . "${HOMEUSU}/.config/user-dirs.dirs" || \
-    salir
+. "${HOMEUSU}/.config/user-dirs.dirs" || \
+salir
 DIRDESKTOP="${HOMEUSU}/$(basename "${XDG_DESKTOP_DIR}")"
 #echo "=> DESKTOR DIR de $(vx-usuario-grafico): \"${DIRDESKTOP}\""
 
@@ -41,5 +41,5 @@ until [ -z "${1}" ] ; do
     fi
     shift
 done
-[[ "${ISINDESKTOP}" == "0" ]] && ( echo True && exit 0 ) || (echo False && exit 1)
+[[ "${ISINDESKTOP}" == "0" ]] && ( echo true && exit 0 ) || (echo false && exit 1)
 
