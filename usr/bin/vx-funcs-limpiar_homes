@@ -7,6 +7,12 @@ FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 FICHFUNCS="/usr/bin/vx-funcs-bash"
 [ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
+# Declaramos todas las funciones que se definen posteriormente para evitar ejecuciones indeseadas:
+declare -a MYFUNCS
+MYFUNCS=(vx-funcs-limpiar_homes-help
+    vx-regenerar_entorno_escritorio_usuarios_especificos
+vx-resetear_navegadores_web_usuarios_especificos)
+
 function vx-funcs-limpiar_homes-help() {
     FICHFUNCS="/usr/bin/vx-funcs-limpiar_homes"
     for FUNCION in $(sed -n "s/^function \(.*\)().*/\1/gp" "${FICHFUNCS}") ; do
@@ -142,4 +148,7 @@ function vx-resetear_navegadores_web_usuarios_especificos() {
     done
 }
 
+# Comprobamos si los parámetros pasados se corresponden con la llamada a una de las funciones para ejecutarla
+# En caso de que el parámetro no sea una de las funciones definidas sólo se quieren importar, no ejecutar
+[[ "${MYFUNCS[*]}" =~ "${1} " ]] && \
 "$@" 2> /dev/null

@@ -1,5 +1,44 @@
 #!/bin/bash
-# Ultima modificación: [arturo@2020-4-1]
+# Ultima modificación: [arturo@2021-4-7] [arturo@2020-4-1]
+# desc: defimos funciones que se puedan reutilizar y llamar desde cualquier otro script
+
+# Declaramos todas las funciones que se definen posteriormente para evitar ejecuciones indeseadas:
+declare -a MYFUNCS
+MYFUNCS=(vx-lista_uniq
+    vx-fecha
+    vx-check_is_integer
+    vx-check_is_decimal
+    vx-check_is_decimal_con_signo
+    vx-trim
+    vx-colorear_command_output
+    vx-colorear_echo
+    vx-colorear_command_output_rojo
+    vx-colorear_command_output_verde
+    vx-colorear_command_output_azul
+    vx-colorear_echo_rojo_negrita
+    vx-colorear_echo_azul_negrita
+    vx-colorear_echo_verde_negrita
+    vx-echo-titulo-azul
+    vx-log_xsession
+    vx-del_tags
+    vx-mensaje_cli
+    vx-mensaje_gui
+    vx-detectar_gui
+    vx-mensaje
+    vx-mensaje_y_salir
+    vx-usuario_grafico
+    vx-check_escritorio_congelado
+    vx-check_user_root
+    vx-obtener_nombre_archivo_con_extension
+    vx-obtener_nombre_archivo
+    vx-obtener_extension_archivo
+    vx-check_write_access_right
+    vx-yad-question-yes-no
+    vx-yad-file-select
+    vx-lista_directorios_perfil
+    vx-obtener_ruta_absoluta
+    vx-check_if_is_directory
+vx-check_if_is_file)
 
 function vx-lista_uniq() {
     local LISTA=()
@@ -384,4 +423,7 @@ function vx-check_if_is_file() {
     return 0
 }
 
+# Comprobamos si los parámetros pasados se corresponden con la llamada a una de las funciones para ejecutarla
+# En caso de que el parámetro no sea una de las funciones definidas sólo se quieren importar, no ejecutar
+[[ "${MYFUNCS[*]}" =~ "${1} " ]] && \
 "$@" 2> /dev/null
