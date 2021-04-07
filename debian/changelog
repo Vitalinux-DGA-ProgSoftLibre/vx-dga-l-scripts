@@ -1,3 +1,13 @@
+vx-dga-l-scripts (4.1-31) unstable; urgency=low
+
+  * Revisamos vx-funcs-bash y declaramos todas las funciones definidas en un array
+  * De esta forma evitamos que se ejecuten de manera indeseada comandos pasados como parámetros al script que las importe
+  * Complementa y hubiera evitado la versión 5.0-47 de este paquete
+  * Revisamos vx-funcs-users por la misma razón anterior
+  * Revisamos vx-funcs-limpiar_homes por la misma razón anterior
+
+ -- Arturo Martin <amartinromero@gmail.com>  Wed, 7 Apr 2021 00:18:06 +0200
+
 vx-dga-l-scripts (4.1-30) unstable; urgency=low
 
   * Revisamos vx-check-if-is-in-desktop-dir y su llamada a vx-funcs-bash

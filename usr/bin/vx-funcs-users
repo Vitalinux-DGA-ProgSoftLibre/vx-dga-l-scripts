@@ -6,7 +6,29 @@ FICHVARS="/etc/default/vx-dga-variables/vx-dga-variables-general.conf"
 
 USUARIOGRAFICO="$(vx-usuario-grafico)"
 
-vx-check_inicio_automatico() {
+# Declaramos todas las funciones que se definen posteriormente para evitar ejecuciones indeseadas:
+declare -a MYFUNCS
+MYFUNCS=(vx-check_inicio_automatico
+    vx-obtener_lista_usuarios
+    vx-conf_idioma_usuario
+    vx-check_exit_users
+    vx-check_exit_groups
+    vx-funcs-users-help
+    vx-resetear_usuarios
+    vx-grupo_primario
+    vx-anadir_a_grupos_secundarios
+    vx-imponer_grupos
+    vx-modificar_password
+    vx-anadir_a_grupo
+    vx-usuario_inicio_auto
+    vx-usuario_inicio_deshabilitado
+    vx-nopasswdlogin
+    vx-crear_usuario_uid_gid
+    vx-crear_usuario
+    vx-crear_usuario_ex_idioma
+vx-borrar_usuario)
+
+function vx-check_inicio_automatico() {
     # Devuelve 0 si esta configurado un inicio de sesión automático:
     local FICHERO="/etc/lightdm/lightdm.conf"
     [ ! -f "${FICHERO}" ] && return 1
@@ -457,4 +479,7 @@ function vx-borrar_usuario() {
     done
 }
 
+# Comprobamos si los parámetros pasados se corresponden con la llamada a una de las funciones para ejecutarla
+# En caso de que el parámetro no sea una de las funciones definidas sólo se quieren importar, no ejecutar
+[[ "${MYFUNCS[*]}" =~ "${1} " ]] && \
 "$@" 2> /dev/null
