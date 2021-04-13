@@ -24,7 +24,7 @@
 
 TITULO="Regenerar Perfil del Usuario"
 TEXTO="\nSe va a <b>Regenerar el Perfil del Usuario</b>."
-TEXTO="${TEXTO}\nSe eliminará todo aquel archivo y directorio añadido por el usuario en los directorios:"
+TEXTO="${TEXTO}\n Se eliminará todo aquel archivo y directorio añadido por el usuario en los directorios: "
 TEXTO="${TEXTO}\n<span foreground='blue'><b>Escritorio, Documentos, Vídeos, etc.</b></span>"
 TEXTO="${TEXTO}\n¿Deseas Continuar?"
 ! vx-funcs-bash vx-yad-question-yes-no \
