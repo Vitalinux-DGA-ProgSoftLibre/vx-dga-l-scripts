@@ -3,38 +3,15 @@
 # Proyecto Software Libre DGA
 
 EJECUTOR=$(whoami)
-LOG="vx-regenerar-entorno-escritorio.log"
 USUGRAF="$(vx-usuario-grafico)"
 HOMEUSUGRAF="$(vx-home-usuario-grafico "${EJECUTOR}")"
 
 FICHFUNCS="/usr/bin/vx-funcs-bash"
 [ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 
-function log_xsession(){
-    #
-    # Funcion que audita el proceso. Si no se pasa como parámetro el nombre del fichero, dejará un log en /tmp
-    # Se auditará en /var/log/vitalinux en el archivo indicado: log_xsession -o nombre_fichero
-    #
-    while getopts 'o:' OPT; do
-        case ${OPT} in
-            o) LOGFILE=${OPTARG};;
-        esac
-    done
-    
-    if [ "${LOGFILE}" ] ; then
-        [ "${EJECUTOR}" == "root" ] && \
-        DIRLOG="/var/log/vitalinux" || \
-        DIRLOG="${HOMEUSUGRAF}/.vx-logs"
-        [ ! -d "${DIRLOG}" ] && mkdir -p "${DIRLOG}"
-        LOGFILE="${DIRLOG}/${LOGFILE}"
-    else
-        LOGFILE="/tmp/logfile.regenerar-entorno-escritorio.log"
-    fi
-    exec 2>&1
-    exec > >(tee -i "${LOGFILE}")
-}
 # 1) Preparamos la auditoria del servicio:
-log_xsession -o "${LOG}"
+LOG="vx-regenerar-entorno-escritorio.log"
+vx-log_xsession -o "${LOG}"
 
 # Regeneramos el entorno de escritorio de los usuarios:
 # 2.1) Si no se pasan parámetros y lo llama el usuario root se regeneran todos los usuarios gráficos
@@ -56,7 +33,7 @@ log_xsession -o "${LOG}"
 # 5) [sin parámetros] => devolvería la lista de todos los usuarios gráficos si el ejecutor es root, o el usuario que ejecuta si no es root
 LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
 
-vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"
+vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}" | sudo vx-auditar-syslog
 
 # 1) Comenzamos regenerando el contenido del Escritorio
 for USUARIO in ${LISTA_USUARIOS[@]} ; do

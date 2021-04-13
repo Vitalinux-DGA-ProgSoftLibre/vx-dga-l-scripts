@@ -20,7 +20,7 @@ vx-log_xsession -o "${LOG}"
 LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
 
 # 2) Regeneramos Escritorio y directorios del perfil de los usuarios:
-vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración el Entorno de Escritorio y Directorios Perfil de usuarios: ${LISTA_USUARIOS[*]}"
+vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración el Entorno de Escritorio y Directorios Perfil de usuarios: ${LISTA_USUARIOS[*]}" | sudo vx-auditar-syslog
 vx-colorear_echo "magenta" "# 1) Regeneramos el Entorno de Escritorio de los usuarios y sus archivos de configuración: ${LISTA_USUARIOS[*]}"
 vx-regenerar-entorno-escritorio-cli "${LISTA_USUARIOS[@]}"
 vx-colorear_echo "magenta" "##### Sincronización de Escritorios Terminada: ${LISTA_USUARIOS[*]} #####"

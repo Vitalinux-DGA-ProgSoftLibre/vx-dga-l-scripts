@@ -9,7 +9,7 @@ FICHFUNCS="/usr/bin/vx-funcs-bash"
 LOG="vx-resetear-navegadores-web.log"
 vx-log_xsession -o "${LOG}"
 
-vx-colorear_echo "magenta" "[$(vx-fecha)] Reseteamos navegadores Web"
+vx-colorear_echo "magenta" "[$(vx-fecha)] Reseteamos navegadores Web" | sudo vx-auditar-syslog
 
 # 1) Comenzamos cerrando las posibles sesiones abiertas de los navegadores:
 for NAVEGADOR in "firefox" "chrome" "chromium-browser" ; do

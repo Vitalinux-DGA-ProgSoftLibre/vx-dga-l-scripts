@@ -1,0 +1,2 @@
+# Permiso para auditar eventos de manera global por parte de cualquier usuario al ejecutar un script:
+ALL ALL=(ALL) NOPASSWD: /usr/bin/vx-auditar-syslog

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# last-upate: arturo@2020-4-29
+# last-upate: arturo@2021-4-12 arturo@2020-4-29
 # Dependiendo del usuario ejecutor se eliminan todos los entornos de Escritorio o solo el personal
 # Proyecto Software Libre DGA
 
@@ -21,9 +21,19 @@
 #     mensaje-error-root
 # fi
 
+TITULO="Regenerar Entornos de Escritorio"
+TEXTO="\nSe va a <b>Regenerar el Entorno de Escritorio</b>."
+TEXTO="${TEXTO}\nSe eliminará todo aquel archivo y directorio añadido por el usuario."
+TEXTO="${TEXTO}\n¿Deseas Continuar?"
+! vx-funcs-bash vx-yad-question-yes-no \
+"${TITULO}" "${TEXTO}" "vitalinux" "Confirmar" "Salir" && \
+exit 1
+
 (
     vx-regenerar-entorno-escritorio-cli | sed -r -u 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
     echo -e "\n=> Ya puedes cerrar la ventana ..."
 ) | yad --title "Regenerar Entornos de Escritorio" --text-info \
 --window-icon vitalinux --tail \
 --width="620" --height="200" --center --image vitalinux
+
+exit 0
