@@ -176,7 +176,7 @@ function vx-log_xsession(){
         LOGFILE="/tmp/vx-log-${USUGRAF}-$(vx-fecha)"
     fi
     exec 2>&1
-    exec > >(tee -i "${LOGFILE}")
+    exec > >(tee -ia "${LOGFILE}")
 }
 
 function vx-del_tags() {

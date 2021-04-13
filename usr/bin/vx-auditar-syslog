@@ -1,0 +1,6 @@
+#!/bin/bash
+# lastmod: arturo@20201-4-13
+# descext: recogemos el mensaje procedente de la entrada estandar mediante pipe y lo redireccionamos al fichero de log
+
+VXSYSLOG="/var/log/vitalinux/vx-syslog.log"
+cat | tee -a "${VXSYSLOG}"

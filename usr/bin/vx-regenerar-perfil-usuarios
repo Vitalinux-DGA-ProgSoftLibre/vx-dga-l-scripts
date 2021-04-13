@@ -22,6 +22,11 @@
 #     mensaje-error-root
 # fi
 
+TITULO="Regenerar Perfil del Usuario"
+TEXTO="Se va a <b>Regenerar el Perfil del Usuario</b>, se eliminará todo aquel archivo y directorio añadido por el usuario en los directorios Escritorio, Documentos, Vídeos, etc."
+TEXTO="${TEXTO}\n¿Deseas Continuar?"
+! vx-funcs-bash vx-yad-question-yes-no "${TITULO}" "${TEXTO}" && exit 1
+
 (
     vx-regenerar-perfil-usuarios-cli | sed -r -u 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'
     echo -e "\n=> Ya puedes cerrar la ventana ..."
@@ -33,3 +38,5 @@
 --image vitalinux \
 --buttons-layout center \
 --button "Cerrar":0
+
+exit 0

@@ -1,3 +1,16 @@
+vx-dga-l-scripts (4.1-32) unstable; urgency=low
+
+  * Modificamos vx-funcs-bash y añadimos la opción "a" a tee -ia "${LOGFILE}" para hacer logs incrementales
+  * Añadimos vx-auditar-syslog para auditar eventos vitalinux de manera global
+  * Añadimos /etc/sudoers.d/vx-auditar-syslog para dar permisos a todo usuario a auditar mediante vx-auditar-syslog
+  * Modificamos vx-regenerar-entorno-escritorio y añadimos un yad de confirmación antes de regenerar escritorio
+  * Modificamos vx-regenerar-entorno-escritorio-cli y añadimos un vx-auditar-syslog para auditar el evento de regenerar
+  * Modificamos vx-regenerar-entorno-escritorio-cli y hacemos uso de la función vx-log-xsession en lugar de definirla en el propio script
+  * Modificamos vx-regenerar-perfil-usuarios-cli y añadimos un vx-auditar-syslog para auditar el evento de regenerar perfiles de usuarios
+  * Modificamos vx-resetear-navegadores-web y añadimos un vx-auditar-syslog para auditar el evento de resetear navegadores Web
+
+ -- Arturo Martin <amartinromero@gmail.com>  Mon, 12 Apr 2021 00:18:06 +0200
+
 vx-dga-l-scripts (4.1-31) unstable; urgency=low
 
   * Revisamos vx-funcs-bash y declaramos todas las funciones definidas en un array
