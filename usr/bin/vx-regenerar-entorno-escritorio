@@ -22,9 +22,12 @@
 # fi
 
 TITULO="Regenerar Entornos de Escritorio"
-TEXTO="Se va a <b>Regenerar el Entorno de Escritorio</b>, se eliminará todo aquel archivo y directorio añadido por el usuario."
+TEXTO="\nSe va a <b>Regenerar el Entorno de Escritorio</b>."
+TEXTO="${TEXTO}\nSe eliminará todo aquel archivo y directorio añadido por el usuario."
 TEXTO="${TEXTO}\n¿Deseas Continuar?"
-! vx-funcs-bash vx-yad-question-yes-no "${TITULO}" "${TEXTO}" && exit 1
+! vx-funcs-bash vx-yad-question-yes-no \
+"${TITULO}" "${TEXTO}" "vitalinux" "Confirmar" "Salir" && \
+exit 1
 
 (
     vx-regenerar-entorno-escritorio-cli | sed -r -u 's/'$(echo -e "\033")'\[[0-9]{1,2}(;([0-9]{1,2})?)?[mK]//g'

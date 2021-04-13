@@ -1,6 +1,7 @@
 vx-dga-l-scripts (4.1-32) unstable; urgency=low
 
   * Modificamos vx-funcs-bash y añadimos la opción "a" a tee -ia "${LOGFILE}" para hacer logs incrementales
+  * Modificamos vx-funcs-bash y añadimos opción fixed al yad de tipo question
   * Añadimos vx-auditar-syslog para auditar eventos vitalinux de manera global
   * Añadimos /etc/sudoers.d/vx-auditar-syslog para dar permisos a todo usuario a auditar mediante vx-auditar-syslog
   * Modificamos vx-regenerar-entorno-escritorio y añadimos un yad de confirmación antes de regenerar escritorio

@@ -312,7 +312,7 @@ function vx-check_write_access_right() {
 function vx-yad-question-yes-no() {
     TITULO="${1:-"Vitalinux"}"
     TEXTO="${2}"
-    IMAGEN="${3:-"Vitalinux"}"
+    IMAGEN="${3:-"vitalinux"}"
     BOTON1="${4:-"Ok"}"
     BOTON2="${5:-"Cerrar"}"
     yad --title "${TITULO}" \
@@ -320,8 +320,8 @@ function vx-yad-question-yes-no() {
     --text-align "center" \
     --window-icon vitalinux \
     --image "${IMAGEN}" \
-    --width "500" \
-    --height "300" \
+    --width "450" \
+    --fixed \
     --center \
     --justify="center" \
     --button "${BOTON1}":0 \
