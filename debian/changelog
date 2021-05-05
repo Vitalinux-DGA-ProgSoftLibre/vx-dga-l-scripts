@@ -1,6 +1,7 @@
 vx-dga-l-scripts (5.0-50) unstable; urgency=low
 
   * Creamos vx-pcmanfm-restart para resetear el entorno de pcmanfm y Escritorio cuando haya problemas
+  * Modicamos vx-regenerar-entorno-escritorio-cli y añadimos vx-pcmanfm-restart
 
  -- Arturo Martin <amartinromero@gmail.com>  Wed, 5 May 2021 00:18:06 +0200
 
