@@ -1,3 +1,9 @@
+vx-dga-l-scripts (5.0-50) unstable; urgency=low
+
+  * Creamos vx-pcmanfm-restart para resetear el entorno de pcmanfm y Escritorio cuando haya problemas
+
+ -- Arturo Martin <amartinromero@gmail.com>  Wed, 5 May 2021 00:18:06 +0200
+
 vx-dga-l-scripts (5.0-49) unstable; urgency=low
 
   * Modificamos vx-funcs-bash y añadimos la opción "a" a tee -ia "${LOGFILE}" para hacer logs incrementales
