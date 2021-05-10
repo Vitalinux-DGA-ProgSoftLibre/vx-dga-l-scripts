@@ -7,6 +7,7 @@ vx-dga-l-scripts (5.0-50) unstable; urgency=low
   * Creamos vx-resetear-entorno-escritorio.desktop para disponer de un lanzador que ejecute lo anterior
   * Modificamos vx-funcs-users para añadir una función para chequear si hay una sesión gráfica de usuario iniciada
   * Modicamos vx-regenerar-entorno-escritorio-cli y añadimos todo lo anterior en el caso de haber sesión gráfica iniciada
+  * Añadimos /etc/logrotate.d/vx-scripts para rotar los ficheros de auditoria
 
  -- Arturo Martin <amartinromero@gmail.com>  Mon, 10 May 2021 00:18:06 +0200
 
