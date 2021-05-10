@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Reseteamos todos los elementos que componen el entorno de Escritorio:
+# 1) el Entorno de Escritorio: pcmanfm
+vx-pcmanfm-restart
+# 2) su panel inferior: lxpanel
+lxpanelctl restart
+# 3) el gestor de ventanas y atajos: openbox
+vx-openbox-reconfigure

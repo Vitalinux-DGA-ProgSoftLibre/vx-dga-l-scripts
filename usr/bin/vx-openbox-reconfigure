@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Comprobamos si existe un fichero de configuración de openbox:
+FILE_OPENBOX_LOCAL="$(vx-home-usuario-grafico)/.config/openbox/lubuntu-rc.xml"
+FILE_OPENBOX_GENERAL="/usr/share/lubuntu/openbox/rc.xml"
+USER_GRAFICO="$(vx-usuario-grafico 2> /dev/null)"
+
+function openbox_restart()
+{
+    # Reseteamos openbox, siendo posible también la opción "openbox --restart":
+    openbox --reconfigure
+}
+
+[[ -f "${FILE_OPENBOX_LOCAL}" ]] && openbox_restart
+[[ ! -f "${FILE_OPENBOX_LOCAL}" && -f "${FILE_OPENBOX_GENERAL}" ]] && \
+mkdir -p "$(dirname "${FILE_OPENBOX_LOCAL}")" && \
+rsync -ah --chown="${USER_GRAFICO}" "${FILE_OPENBOX_GENERAL}" "${FILE_OPENBOX_LOCAL}" && \
+openbox_restart
+
+exit 0

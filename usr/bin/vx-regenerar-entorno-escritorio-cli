@@ -90,9 +90,9 @@ vx-colorear_echo "verde" "=> Eliminamos personalizaciones del Greeter: ${FICHGRE
 # 5) Regeneramos el tipo de sesión gráfica por defecto: Lubuntu
 sudo vx-regenerar-sesion-grafica-lubuntu
 
-# 6) Reseteamos el Entorno de Escritorio
+# 6) Reseteamos el Entorno de Escritorio, su panel inferior y openbox:
 echo "=> Reseteamos el Entorno de Escritorio para adoptar posibles cambios o subsanar problemas de pcmanfm"
-vx-pcmanfm-restart
+vx-resetear-entorno-escritorio-cli
 
 # Mensaje de terminación:
 vx-colorear_echo "azul" "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"

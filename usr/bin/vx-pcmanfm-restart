@@ -2,6 +2,7 @@
 
 FILE_PCMANFM_GENERAL="/etc/xdg/pcmanfm/lubuntu/pcmanfm.conf"
 FILE_PCMANFM_LOCAL="$(vx-home-usuario-grafico)/.config/pcmanfm/lubuntu/pcmanfm.conf"
+USER_GRAFICO="$(vx-usuario-grafico 2> /dev/null)"
 
 function pcmanfm_restart() {
     killall pcmanfm
@@ -11,7 +12,7 @@ function pcmanfm_restart() {
 [ -f "${FILE_PCMANFM_LOCAL}" ] && pcmanfm_restart || \
 {
     [ -f "${FILE_PCMANFM_GENERAL}" ] && \
-    cp "${FILE_PCMANFM_GENERAL}" "${FILE_PCMANFM_LOCAL}" && \
+    rsync -ah --chown="${USER_GRAFICO}" "${FILE_PCMANFM_GENERAL}" "${FILE_PCMANFM_LOCAL}" && \
     pcmanfm_restart ;
 }
 
