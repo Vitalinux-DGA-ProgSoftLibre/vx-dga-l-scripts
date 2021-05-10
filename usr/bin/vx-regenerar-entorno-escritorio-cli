@@ -90,9 +90,13 @@ vx-colorear_echo "verde" "=> Eliminamos personalizaciones del Greeter: ${FICHGRE
 # 5) Regeneramos el tipo de sesión gráfica por defecto: Lubuntu
 sudo vx-regenerar-sesion-grafica-lubuntu
 
-# 6) Reseteamos el Entorno de Escritorio, su panel inferior y openbox:
-echo "=> Reseteamos el Entorno de Escritorio para adoptar posibles cambios o subsanar problemas de pcmanfm"
-vx-resetear-entorno-escritorio-cli > /dev/null 2>&1
+# 6) Reseteamos el Entorno de Escritorio, su panel inferior y openbox si hay una sesión gráfica creada:
+(( $(id -u "${USUGRAF}") > 999 )) && \
+{
+    echo "=> Reseteamos el Entorno de Escritorio para adoptar posibles cambios o subsanar problemas de pcmanfm" && \
+    vx-resetear-entorno-escritorio-cli > /dev/null 2>&1 ;
+} || \
+echo "=> No reseteamos el Entorno de Escritorio al no haber una sesión gráfica de usuario: ${USUGRAF}"
 
 # Mensaje de terminación:
 vx-colorear_echo "azul" "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"

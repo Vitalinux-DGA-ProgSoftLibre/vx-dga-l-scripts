@@ -3,7 +3,35 @@
 FILE_PCMANFM_GENERAL="/etc/xdg/pcmanfm/lubuntu/pcmanfm.conf"
 FILE_PCMANFM_LOCAL="$(vx-home-usuario-grafico)/.config/pcmanfm/lubuntu/pcmanfm.conf"
 USER_GRAFICO="$(vx-usuario-grafico 2> /dev/null)"
+HOMEUSU="$(vx-home-usuario-grafico 2> /dev/null)"
 
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+# 1) Preparamos la auditoria del servicio:
+LOG="vx-pcmanfm-restart.log"
+vx-log_xsession -o "${LOG}"
+
+TEXTO="Reseterar explorador de Archivos pcmanfm"
+vx-colorear_echo "magenta" "[$(vx-fecha)] ${TEXTO}" | sudo vx-auditar-syslog
+
+# 2) Comprobamos si hay que eliminar los archivos de configuración
+function pcmanfm_rm_files() {
+    for DIR in ".config/pcmanfm" ; do
+        [[ ! -d "/etc/skel/${DIR}" ]] && continue
+        if rsync --delete -ah --chown="${PROPIETARIO}" "/etc/skel/${DIR}/" "${HOMEUSU}/${DIR}" ; then
+            vx-colorear_echo "verde" "=> OK: copiado /etc/skel/${DIR}/ en ${HOMEUSU}/${DIR}"
+        else
+            rm -Rf "${HOMEUSU}/${DIR}"
+            vx-colorear_echo "rojo" "=> ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSU}/${DIR}"
+        fi
+        
+    done
+}
+[ "${1}" == "-d" ] && pcmanfm_rm_files
+
+
+# 3) Reseteamos pcmanfm tras comprobar que existe el archivo de descripción de pcmanfm:
 function pcmanfm_restart() {
     killall pcmanfm
     pcmanfm --desktop --profile lubuntu --one-screen &

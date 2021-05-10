@@ -13,6 +13,7 @@ MYFUNCS=(vx-check_inicio_automatico
     vx-conf_idioma_usuario
     vx-check_exit_users
     vx-check_exit_groups
+    vx-check_sesion_grafica
     vx-funcs-users-help
     vx-resetear_usuarios
     vx-grupo_primario
@@ -27,6 +28,12 @@ MYFUNCS=(vx-check_inicio_automatico
     vx-crear_usuario
     vx-crear_usuario_ex_idioma
 vx-borrar_usuario)
+
+function vx-check_sesion_grafica()
+{
+    # Devuelve un 0 si se detecta que hay una sesión gráfica de usuario iniciada:
+    (( $(id -u "${USUGRAF}") > 999 )) && return 0 || return 1
+}
 
 function vx-check_inicio_automatico() {
     # Devuelve 0 si esta configurado un inicio de sesión automático:

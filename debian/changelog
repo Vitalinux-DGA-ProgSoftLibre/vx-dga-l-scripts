@@ -2,11 +2,13 @@ vx-dga-l-scripts (5.0-50) unstable; urgency=low
 
   * Creamos vx-pcmanfm-restart para resetear el entorno de pcmanfm y su pcmanfm/lubuntu/pcmanfm.conf
   * Creamos vx-openbox-reconfigure para resetear o reconfigurar openbox y su openbox/lubuntu-rc.xml
+  * Creamos vx-lxpanel-restart para resetear lxpanel y su lxpanel/Lubuntu/panels/panel
   * Creamos vx-resetear-entorno-escritorio-cli para resetear pcmanfm, lxpanel y openbox
-  * Modicamos vx-regenerar-entorno-escritorio-cli y añadimos todo lo anterior
   * Creamos vx-resetear-entorno-escritorio.desktop para disponer de un lanzador que ejecute lo anterior
+  * Modificamos vx-funcs-users para añadir una función para chequear si hay una sesión gráfica de usuario iniciada
+  * Modicamos vx-regenerar-entorno-escritorio-cli y añadimos todo lo anterior en el caso de haber sesión gráfica iniciada
 
- -- Arturo Martin <amartinromero@gmail.com>  Wed, 5 May 2021 00:18:06 +0200
+ -- Arturo Martin <amartinromero@gmail.com>  Mon, 10 May 2021 00:18:06 +0200
 
 vx-dga-l-scripts (5.0-49) unstable; urgency=low
 
