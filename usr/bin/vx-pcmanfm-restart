@@ -1,4 +1,18 @@
 #!/bin/bash
 
-killall pcmanfm
-pcmanfm --desktop --profile lubuntu --one-screen &
+FILE_PCMANFM_GENERAL="/etc/xdg/pcmanfm/lubuntu/pcmanfm.conf"
+FILE_PCMANFM_LOCAL="$(vx-home-usuario-grafico)/.config/pcmanfm/lubuntu/pcmanfm.conf"
+
+function pcmanfm_restart() {
+    killall pcmanfm
+    pcmanfm --desktop --profile lubuntu --one-screen &
+}
+
+[ -f "${FILE_PCMANFM_LOCAL}" ] && pcmanfm_restart || \
+{
+    [ -f "${FILE_PCMANFM_GENERAL}" ] && \
+    cp "${FILE_PCMANFM_GENERAL}" "${FILE_PCMANFM_LOCAL}" && \
+    pcmanfm_restart ;
+}
+
+exit 0
