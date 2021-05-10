@@ -92,7 +92,7 @@ sudo vx-regenerar-sesion-grafica-lubuntu
 
 # 6) Reseteamos el Entorno de Escritorio, su panel inferior y openbox:
 echo "=> Reseteamos el Entorno de Escritorio para adoptar posibles cambios o subsanar problemas de pcmanfm"
-vx-resetear-entorno-escritorio-cli
+vx-resetear-entorno-escritorio-cli > /dev/null 2>&1
 
 # Mensaje de terminación:
 vx-colorear_echo "azul" "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"

@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # Reseteamos todos los elementos que componen el entorno de Escritorio:
+# 0) Eliminamos los ficheros de configuración personales por si hubiera cambios indesedos:
+USER_GRAFICO="$(vx-usuario-grafico 2> /dev/null)"
+vx-eliminar-ficheros-conf-personales "${USER_GRAFICO}"
 # 1) el Entorno de Escritorio: pcmanfm
 vx-pcmanfm-restart
 # 2) su panel inferior: lxpanel
