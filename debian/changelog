@@ -8,6 +8,10 @@ vx-dga-l-scripts (5.0-50) unstable; urgency=low
   * Modificamos vx-funcs-users para añadir una función para chequear si hay una sesión gráfica de usuario iniciada
   * Modicamos vx-regenerar-entorno-escritorio-cli y añadimos todo lo anterior en el caso de haber sesión gráfica iniciada
   * Añadimos /etc/logrotate.d/vx-scripts para rotar los ficheros de auditoria
+  * Modificamos vx-funcs-users y vx-funcs-bash para comprobar idoneamente si la función pasada como parámetro esta en la lista de funciones disponibles
+  * Modificamos vx-funcs-users para añadir vx-check_sesion_grafica y vx-lista-usuarios-iniciado-sesion
+  * La función vx-lista-usuarios-iniciado-sesion devuelve la lista de usuarios que han iniciado sessión en el equipo desde que arrancó
+  * La función vx-check_sesion_grafica nos informa de se hay una sesión gráfica de usuario inciada, pudiendo devolver el name o uid del usuario
 
  -- Arturo Martin <amartinromero@gmail.com>  Mon, 10 May 2021 00:18:06 +0200
 

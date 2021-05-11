@@ -37,8 +37,16 @@ MYFUNCS=(vx-lista_uniq
     vx-yad-file-select
     vx-lista_directorios_perfil
     vx-obtener_ruta_absoluta
+    vx-check_var_is_number
     vx-check_if_is_directory
-vx-check_if_is_file)
+    vx-check_if_is_file
+)
+
+function vx-check_var_is_number() {
+    # Devuelve un 0 si el valor pasado como parámetro es un número:
+    regexnum='^[0-9]+$'
+    [[ "${1}" =~ ${regexnum} ]] && return 0 || return 1
+}
 
 function vx-lista_uniq() {
     local LISTA=()
@@ -425,5 +433,8 @@ function vx-check_if_is_file() {
 
 # Comprobamos si los parámetros pasados se corresponden con la llamada a una de las funciones para ejecutarla
 # En caso de que el parámetro no sea una de las funciones definidas sólo se quieren importar, no ejecutar
-[[ "${MYFUNCS[*]}" =~ "${1} " ]] && \
+LISTADO_FUNCIONES=":${MYFUNCS[*]}:"
+LISTADO_FUNCIONES="${LISTADO_FUNCIONES// /:}"
+MIREGEX=":${1}:"
+[[ "${LISTADO_FUNCIONES}" =~ ${MIREGEX} ]] && \
 "$@" 2> /dev/null
