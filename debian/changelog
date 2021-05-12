@@ -5,6 +5,8 @@ vx-dga-l-scripts (5.0-50) unstable; urgency=low
   * Creamos vx-lxpanel-restart para resetear lxpanel y su lxpanel/Lubuntu/panels/panel
   * Creamos vx-resetear-entorno-escritorio-cli para resetear pcmanfm, lxpanel y openbox
   * Creamos vx-resetear-entorno-escritorio.desktop para disponer de un lanzador que ejecute lo anterior
+  * Creamos vx-reiniciar-entorno-escritorio-cli para reiniciar pcmanfm, lxpanel y openbox sin eliminar ficheros de configuración
+  * Creamos /vx-reiniciar-entorno-escritorio.desktop para disponer de un lanzador que ejecute lo anterior
   * Modificamos vx-funcs-users para añadir una función para chequear si hay una sesión gráfica de usuario iniciada
   * Modicamos vx-regenerar-entorno-escritorio-cli y añadimos todo lo anterior en el caso de haber sesión gráfica iniciada
   * Añadimos /etc/logrotate.d/vx-scripts para rotar los ficheros de auditoria
@@ -12,6 +14,7 @@ vx-dga-l-scripts (5.0-50) unstable; urgency=low
   * Modificamos vx-funcs-users para añadir vx-check_sesion_grafica y vx-lista-usuarios-iniciado-sesion
   * La función vx-lista-usuarios-iniciado-sesion devuelve la lista de usuarios que han iniciado sessión en el equipo desde que arrancó
   * La función vx-check_sesion_grafica nos informa de se hay una sesión gráfica de usuario inciada, pudiendo devolver el name o uid del usuario
+  * Modificamos vx-regenerar-sesion-grafica-lubuntu para mostrar mensajes de auditoria de lo que hace
 
  -- Arturo Martin <amartinromero@gmail.com>  Mon, 10 May 2021 00:18:06 +0200
 
