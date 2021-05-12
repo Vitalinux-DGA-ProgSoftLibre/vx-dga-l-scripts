@@ -17,3 +17,5 @@ vx-pcmanfm-restart -d
 vx-lxpanel-restart -d
 # 4) el gestor de ventanas y atajos: openbox
 vx-openbox-reconfigure -d
+# 5) reinicamos el widget del escritorio:
+inicio-conky

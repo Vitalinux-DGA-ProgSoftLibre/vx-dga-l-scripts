@@ -35,10 +35,12 @@ vx-log_xsession -o "${LOG}"
 # [[ "${EJECUTOR}" == "root" && -z "${1}" ]] && \
 # LISTA_USUARIOS=($(vx-funcs-users vx-lista-usuarios-iniciado-sesion)) || \
 # LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
-[[ "${EJECUTOR}" == "root" && -z "${1}" ]] && \
-LISTA_USUARIOS=($(cat /tmp/vx-lista-usuarios-iniciado-sesion)) || \
-LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
-
+declare -a LISTA_USUARIOS
+# Comprobamos si esta instalado el paquete vx-dga-l-congelar-escritorio, el cual guarda en /tmp/vx-lista-usuarios-iniciado-sesion los usuarios que han iniciado sesión gráfica:
+FICH_LISTA_USUARIOS_INICIO_SESION="/tmp/vx-lista-usuarios-iniciado-sesion"
+[[ "${EJECUTOR}" == "root" && -z "${1}" && -f "${FICH_LISTA_USUARIOS_INICIO_SESION}" ]] && \
+LISTA_USUARIOS=($(cat "${FICH_LISTA_USUARIOS_INICIO_SESION}"))
+(( ${#LISTA_USUARIOS[@]} == 0 )) && LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
 
 vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}" | sudo vx-auditar-syslog
 
