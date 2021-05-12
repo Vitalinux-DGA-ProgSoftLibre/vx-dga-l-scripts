@@ -32,9 +32,13 @@ vx-log_xsession -o "${LOG}"
 # 4) usu1 usu2 usu3 ... => devolvería la lista de usuarios indicados que son reales
 # 5.1) [sin parámetros] => vx-obtener_lista_usuarios devolvería la lista de todos los usuarios gráficos si el ejecutor es root, o el usuario que ejecuta si no es root
 # 5.2) [sin parámetros] => Para evitar la lista completa de todos los usuarios, si el ejecutor es root hacemos uso de vx-funcs-users vx-lista-usuarios-iniciado-sesion
+# [[ "${EJECUTOR}" == "root" && -z "${1}" ]] && \
+# LISTA_USUARIOS=($(vx-funcs-users vx-lista-usuarios-iniciado-sesion)) || \
+# LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
 [[ "${EJECUTOR}" == "root" && -z "${1}" ]] && \
-LISTA_USUARIOS=($(vx-funcs-users vx-lista-usuarios-iniciado-sesion)) || \
+LISTA_USUARIOS=($(cat /tmp/vx-lista-usuarios-iniciado-sesion)) || \
 LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
+
 
 vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}" | sudo vx-auditar-syslog
 
@@ -90,18 +94,18 @@ FICHGREETER="/etc/lightdm/lightdm-gtk-greeter.conf"
 [[ -f "${FICHGREETER}" && "${EJECUTOR}" == "root" ]] && rm -f "${FICHGREETER}" && \
 vx-colorear_echo "verde" "=> Eliminamos personalizaciones del Greeter: ${FICHGREETER}"
 
-# 5) Regeneramos el tipo de sesión gráfica por defecto: Lubuntu
-sudo vx-regenerar-sesion-grafica-lubuntu && \
-vx-colorear_echo "verde" "=> Se ha regenerado la sesión gráfica de Lubuntu" || \
-vx-colorear_echo "rojo" "=> Problemas para regenerar la sesión gráfica de Lubuntu"
-
-# 6) Reseteamos el Entorno de Escritorio, su panel inferior y openbox si hay una sesión gráfica creada:
+# 5) Reseteamos el Entorno de Escritorio, su panel inferior y openbox si hay una sesión gráfica creada:
 vx-funcs-users vx-check_sesion_grafica && \
 {
     vx-colorear_echo "verde" "=> Hay una sesión gráfica iniciada. Reseteamos el Entorno de Escritorio para adoptar posibles cambios o subsanar problemas de pcmanfm" && \
     vx-resetear-entorno-escritorio-cli > /dev/null 2>&1 ;
 } || \
 vx-colorear_echo "rojo" "=> No reseteamos el Entorno de Escritorio al no haber una sesión gráfica de usuario: ${USUGRAF}"
+
+# 6) Regeneramos el tipo de sesión gráfica por defecto: Lubuntu
+sudo vx-regenerar-sesion-grafica-lubuntu && \
+vx-colorear_echo "verde" "=> Se ha regenerado la sesión gráfica de Lubuntu" || \
+vx-colorear_echo "rojo" "=> Problemas para regenerar la sesión gráfica de Lubuntu"
 
 # Mensaje de terminación:
 vx-colorear_echo "azul" "=> Terminada regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"

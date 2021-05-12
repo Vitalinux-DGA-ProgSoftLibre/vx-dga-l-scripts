@@ -1,18 +1,17 @@
 [Desktop Entry]
 Encoding=UTF-8
 
-Name=Restart Desktop Enviroment
-Name[en]=Restart Desktop Enviroment
+Name=Reset Desktop Enviroment
+Name[en]=Reset Desktop Enviroment
 Name[es]=Resetear Entorno de Escritorio
 Name[es_ES]=Resetear Entorno de Escritorio
 
-Comment=Application that allows Restart Desktop Enviroment
-Comment[en]=Application that allows Restart Desktop Enviroment
+Comment=Application that allows Reset Desktop Enviroment
+Comment[en]=Application that allows Reset Desktop Enviroment
 Comment[es]=Aplicación que permite Resetear el Entorno de Escritorio
 
 Icon=folder
 
-#Exec=/usr/bin/vx-pcmanfm-restart
 Exec=vx-resetear-entorno-escritorio-cli
 Terminal=false
 Type=Application

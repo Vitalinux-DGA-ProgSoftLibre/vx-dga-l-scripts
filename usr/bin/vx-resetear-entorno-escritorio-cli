@@ -1,12 +1,19 @@
 #!/bin/bash
 
+# 0) Preparamos la auditoria del servicio:
+LOG="vx-reiniciar-entorno-escritorio.log"
+vx-log_xsession -o "${LOG}"
+# Reiniciamos todos los elementos que componen el entorno de Escritorio:
+TEXTO="Reseteamos el entorno de Escritorio eliminando archivos de configuración"
+vx-colorear_echo "magenta" "[$(vx-fecha)] ${TEXTO}"
+
 # Reseteamos todos los elementos que componen el entorno de Escritorio:
-# 0) Eliminamos los ficheros de configuración personales por si hubiera cambios indesedos:
-USER_GRAFICO="$(vx-usuario-grafico 2> /dev/null)"
-vx-eliminar-ficheros-conf-personales "${USER_GRAFICO}"
-# 1) el Entorno de Escritorio: pcmanfm
+# 1) Eliminamos los ficheros de configuración personales por si hubiera cambios indesedos:
+# USER_GRAFICO="$(vx-usuario-grafico 2> /dev/null)"
+# vx-eliminar-ficheros-conf-personales "${USER_GRAFICO}"
+# 2) el Entorno de Escritorio: pcmanfm
 vx-pcmanfm-restart -d
-# 2) su panel inferior: lxpanel
+# 3) su panel inferior: lxpanel
 vx-lxpanel-restart -d
-# 3) el gestor de ventanas y atajos: openbox
+# 4) el gestor de ventanas y atajos: openbox
 vx-openbox-reconfigure -d

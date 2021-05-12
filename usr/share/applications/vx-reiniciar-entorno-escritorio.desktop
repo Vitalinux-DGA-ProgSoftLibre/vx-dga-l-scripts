@@ -1,0 +1,20 @@
+[Desktop Entry]
+Encoding=UTF-8
+
+Name=Restart Desktop Enviroment
+Name[en]=Restart Desktop Enviroment
+Name[es]=Reiniciar Entorno de Escritorio
+Name[es_ES]=Reiniciar Entorno de Escritorio
+
+Comment=Application that allows Restart Desktop Enviroment
+Comment[en]=Application that allows Restart Desktop Enviroment
+Comment[es]=Aplicación que permite Reiniciar el Entorno de Escritorio
+
+Icon=folder
+
+Exec=vx-reiniciar-entorno-escritorio-cli
+Terminal=false
+Type=Application
+Categories=Vitalinux;
+StartupNotify=true
+Hidden=false
