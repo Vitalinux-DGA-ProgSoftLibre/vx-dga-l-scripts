@@ -7,7 +7,7 @@ TEXTO=" Selecciona que tipo de acción quieres llevar a cabo sobre el Entorno de
 --center \
 --window-icon "vitalinux" \
 --image "vx-desktop-environment" \
---height 450 --width 800 \
+--height 250 --width 800 \
 --text "${TEXTO}" \
 --list --radiolist \
 --column "Opción":RD \
