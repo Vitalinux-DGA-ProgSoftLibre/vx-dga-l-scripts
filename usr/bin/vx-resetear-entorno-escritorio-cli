@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # 0) Preparamos la auditoria del servicio:
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
 LOG="vx-reiniciar-entorno-escritorio.log"
 vx-log_xsession -o "${LOG}"
 # Reiniciamos todos los elementos que componen el entorno de Escritorio:
