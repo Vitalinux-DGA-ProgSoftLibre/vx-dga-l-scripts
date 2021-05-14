@@ -40,10 +40,92 @@ MYFUNCS=(vx-lista_uniq
     vx-check_var_is_number
     vx-check_if_is_directory
     vx-check_if_is_file
+    vx-check_need_help
+    vx-show_help
+    vx-echo_log_titulo1
+    vx-echo_log_titulo2
+    vx-echo_log_ok
+    vx-echo_log_error
 )
+
+function vx-echo_log_error() {
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve el texto formateado listo para auditar como título de Error en color rojo. Un parámetro: Descripción"
+    EJEMPLOS=("${FUNCNAME[0]} \"¡¡Error!!. No se ha podido regenerar los Entornos de Escritorio\"")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} \"¡¡Error!!. No se ha podido regenerar los Entornos de Escritorio\"")
+    vx-check_need_help "${1}" && \
+    vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    # Help-End
+    vx-colorear_echo "rojo" "=> ${1}"
+    return 0
+}
+
+function vx-echo_log_ok() {
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve el texto formateado listo para auditar como título ok en color verde. Un parámetro: Descripción"
+    EJEMPLOS=("${FUNCNAME[0]} \"Todo Ok. Se ha procedido a regenerar los Entornos de Escritorio\"")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} \"Todo Ok. Se ha procedido a regenerar los Entornos de Escritorio\"")
+    vx-check_need_help "${1}" && \
+    vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    # Help-End
+    vx-colorear_echo "verde" "=> ${1}"
+    return 0
+}
+
+function vx-echo_log_titulo2() {
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve el texto formateado listo para auditar como título secundario en color Azul. Dos parámetros: Asunto y Descripción"
+    EJEMPLOS=("${FUNCNAME[0]} \"SRV-CONGELACION\" \"Se procede a regenerar los Entornos de Escritorio\"")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} \"SRV-CONGELACION\" \"Se procede a regenerar los Entornos de Escritorio\"")
+    vx-check_need_help "${1}" && \
+    vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    # Help-End
+    vx-colorear_echo "azul" "## [$(vx-fecha)] ${1}: ${2} ##"
+    return 0
+}
+
+function vx-echo_log_titulo1() {
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve el texto formateado listo para auditar como título principal en color magenta. Dos parámetros: Asunto y Descripción"
+    EJEMPLOS=("${FUNCNAME[0]} \"SRV-CONGELACION\" \"Se procede a regenerar los Entornos de Escritorio\"")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} \"SRV-CONGELACION\" \"Se procede a regenerar los Entornos de Escritorio\"")
+    vx-check_need_help "${1}" && \
+    vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    # Help-End
+    vx-colorear_echo "magenta" "[$(vx-fecha)] ${1}: ${2}" | sudo vx-auditar-syslog
+    return 0
+}
+
+# Mostramos la lista de funciones disponibles en el caso de que se pase como parámetro "-h" o "--help":
+MIREGEX='^-h$|^--help$'
+[[ "${1}" =~ ${MIREGEX} ]] && echo "${MYFUNCS[@]}" | tr -s " " "\n" | sort | more
+
+function vx-check_need_help() {
+    MIREGEX='^-h$|^--help$'
+    [[ "${1}" =~ ${MIREGEX} ]] && return 0 || return 1
+}
+
+function vx-show_help() {
+    echo "=> Nombre de la función: $(vx-colorear_echo_azul_negrita "${1}")"
+    shift
+    echo -e "=> Descripción: \n$(vx-colorear_echo "cyan" "${1}")"
+    shift
+    echo "=> Ejemplos de uso:"
+    for EJEMPLO in "${@}" ; do
+        vx-colorear_echo "cyan" "${EJEMPLO:-No se indican}"
+    done
+}
 
 function vx-check_var_is_number() {
     # Devuelve un 0 si el valor pasado como parámetro es un número:
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve un 0 si el parámetro pasado a la función es un número entero. Por el contrario devuelve un 1"
+    EJEMPLOS=("${FUNCNAME[0]} 678 # Devuelve 0")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} 7830 # Devuelve 0")
+    EJEMPLOS+=("${FUNCNAME[0]} m678 # Devuelve 1")
+    vx-check_need_help "${1}" && \
+    vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    # Help-End
     regexnum='^[0-9]+$'
     [[ "${1}" =~ ${regexnum} ]] && return 0 || return 1
 }

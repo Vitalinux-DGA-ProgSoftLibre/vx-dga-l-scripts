@@ -1,0 +1,23 @@
+#!/bin/bash
+# lastact: [arturo@2021-5-14]
+# desc: yad que permite que el usuario seleccione entre las distintas opciones de gestión del Escritorio
+
+! RESPUESTA="$(yad --title "${TITULO}" \
+--center \
+--window-icon "vitalinux" \
+--image "migasfree" \
+--width 400 --height 150 --fixed \
+--text "Elige la frecuencia con que quieres que tu equipo se actualice contra Migasfree" \
+--list --radiolist \
+--column "Opción":RD \
+--column "Frecuencia Lanzar Migasfree Launcher":HD \
+--column "Descripción":TEXT \
+FALSE 0 "Tantas como veces se inicia el equipo" \
+TRUE 7 "Una vez al día" \
+FALSE 1 "Una vez a la semana" \
+--button "Confirmar":0 --button "Cancelar":1)" && exit 1
+
+OPCION="$(echo "${RESPUESTA}" | cut -d"|" -f2)"
+case "${OPCION}" in
+
+esac

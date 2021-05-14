@@ -10,7 +10,7 @@ Comment=Application that allows Restart Desktop Enviroment
 Comment[en]=Application that allows Restart Desktop Enviroment
 Comment[es]=Aplicación que permite Reiniciar el Entorno de Escritorio
 
-Icon=folder
+Icon=vx-desktop-environment-restart
 
 Exec=vx-reiniciar-entorno-escritorio-cli
 Terminal=false

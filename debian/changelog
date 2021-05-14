@@ -15,6 +15,8 @@ vx-dga-l-scripts (5.0-50) unstable; urgency=low
   * La función vx-lista-usuarios-iniciado-sesion devuelve la lista de usuarios que han iniciado sessión en el equipo desde que arrancó
   * La función vx-check_sesion_grafica nos informa de se hay una sesión gráfica de usuario inciada, pudiendo devolver el name o uid del usuario
   * Modificamos vx-regenerar-sesion-grafica-lubuntu para mostrar mensajes de auditoria de lo que hace
+  * Modificamos vx-funcs-bash para añadir funciones para auditar y mostrar mensajes de ayuda: 
+  * vx-check_need_help vx-show_help vx-echo_log_titulo1 vx-echo_log_titulo2 vx-echo_log_ok vx-echo_log_error
 
  -- Arturo Martin <amartinromero@gmail.com>  Mon, 10 May 2021 00:18:06 +0200
 

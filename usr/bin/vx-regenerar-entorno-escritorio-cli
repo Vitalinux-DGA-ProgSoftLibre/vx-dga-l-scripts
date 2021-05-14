@@ -42,7 +42,8 @@ FICH_LISTA_USUARIOS_INICIO_SESION="/tmp/vx-lista-usuarios-iniciado-sesion"
 LISTA_USUARIOS=($(cat "${FICH_LISTA_USUARIOS_INICIO_SESION}"))
 (( ${#LISTA_USUARIOS[@]} == 0 )) && LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
 
-vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}" | sudo vx-auditar-syslog
+TEXTO="Regeneración Entornos de Escritorio: ${LISTA_USUARIOS[*]}"
+vx-echo_log_titulo1 "SRV-CONGELACION-ESCRITORIO" "${TEXTO}"
 
 # 1) Comenzamos regenerando el contenido del Escritorio
 for USUARIO in ${LISTA_USUARIOS[@]} ; do
@@ -50,10 +51,11 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
     # vx-funcs-users vx-check_exit_users "${USU}" && \
     # HOMEUSUARIO="$(vx-home-usuario-grafico "${USUARIO}")" || \
     # continue
-    
     HOMEUSUARIO="$(vx-home-usuario-grafico "${USUARIO}")"
     
-    vx-colorear_echo "azul" "## Comienzo Sincronización Escritorio: ${USUARIO} ####"
+    TEXTO="Comienzo Sincronización Escritorio: ${USUARIO}"
+    vx-echo_log_titulo2 "SRV-CONGELACION-ESCRITORIO" "${TEXTO}"
+    
     BASE="/etc/skel/Escritorio/"
     if test -d "${BASE}" ; then
         for DIR in "Escritorio" "Desktop" "Bureau" "Schreibtisch" ; do
@@ -92,17 +94,24 @@ for USUARIO in ${LISTA_USUARIOS[@]} ; do
 done
 
 # 4) Devolvemos el Greeter a su configuración original eliminando las personalizaciones del usuario:
+TEXTO="Devolvemos el Greeter a su configuración original eliminando las personalizaciones del usuario"
+vx-echo_log_titulo2 "SRV-CONGELACION-ESCRITORIO" "${TEXTO}"
 FICHGREETER="/etc/lightdm/lightdm-gtk-greeter.conf"
-[[ -f "${FICHGREETER}" && "${EJECUTOR}" == "root" ]] && rm -f "${FICHGREETER}" && \
-vx-colorear_echo "verde" "=> Eliminamos personalizaciones del Greeter: ${FICHGREETER}"
+if [[ -f "${FICHGREETER}" && "${EJECUTOR}" == "root" ]] ; then
+    rm -f "${FICHGREETER}" && \
+    vx-echo_log_ok "Eliminamos personalizaciones del Greeter: ${FICHGREETER}" || \
+    vx-echo_log_error "No se han podido eliminar las personalizaciones del Greeter: ${FICHGREETER}"
+fi
 
 # 5) Reseteamos el Entorno de Escritorio, su panel inferior y openbox si hay una sesión gráfica creada:
+TEXTO="Reseteamos el Entorno de Escritorio, su panel inferior y openbox si hay una sesión gráfica creada"
+vx-echo_log_titulo2 "SRV-CONGELACION-ESCRITORIO" "${TEXTO}"
 vx-funcs-users vx-check_sesion_grafica && \
 {
     vx-colorear_echo "verde" "=> Hay una sesión gráfica iniciada. Reseteamos el Entorno de Escritorio para adoptar posibles cambios o subsanar problemas de pcmanfm" && \
     vx-resetear-entorno-escritorio-cli > /dev/null 2>&1 ;
 } || \
-vx-colorear_echo "rojo" "=> No reseteamos el Entorno de Escritorio al no haber una sesión gráfica de usuario: ${USUGRAF}"
+vx-colorear_echo "rojo" "=> No reseteamos el Entorno de Escritorio al no haber una sesión gráfica de usuario"
 
 # 6) Regeneramos el tipo de sesión gráfica por defecto: Lubuntu
 sudo vx-regenerar-sesion-grafica-lubuntu && \
