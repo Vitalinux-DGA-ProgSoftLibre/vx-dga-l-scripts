@@ -46,7 +46,12 @@ MYFUNCS=(vx-lista_uniq
     vx-echo_log_titulo2
     vx-echo_log_ok
     vx-echo_log_error
+    vx-show_help_script
 )
+
+# Mostramos la lista de funciones disponibles en el caso de que se pase como parámetro "-h" o "--help":
+MIREGEX='^-h$|^--help$'
+[[ "${1}" =~ ${MIREGEX} ]] && echo "${MYFUNCS[@]}" | tr -s " " "\n" | sort | more
 
 function vx-echo_log_error() {
     # Help-Begin: Descripción de la ayuda de la función:
@@ -96,10 +101,6 @@ function vx-echo_log_titulo1() {
     return 0
 }
 
-# Mostramos la lista de funciones disponibles en el caso de que se pase como parámetro "-h" o "--help":
-MIREGEX='^-h$|^--help$'
-[[ "${1}" =~ ${MIREGEX} ]] && echo "${MYFUNCS[@]}" | tr -s " " "\n" | sort | more
-
 function vx-check_need_help() {
     MIREGEX='^-h$|^--help$'
     [[ "${1}" =~ ${MIREGEX} ]] && return 0 || return 1
@@ -107,6 +108,17 @@ function vx-check_need_help() {
 
 function vx-show_help() {
     echo "=> Nombre de la función: $(vx-colorear_echo_azul_negrita "${1}")"
+    shift
+    echo -e "=> Descripción: \n$(vx-colorear_echo "cyan" "${1}")"
+    shift
+    echo "=> Ejemplos de uso:"
+    for EJEMPLO in "${@}" ; do
+        vx-colorear_echo "cyan" "${EJEMPLO:-No se indican}"
+    done
+}
+
+function vx-show_help_script() {
+    echo "=> Nombre del script: $(vx-colorear_echo_azul_negrita "${1}")"
     shift
     echo -e "=> Descripción: \n$(vx-colorear_echo "cyan" "${1}")"
     shift
