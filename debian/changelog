@@ -25,7 +25,6 @@ vx-dga-l-scripts (5.0-50) unstable; urgency=low
   * vx-check_need_help vx-show_help vx-echo_log_titulo1 vx-echo_log_titulo2 vx-echo_log_ok vx-echo_log_error
   * Añadimos vx-gestionar-entorno-escritorio con un yad para que el usuario seleccione una acción a llevar a cabo sobre el Entorno de Escritorio
   * Añadimos vx-gestionar-entorno-escritorio.desktop para lanzar el script anterior
-  * Creamos vx-pcmanfm-config para configurar el explorador de archivos pcmanfm mediante el paso de directivas y valores
 
  -- Arturo Martin <amartinromero@gmail.com>  Mon, 10 May 2021 00:18:06 +0200
 
