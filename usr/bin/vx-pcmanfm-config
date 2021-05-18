@@ -76,6 +76,8 @@ for FICHERO in "${LISTA_FILES[@]}" ; do
         VALOR="${ELEMENTO##*=}"
         vx-echo_log_titulo2 "vx-pcmanfm-config: ${FICHERO} [${SECCION}] ${DIRECTIVA}=${VALOR}"
         if [ -f "${FICHERO}" ] ; then
+            # ¡¡Cuidado!! Con crudini si editamos un link lo convertimos en fichero normal, afectando al divertido
+            [ -L "${FICHERO}" ] && FICHERO="$(readlink -f "${FICHERO}")"
             crudini --set "${FICHERO}" "${SECCION}" "${DIRECTIVA}" "${VALOR}" && \
             vx-echo_log_ok "Se ha asignado correctamente" || \
             vx-echo_log_error "Problemas para asignar la directiva y valor"
