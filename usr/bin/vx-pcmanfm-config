@@ -70,19 +70,39 @@ shift
 # Ej: dir1=var11;var12;,dir2=var21,dir3=var31;var32;var33
 # Ej: view_mode=list,sort=mtime;descending;
 LISTA_DIRECTIVAS=( ${1//,/ } )
+LISTA_OK=()
+LISTA_ERROR=()
 for FICHERO in "${LISTA_FILES[@]}" ; do
     for ELEMENTO in "${LISTA_DIRECTIVAS[@]}" ; do
         DIRECTIVA="${ELEMENTO//=*}"
         VALOR="${ELEMENTO##*=}"
-        vx-echo_log_titulo2 "vx-pcmanfm-config: ${FICHERO} [${SECCION}] ${DIRECTIVA}=${VALOR}"
+        #vx-echo_log_titulo2 "vx-pcmanfm-config: ${FICHERO} [${SECCION}] ${DIRECTIVA}=${VALOR}"
         if [ -f "${FICHERO}" ] ; then
             # ¡¡Cuidado!! Con crudini si editamos un link lo convertimos en fichero normal, afectando al divertido
             [ -L "${FICHERO}" ] && FICHERO="$(readlink -f "${FICHERO}")"
             crudini --set "${FICHERO}" "${SECCION}" "${DIRECTIVA}" "${VALOR}" && \
-            vx-echo_log_ok "Se ha asignado correctamente" || \
-            vx-echo_log_error "Problemas para asignar la directiva y valor"
+            LISTA_OK+=("${FICHERO} [${SECCION}] ${DIRECTIVA}=${VALOR}") || \
+            LISTA_ERROR+=("${FICHERO} [${SECCION}] ${DIRECTIVA}=${VALOR}")
         else
             vx-echo_log_error "No existe el archivo de configuración: ${FICHERO}"
         fi
     done
 done
+
+# Mostramos por la salida las asignaciones realizadas:
+(( ${#LISTA_OK[@]} > 0 )) && \
+{
+    vx-echo_log_ok "vx-pcmanfm-config: Asignados Correctamente"
+    for ELEMENTO in "${LISTA_OK[@]}" ; do
+        vx-echo_log_ok "# ${ELEMENTO}"
+    done ;
+}
+(( ${#LISTA_ERROR[@]} > 0 )) && \
+{
+    vx-echo_log_error "vx-pcmanfm-config: Asignados Erroneamente"
+    for ELEMENTO in "${LISTA_OK[@]}" ; do
+        vx-echo_log_error "# ${ELEMENTO}"
+    done ;
+}
+
+exit 0
