@@ -11,23 +11,22 @@
 # ~/.config/pcmanfm/lubuntu/pcmanfm.conf # Si no existe, se genera al vuelo en el momento en que se abre pcmanfm, no cuando se inicia sesión. No coincide con el general
 # ~/.config/pcmanfm/lubuntu/desktop-items-0.conf
 
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
 # 0) Comprobamos si se solicita ayuda y se muestra:
 function vx-pcmanfm-config_help() {
     DESCRIPCION="La llamada al script debe venir acompañada de 3 parámetros:
     1. Fichero de configuración a modificar
     2. Sección dentro de fichero anterior donde incluir las directivas
     3. Lista de directivas y valores de estas separadas por comas"
-    EJEMPLO="vx-pcmanfm-config \"pcmanfm.conf|desktop-items-0.conf\" \"ui|config|volume|desktop|*\" \"view_mode=list,sort=mtime;descending;\""
+    EJEMPLO="${0} \"pcmanfm.conf|desktop-items-0.conf\" \"ui|config|volume|desktop|*\" \"view_mode=list,sort=mtime;descending;\""
     vx-show_help_script "${0}" "${DESCRIPCION}" "${EJEMPLO}"
 }
 
-vx-funcs-bash vx-check_need_help && \
-vx-pcmanfm-config_help && \
-exit 0
+vx-check_need_help && vx-pcmanfm-config_help && exit 0
 
-# 1) Importamos las funciones y preparamos la auditoria:
-FICHFUNCS="/usr/bin/vx-funcs-bash"
-[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+# 1) Preparamos la auditoria:
 LOG="vx-pcmanfm-config.log"
 vx-log_xsession -o "${LOG}"
 
