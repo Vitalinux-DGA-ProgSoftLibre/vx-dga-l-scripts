@@ -2,6 +2,7 @@ vx-dga-l-scripts (5.0-51) unstable; urgency=low
 
   * Creamos vx-pcmanfm-config para configurar el explorador de archivos pcmanfm mediante el paso de directivas y valores
   * Creamos vx-avahi-cli para gestionar poder habilitar o inhabilitar el servicio avahi
+  * Añadimos vx-paquete-descargar-instalar para facilitar la instalación de paquetes descargados vía wget
 
  -- Arturo Martin <amartinromero@gmail.com>  Mon, 17 May 2021 00:18:06 +0200
 
