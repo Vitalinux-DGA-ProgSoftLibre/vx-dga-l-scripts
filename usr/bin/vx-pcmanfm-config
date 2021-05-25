@@ -26,13 +26,13 @@ function vx-pcmanfm-config_help() {
     vx-show_help_script "${NAME_SCRIPT}" "${DESCRIPCION}" "${EJEMPLO}"
 }
 
-vx-check_need_help "${1}" && vx-pcmanfm-config_help && exit 0
+if vx-check_need_help "${1}" || [ -z "${3}" ] ; then
+    vx-pcmanfm-config_help && exit 0
+fi
 
 # 1) Preparamos la auditoria:
 LOG="vx-pcmanfm-config.log"
 vx-log_xsession -o "${LOG}"
-
-vx-echo_log_titulo1 "PCMANFM-CONFIG" "${*}"
 
 # 2.1) Rescatamos los parámetros: Fichero de configuración a editar
 HOME_USUARIO_GRAFICO="$(vx-home-usuario-grafico)"
@@ -56,6 +56,9 @@ case "${1}" in
     ;;
 esac
 shift
+
+# Auditamos lo que vamos a configurar:
+vx-echo_log_titulo1 "PCMANFM-CONFIG" "${*}"
 
 # 2.2) Rescatamos los parámetros: Sección dentro del fichero a configurar
 [ ! -z "${1}" ] && \
