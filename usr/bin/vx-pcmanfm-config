@@ -12,7 +12,9 @@
 # ~/.config/pcmanfm/lubuntu/desktop-items-0.conf
 
 FICHFUNCS="/usr/bin/vx-funcs-bash"
-[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+[ -f "${FICHFUNCS}" ] && \
+source "${FICHFUNCS}" "sin-parametros"
+NAME_SCRIPT="${0}"
 
 # 0) Comprobamos si se solicita ayuda y se muestra:
 function vx-pcmanfm-config_help() {
@@ -20,11 +22,11 @@ function vx-pcmanfm-config_help() {
     1. Fichero de configuración a modificar
     2. Sección dentro de fichero anterior donde incluir las directivas
     3. Lista de directivas y valores de estas separadas por comas"
-    EJEMPLO="${0} \"pcmanfm.conf|desktop-items-0.conf\" \"ui|config|volume|desktop|*\" \"view_mode=list,sort=mtime;descending;\""
-    vx-show_help_script "${0}" "${DESCRIPCION}" "${EJEMPLO}"
+    EJEMPLO="${NAME_SCRIPT} \"pcmanfm.conf|desktop-items-0.conf\" \"ui|config|volume|desktop|*\" \"view_mode=list,sort=mtime;descending;\""
+    vx-show_help_script "${NAME_SCRIPT}" "${DESCRIPCION}" "${EJEMPLO}"
 }
 
-vx-check_need_help && vx-pcmanfm-config_help && exit 0
+vx-check_need_help "${1}" && vx-pcmanfm-config_help && exit 0
 
 # 1) Preparamos la auditoria:
 LOG="vx-pcmanfm-config.log"
@@ -40,7 +42,7 @@ FILES_PCMANFM_GENERAL=( "/etc/xdg/pcmanfm/lubuntu/pcmanfm.conf"
 "/etc/xdg/pcmanfm/default/pcmanfm.conf" )
 case "${1}" in
     "pcmanfm.conf" )
-        vx-funcs-bash vx-check_user_root && \
+        vx-check_user_root && \
         LISTA_FILES=(${FILES_PCMANFM_LOCAL[@]} ${FILES_PCMANFM_GENERAL[@]}) || \
         LISTA_FILES=(${FILES_PCMANFM_LOCAL[@]})
     ;;
@@ -48,7 +50,7 @@ case "${1}" in
         LISTA_FILES=("${FILES_PCMANFM_DESKTOP_LOCAL[@]}")
     ;;
     * )
-        echo "Error: No se ha pasado correctamente el fichero de configuración a editar"
+        vx-echo_log_error "Error: No se ha pasado correctamente el fichero de configuración a editar"
         vx-pcmanfm-config_help
         exit 1
     ;;
@@ -59,7 +61,7 @@ shift
 [ ! -z "${1}" ] && \
 SECCION="${1}" || \
 {
-    echo "Error: No se ha indicado el nombre de la sección del fichero de configuración a editar"
+    vx-echo_log_error "Error: No se ha indicado el nombre de la sección del fichero de configuración a editar"
     vx-pcmanfm-config_help
     exit 1 ;
 }
