@@ -3,6 +3,7 @@ vx-dga-l-scripts (5.0-52) unstable; urgency=low
   * Eliminamos vx-embeber-swf.desktop ya que los navegadores Web no soportan Flash
   * Añadimos vx-funcs-yad para reutilizar ventanas de yad como la yad pipe
   * Modificamos vx-pcmanfm-config para exporte las funciones de bash sin dar problemas al mostrar la ayuda
+  * Modificamos vx-regenerar-directorios-usuarios-cli para afectar únicamente a los usuarios que han iniciado sesión gráfica, cuando se lance gráficamente
 
  -- Arturo Martin <amartinromero@gmail.com>  Fri, 21 May 2021 00:18:06 +0200
 

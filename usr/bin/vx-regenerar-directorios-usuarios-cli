@@ -3,7 +3,7 @@
 # Proyecto Software Libre DGA
 
 FICHFUNCS="/usr/bin/vx-funcs-bash"
-[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}" "sin-parametros"
 
 EJECUTOR="$(whoami)"
 
@@ -29,9 +29,17 @@ vx-log_xsession -o "${LOG}"
 # 3) -g grupo1,grupo2,... => devolvería la lista de que usuarios forman parte de esos grupos
 # 4) usu1 usu2 usu3 ... => devolvería la lista de usuarios indicados que son reales
 # 5) [sin parámetros] => devolvería la lista de todos los usuarios gráficos si el ejecutor es root, o el usuario que ejecuta si no es root
-LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
+# LISTA_USUARIOS=($(vx-funcs-users vx-lista-usuarios-iniciado-sesion)) || \
+# LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
+declare -a LISTA_USUARIOS
+# Comprobamos si esta instalado el paquete vx-dga-l-congelar-escritorio, el cual guarda en /tmp/vx-lista-usuarios-iniciado-sesion los usuarios que han iniciado sesión gráfica:
+FICH_LISTA_USUARIOS_INICIO_SESION="/tmp/vx-lista-usuarios-iniciado-sesion"
+[[ "${EJECUTOR}" == "root" && -z "${1}" && -f "${FICH_LISTA_USUARIOS_INICIO_SESION}" ]] && \
+LISTA_USUARIOS=($(cat "${FICH_LISTA_USUARIOS_INICIO_SESION}"))
+(( ${#LISTA_USUARIOS[@]} == 0 )) && LISTA_USUARIOS=($(vx-funcs-users vx-obtener_lista_usuarios "${@}"))
 
-vx-colorear_echo "magenta" "[$(vx-fecha)] Regeneración directorios perfil de usuarios: ${LISTA_USUARIOS[*]}"
+TEXTO="Regeneración directorios perfil de usuarios: ${LISTA_USUARIOS[*]}"
+vx-echo_log_titulo1 "SRV-CONGELACION-ESCRITORIO" "${TEXTO}"
 
 # 1) Comenzamos regenerando el contenido del Escritorio y resto de directorios del perfil de los usuarios
 for USUARIO in ${LISTA_USUARIOS[@]} ; do
