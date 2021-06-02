@@ -1,3 +1,11 @@
+vx-dga-l-scripts (5.0-53) unstable; urgency=low
+
+  * Modificamos vx-gestionar-entorno-escritorio para añadir un título al yad
+  * Reescribimos vx-conf-soft-arduino-s4a para usarlo en los paquetes de centro
+  * Añadimos un submenú dentro de Vitalinux en el menú principal para la gestión del Entorno de Escritorio
+
+ -- Arturo Martin <amartinromero@gmail.com>  Wed, 2 Jun 2021 00:18:06 +0200
+
 vx-dga-l-scripts (5.0-52) unstable; urgency=low
 
   * Eliminamos vx-embeber-swf.desktop ya que los navegadores Web no soportan Flash

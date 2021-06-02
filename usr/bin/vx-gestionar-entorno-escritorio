@@ -2,11 +2,14 @@
 # lastact: [arturo@2021-5-14]
 # desc: yad que permite que el usuario seleccione entre las distintas opciones de gestión del Escritorio
 
+TITULO="Gestión del Entorno de Escritorio"
+IMAGEN="vx-desktop-environment"
+ICONO="vitalinux"
 TEXTO=" Selecciona que tipo de acción quieres llevar a cabo sobre el Entorno de Escritorio: "
 ! RESPUESTA="$(yad --title "${TITULO}" \
 --center \
---window-icon "vitalinux" \
---image "vx-desktop-environment" \
+--window-icon "${ICONO}" \
+--image "${IMAGEN}" \
 --height 250 --width 800 \
 --text "${TEXTO}" \
 --list --radiolist \

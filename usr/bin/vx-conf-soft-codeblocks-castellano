@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DIRCODE="/usr/share/codeblocks/"
+DIRLOCALES="/usr/share/codeblocks/locale/es_ES/"
+URL="http://migasfree.educa.aragon.es/software-terceros/codeblocks/es_LC_MESSAGES_codeblocks.mo"
+
+[[ ! -d "${DIRLOCALES}" ]] && mkdir -p "${DIRLOCALES}"
+[[ ! -e "${DIRLOCALES}/es_LC_MESSAGES_codeblocks.mo" ]] && \
+wget "${URL}" -P "${DIRLOCALES}" &>/dev/null
+
+exit 0
