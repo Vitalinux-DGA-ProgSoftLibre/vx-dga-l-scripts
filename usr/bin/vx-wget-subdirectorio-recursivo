@@ -1,0 +1,9 @@
+#!/bin/bash
+
+[ -z "${2}" ] && \
+echo -e "Debes pasar 2 parametros:
+1) la URL con el path del subdirectorio del cual descargar su contenido
+2) El directorio local de destino de los documentos descargados" && \
+exit 1
+
+wget -r -l1 --no-parent -nd "${1}" -P "${2}"

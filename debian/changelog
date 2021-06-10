@@ -1,3 +1,31 @@
+vx-dga-l-scripts (4.1-33) unstable; urgency=low
+
+  * Modificamos scripts en consonancia con lo hecho para vitalinux 2.0
+  * modificado: usr/bin/vx-conf-soft-arduino-s4a
+  * modificado: usr/bin/vx-funcs-bash
+  * modificado: usr/bin/vx-funcs-users
+  * Añadimos scripts y configuraciones en consonancia con lo hecho para vitalinux 2.0:
+  * etc/logrotate.d/
+  * etc/xdg/
+  * usr/bin/vx-avahi-cli
+  * usr/bin/vx-funcs-yad
+  * usr/bin/vx-gestionar-entorno-escritorio
+  * usr/bin/vx-lxpanel-restart
+  * usr/bin/vx-openbox-reconfigure
+  * usr/bin/vx-paquete-descargar-instalar
+  * usr/bin/vx-pcmanfm-config
+  * usr/bin/vx-pcmanfm-restart
+  * usr/bin/vx-reiniciar-entorno-escritorio-cli
+  * usr/bin/vx-resetear-entorno-escritorio-cli
+  * usr/bin/vx-wget-recursivo
+  * usr/bin/vx-wget-subdirectorio-recursivo
+  * usr/share/applications/vx-gestionar-entorno-escritorio.desktop
+  * usr/share/applications/vx-reiniciar-entorno-escritorio.desktop
+  * usr/share/applications/vx-resetear-entorno-escritorio.desktop
+  * usr/share/desktop-directories/
+
+ -- Arturo Martin <amartinromero@gmail.com>  Mon, 12 Apr 2021 00:18:06 +0200
+
 vx-dga-l-scripts (4.1-32) unstable; urgency=low
 
   * Modificamos vx-funcs-bash y añadimos la opción "a" a tee -ia "${LOGFILE}" para hacer logs incrementales

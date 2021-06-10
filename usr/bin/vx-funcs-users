@@ -10,9 +10,11 @@ USUARIOGRAFICO="$(vx-usuario-grafico)"
 declare -a MYFUNCS
 MYFUNCS=(vx-check_inicio_automatico
     vx-obtener_lista_usuarios
+    vx-lista-usuarios-iniciado-sesion
     vx-conf_idioma_usuario
     vx-check_exit_users
     vx-check_exit_groups
+    vx-check_sesion_grafica
     vx-funcs-users-help
     vx-resetear_usuarios
     vx-grupo_primario
@@ -26,7 +28,80 @@ MYFUNCS=(vx-check_inicio_automatico
     vx-crear_usuario_uid_gid
     vx-crear_usuario
     vx-crear_usuario_ex_idioma
-vx-borrar_usuario)
+    vx-borrar_usuario
+)
+
+# Definición de las funciones:
+
+function vx-lista-usuarios-iniciado-sesion() {
+    # Devolvemos una lista de usuarios que han iniciado sesión en el equipo:
+    # Por defecto los devuelve separados por defecto por un " "
+    # Se puede pasar como parámetro el carácter separador de la lista de usuarios
+    # Puede obtenerse mediante el comando last o loginctl:
+    [[ ! -z "${1}" && "${#1}" -eq 1 ]] && SEPARADOR="${1}" || SEPARADOR=" "
+    for sessionid in $(loginctl list-sessions --no-legend | awk '{ print $1 }'); do
+        loginctl show-session \
+        -p Id -p Name -p User -p State -p Type -p Remote "${sessionid}" | \
+        sort
+    done | \
+    awk -F= '/Name/ { name = $2 } \
+        /User/ { user = $2 } \
+        /State/ { state = $2 } \
+        /Type/ { type = $2 } \
+        /Remote/ { remote = $2 } \
+        /User/ && remote == "no" && \
+        user > 999 && \
+        ( state == "active" || state == "closing" || state == "online" ) && \
+        (type == "x11" || type == "wayland") \
+    { print user":"name }' | \
+    sort | uniq | cut -d":" -f2 | tr -s "\n" "${SEPARADOR}"
+    return 0
+}
+
+function vx-check_sesion_grafica() {
+    # Devuelve un 0 si se detecta que hay una sesión gráfica de usuario iniciada:
+    # 1) Listamos todas las sesiones que se han iniciado en el equipo para saber si hay alguna activa:
+    RESULTADO=$(for sessionid in $(loginctl list-sessions --no-legend | awk '{ print $1 }') ; do
+            # 2) El parámetro "State" de show-sessions indica si la sesión se cerró (closing), esta iniciada pero no es la activa (online) o esta iniciada (active)
+            # State=closing|online|active (el estado de la sesión: puede haber más de una activa, una x11|wayland y otra tty vía ssh)
+            # Type=tty|x11|wayland (tty es el valor que adopta cuando accedemos vía ssh)
+            # Remote=no|yes (vía ssh es yes)
+            # Name=alumno|profesor|cau (el nombre del usuario)
+            # User=0|1100|1200|1201 (el uid del usuario)
+            # Id=c1|c3|2|c7|c10 (identificador de la sesión: precede una c cuando es gráfica tipo x11)
+            loginctl show-session \
+            -p Id -p Name -p User -p State -p Type -p Remote "${sessionid}" | \
+            sort
+        done | \
+        awk -F= '/Name/ { name = $2 } \
+    /User/ { user = $2 } \
+    /State/ { state = $2 } \
+    /Type/ { type = $2 } \
+    /Remote/ { remote = $2 } \
+    /User/ && \
+    remote == "no" && \
+    state == "active" && \
+    (type == "x11" || type == "wayland") \
+    { print user":"name }')
+    IDUSUARIO="${RESULTADO//:*}"
+    NAMEUSUARIO="${RESULTADO##*:}"
+    # 3) El IDUSUARIO devuelto puede ser de un usuario gráfico (> 999) o de lightdm (106):
+    if vx-funcs-bash vx-check_is_integer "${IDUSUARIO}" && \
+    (( "${IDUSUARIO}" > 999 )) ; then
+        [ -z "${1}" ] && return 0
+        case "${1}" in
+            "-uid" )
+                echo "${IDUSUARIO}"
+            ;;
+            "-name" )
+                echo "${NAMEUSUARIO}"
+            ;;
+        esac
+        return 0
+    else
+        return 1
+    fi
+}
 
 function vx-check_inicio_automatico() {
     # Devuelve 0 si esta configurado un inicio de sesión automático:
@@ -481,5 +556,8 @@ function vx-borrar_usuario() {
 
 # Comprobamos si los parámetros pasados se corresponden con la llamada a una de las funciones para ejecutarla
 # En caso de que el parámetro no sea una de las funciones definidas sólo se quieren importar, no ejecutar
-[[ "${MYFUNCS[*]}" =~ "${1} " ]] && \
+LISTADO_FUNCIONES=":${MYFUNCS[*]}:"
+LISTADO_FUNCIONES="${LISTADO_FUNCIONES// /:}"
+MIREGEX=":${1}:"
+[[ "${LISTADO_FUNCIONES}" =~ ${MIREGEX} ]] && \
 "$@" 2> /dev/null

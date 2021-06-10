@@ -1,0 +1,113 @@
+#!/bin/bash
+
+# lastact: [arturo@2021-5-14]
+# desc: Permite configurar el explorador de archivos a partir una lista de directivas y su correspondiente valor
+
+# Ficheros de configuración de pcmanfm:
+# General:
+# /etc/xdg/pcmanfm/lubuntu/pcmanfm.conf -> provisto por lubuntu-default-settings
+# /etc/xdg/pcmanfm/default/pcmanfm.conf -> provisto por pcmanfm
+# Local:
+# ~/.config/pcmanfm/lubuntu/pcmanfm.conf # Si no existe, se genera al vuelo en el momento en que se abre pcmanfm, no cuando se inicia sesión. No coincide con el general
+# ~/.config/pcmanfm/lubuntu/desktop-items-0.conf
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && \
+source "${FICHFUNCS}" "sin-parametros"
+NAME_SCRIPT="${0}"
+
+# 0) Comprobamos si se solicita ayuda y se muestra:
+function vx-pcmanfm-config_help() {
+    DESCRIPCION="La llamada al script debe venir acompañada de 3 parámetros:
+    1. Fichero de configuración a modificar
+    2. Sección dentro de fichero anterior donde incluir las directivas
+    3. Lista de directivas y valores de estas separadas por comas"
+    EJEMPLO="${NAME_SCRIPT} \"pcmanfm.conf|desktop-items-0.conf\" \"ui|config|volume|desktop|*\" \"view_mode=list,sort=mtime;descending;\""
+    vx-show_help_script "${NAME_SCRIPT}" "${DESCRIPCION}" "${EJEMPLO}"
+}
+
+if vx-check_need_help "${1}" || [ -z "${3}" ] ; then
+    vx-pcmanfm-config_help && exit 0
+fi
+
+# 1) Preparamos la auditoria:
+LOG="vx-pcmanfm-config.log"
+vx-log_xsession -o "${LOG}"
+
+# 2.1) Rescatamos los parámetros: Fichero de configuración a editar
+HOME_USUARIO_GRAFICO="$(vx-home-usuario-grafico)"
+FILES_PCMANFM_LOCAL=("${HOME_USUARIO_GRAFICO}/.config/pcmanfm/lubuntu/pcmanfm.conf")
+FILES_PCMANFM_DESKTOP_LOCAL=("${HOME_USUARIO_GRAFICO}/.config/pcmanfm/lubuntu/desktop-items-0.conf")
+FILES_PCMANFM_GENERAL=( "/etc/xdg/pcmanfm/lubuntu/pcmanfm.conf"
+"/etc/xdg/pcmanfm/default/pcmanfm.conf" )
+case "${1}" in
+    "pcmanfm.conf" )
+        vx-check_user_root && \
+        LISTA_FILES=(${FILES_PCMANFM_LOCAL[@]} ${FILES_PCMANFM_GENERAL[@]}) || \
+        LISTA_FILES=(${FILES_PCMANFM_LOCAL[@]})
+    ;;
+    "desktop-items-0.conf" )
+        LISTA_FILES=("${FILES_PCMANFM_DESKTOP_LOCAL[@]}")
+    ;;
+    * )
+        vx-echo_log_error "Error: No se ha pasado correctamente el fichero de configuración a editar"
+        vx-pcmanfm-config_help
+        exit 1
+    ;;
+esac
+shift
+
+# Auditamos lo que vamos a configurar:
+vx-echo_log_titulo1 "PCMANFM-CONFIG" "${*}"
+
+# 2.2) Rescatamos los parámetros: Sección dentro del fichero a configurar
+[ ! -z "${1}" ] && \
+SECCION="${1}" || \
+{
+    vx-echo_log_error "Error: No se ha indicado el nombre de la sección del fichero de configuración a editar"
+    vx-pcmanfm-config_help
+    exit 1 ;
+}
+shift
+
+# 2.3) Rescatamos los parámetros: Lista de directivas a configurar
+# Recibe como parámetro una lista de directivas y valores de estas separadas por comas:
+# Ej: dir1=var11;var12;,dir2=var21,dir3=var31;var32;var33
+# Ej: view_mode=list,sort=mtime;descending;
+LISTA_DIRECTIVAS=( ${1//,/ } )
+LISTA_OK=()
+LISTA_ERROR=()
+for FICHERO in "${LISTA_FILES[@]}" ; do
+    for ELEMENTO in "${LISTA_DIRECTIVAS[@]}" ; do
+        DIRECTIVA="${ELEMENTO//=*}"
+        VALOR="${ELEMENTO##*=}"
+        #vx-echo_log_titulo2 "vx-pcmanfm-config: ${FICHERO} [${SECCION}] ${DIRECTIVA}=${VALOR}"
+        if [ -f "${FICHERO}" ] ; then
+            # ¡¡Cuidado!! Con crudini si editamos un link lo convertimos en fichero normal, afectando al divertido
+            [ -L "${FICHERO}" ] && FICHERO="$(readlink -f "${FICHERO}")"
+            crudini --set "${FICHERO}" "${SECCION}" "${DIRECTIVA}" "${VALOR}" && \
+            LISTA_OK+=("${FICHERO} [${SECCION}] ${DIRECTIVA}=${VALOR}") || \
+            LISTA_ERROR+=("${FICHERO} [${SECCION}] ${DIRECTIVA}=${VALOR}")
+        else
+            vx-echo_log_error "No existe el archivo de configuración: ${FICHERO}"
+        fi
+    done
+done
+
+# Mostramos por la salida las asignaciones realizadas:
+(( ${#LISTA_OK[@]} > 0 )) && \
+{
+    vx-echo_log_ok "vx-pcmanfm-config: Asignados Correctamente"
+    for ELEMENTO in "${LISTA_OK[@]}" ; do
+        vx-echo_log_ok "# ${ELEMENTO}"
+    done ;
+}
+(( ${#LISTA_ERROR[@]} > 0 )) && \
+{
+    vx-echo_log_error "vx-pcmanfm-config: Asignados Erroneamente"
+    for ELEMENTO in "${LISTA_OK[@]}" ; do
+        vx-echo_log_error "# ${ELEMENTO}"
+    done ;
+}
+
+exit 0

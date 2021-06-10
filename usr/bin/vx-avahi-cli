@@ -1,0 +1,55 @@
+#!/bin/bash
+# lastact: [arturo@2021-5-18]
+# desc: script que permite gestionar avahi (habilitar y deshabilitar)
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+# 0) Comprobamos si se solicita ayuda y se muestra:
+function avahi_cli_help() {
+    DESCRIPCION="Permite habilitar o deshabilitar avahi.  Necesita un parámetro:
+    1. '--disable' => deshabilita avahi
+    2. '--enable' => habilita avahi"
+    EJEMPLO="${0} \"--enable|--disable\""
+    vx-show_help_script "${0}" "${DESCRIPCION}" "${EJEMPLO}"
+}
+
+# 1) Comprobamos si se pide ayuda de como usar el comando:
+vx-check_need_help && avahi_cli_help && exit 0
+
+# 2) Comprobamos si systemd gestiona los servicios:
+INITSYS="$(ls -al /proc/1/exe | awk -F' ' '{print $NF}' | awk -F'/' '{print $NF}')"
+
+function configurar_avahi_deshabilitar() {
+    if [ "systemd" == "$INITSYS" ]; then
+        # systemctl stop avahi-daemon.service &> /dev/null || true
+        systemctl disable --now avahi-daemon.socket
+        systemctl disable --now avahi-daemon.service
+        echo "=> Se ha deshabilitado avahi ..."
+        elif [ "init" == "$INITSYS" ]; then
+        /etc/init.d/avahi-daemon stop &> /dev/null || true
+    fi
+}
+
+function configurar_avahi_habilitar() {
+    if [ "systemd" == "$INITSYS" ]; then
+        # systemctl stop avahi-daemon.service &> /dev/null || true
+        systemctl enable --now avahi-daemon.socket
+        systemctl enable --now avahi-daemon.service
+        echo "=> Se ha habilitado avahi ..."
+        elif [ "init" == "$INITSYS" ]; then
+        /etc/init.d/avahi-daemon restart &> /dev/null || true
+    fi
+}
+
+# 2) Comprobamos a través del primer parámetro la acción a desencadenar:
+[ -z "${1}" ] && avahi_cli_help && exit 1
+case "${1}" in
+    "--disable" ) configurar_avahi_deshabilitar ;;
+    "--enable" ) configurar_avahi_habilitar ;;
+    * )
+        avahi_cli_help
+        exit 1
+    ;;
+esac
+exit 0

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+# 0) Preparamos la auditoria del servicio:
+LOG="vx-reiniciar-entorno-escritorio.log"
+vx-log_xsession -o "${LOG}"
+# Reiniciamos todos los elementos que componen el entorno de Escritorio:
+TEXTO="Reiniciamos el entorno de Escritorio sin eliminar archivos de configuración"
+vx-colorear_echo "magenta" "[$(vx-fecha)] ${TEXTO}"
+
+# 1) el Entorno de Escritorio: pcmanfm
+vx-pcmanfm-restart
+# 2) su panel inferior: lxpanel
+vx-lxpanel-restart
+# 3) el gestor de ventanas y atajos: openbox
+vx-openbox-reconfigure
+# 4) reinicamos el widget del escritorio:
+inicio-conky

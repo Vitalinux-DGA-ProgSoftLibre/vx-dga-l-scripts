@@ -1,0 +1,15 @@
+#!/bin/bash
+# lastact: [arturo@2021-5-18]
+# desc: Le pasamos como parámetros la urls de los paquetes a descargar e instalar
+
+[ -z "${1}" ] && \
+echo "=> Debes pasar como parámetros la urls de los paquetes a descargar e instalar" && \
+exit 1
+
+until [ -z "${1}" ] ; do
+    URL="${1}"
+    [ -f "$(basename "${URL}")" ] && rm -f "$(basename "${URL}")" && \
+    echo "=> Se ha eliminado el paquete \"$(basename "${URL}")\" que ya existía en este directorio."
+    wget "${URL}" && echo "s" | gdebi "$(basename "${URL}")"
+    shift
+done

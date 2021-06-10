@@ -1,5 +1,5 @@
 #!/bin/bash
-# Ultima modificación: [arturo@2021-4-7] [arturo@2020-4-1]
+# Ultima modificación: [arturo@2021-5-25][arturo@2021-4-7] [arturo@2020-4-1]
 # desc: defimos funciones que se puedan reutilizar y llamar desde cualquier otro script
 
 # Declaramos todas las funciones que se definen posteriormente para evitar ejecuciones indeseadas:
@@ -37,8 +37,128 @@ MYFUNCS=(vx-lista_uniq
     vx-yad-file-select
     vx-lista_directorios_perfil
     vx-obtener_ruta_absoluta
+    vx-check_var_is_number
     vx-check_if_is_directory
-vx-check_if_is_file)
+    vx-check_if_is_file
+    vx-check_need_help
+    vx-show_help
+    vx-show_help_script
+    vx-echo_log_titulo1
+    vx-echo_log_titulo2
+    vx-echo_log_ok
+    vx-echo_log_error
+    vx-regex_url
+    vx-regex_path_absolute)
+
+# Mostramos la lista de funciones disponibles en el caso de que se pase como parámetro "-h" o "--help":
+MIREGEX='^-h$|^--help$'
+[[ "${1}" =~ ${MIREGEX} ]] && echo "${MYFUNCS[@]}" | tr -s " " "\n" | sort | more
+
+function vx-regex_url() {
+    # REGEX='^(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]\.[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]$'
+    REGEX='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+    [[ "${1}" =~ ${REGEX} ]] && return 0 || return 1
+}
+
+function vx-regex_path_absolute() {
+    REGEX='^/[^/].*'
+    [[ "${1}" =~ ${REGEX} ]] && return 0 || return 1
+}
+
+function vx-echo_log_error() {
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve el texto formateado listo para auditar como título de Error en color rojo. Un parámetro: Descripción"
+    EJEMPLOS=("${FUNCNAME[0]} \"¡¡Error!!. No se ha podido regenerar los Entornos de Escritorio\"")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} \"¡¡Error!!. No se ha podido regenerar los Entornos de Escritorio\"")
+    if vx-check_need_help "${1}" || [[ -z "${1}" ]] ; then
+        vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    fi
+    # Help-End
+    vx-colorear_echo "rojo" "=> ${1}"
+    return 0
+}
+
+function vx-echo_log_ok() {
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve el texto formateado listo para auditar como título ok en color verde. Un parámetro: Descripción"
+    EJEMPLOS=("${FUNCNAME[0]} \"Todo Ok. Se ha procedido a regenerar los Entornos de Escritorio\"")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} \"Todo Ok. Se ha procedido a regenerar los Entornos de Escritorio\"")
+    if vx-check_need_help "${1}" || [[ -z "${1}" ]] ; then
+        vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    fi
+    # Help-End
+    vx-colorear_echo "verde" "=> ${1}"
+    return 0
+}
+
+function vx-echo_log_titulo2() {
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve el texto formateado listo para auditar como título secundario en color Azul. Dos parámetros: Asunto y Descripción"
+    EJEMPLOS=("${FUNCNAME[0]} \"SRV-CONGELACION\" \"Se procede a regenerar los Entornos de Escritorio\"")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} \"SRV-CONGELACION\" \"Se procede a regenerar los Entornos de Escritorio\"")
+    if vx-check_need_help "${1}" || [[ -z "${2}" ]] ; then
+        vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    fi
+    # Help-End
+    vx-colorear_echo "azul" "## [$(vx-fecha)] ${1}: ${2} ##"
+    return 0
+}
+
+function vx-echo_log_titulo1() {
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve el texto formateado listo para auditar como título principal en color magenta. Dos parámetros: Asunto y Descripción"
+    EJEMPLOS=("${FUNCNAME[0]} \"SRV-CONGELACION\" \"Se procede a regenerar los Entornos de Escritorio\"")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} \"SRV-CONGELACION\" \"Se procede a regenerar los Entornos de Escritorio\"")
+    if vx-check_need_help "${1}" || [[ -z "${2}" ]] ; then
+        vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    fi
+    # Help-End
+    vx-colorear_echo "magenta" "[$(vx-fecha)] ${1}: ${2}" | sudo vx-auditar-syslog
+    return 0
+}
+
+function vx-check_need_help() {
+    MIREGEX='^-h$|^--help$'
+    [[ "${1}" =~ ${MIREGEX} ]] && return 0 || return 1
+}
+
+function vx-show_help() {
+    echo "=> Nombre de la función: $(vx-colorear_echo_azul_negrita "${1}")"
+    shift
+    echo -e "=> Descripción: \n$(vx-colorear_echo "cyan" "${1}")"
+    shift
+    echo "=> Ejemplos de uso:"
+    for EJEMPLO in "${@}" ; do
+        vx-colorear_echo "cyan" "${EJEMPLO:-No se indican}"
+    done
+    return 0
+}
+
+function vx-show_help_script() {
+    echo "=> Nombre del script: $(vx-colorear_echo_azul_negrita "${1}")"
+    shift
+    echo -e "=> Descripción: \n$(vx-colorear_echo "cyan" "${1}")"
+    shift
+    echo "=> Ejemplos de uso:"
+    for EJEMPLO in "${@}" ; do
+        vx-colorear_echo "cyan" "${EJEMPLO:-No se indican}"
+    done
+    return 0
+}
+
+function vx-check_var_is_number() {
+    # Devuelve un 0 si el valor pasado como parámetro es un número:
+    # Help-Begin: Descripción de la ayuda de la función:
+    AYUDA="Devuelve un 0 si el parámetro pasado a la función es un número entero. Por el contrario devuelve un 1"
+    EJEMPLOS=("${FUNCNAME[0]} 678 # Devuelve 0")
+    EJEMPLOS+=("vx-funcs-bash ${FUNCNAME[0]} 7830 # Devuelve 0")
+    EJEMPLOS+=("${FUNCNAME[0]} m678 # Devuelve 1")
+    vx-check_need_help "${1}" && \
+    vx-show_help "${FUNCNAME[0]}" "${AYUDA}" "${EJEMPLOS[@]}" && return 0
+    # Help-End
+    regexnum='^[0-9]+$'
+    [[ "${1}" =~ ${regexnum} ]] && return 0 || return 1
+}
 
 function vx-lista_uniq() {
     local LISTA=()
@@ -425,5 +545,8 @@ function vx-check_if_is_file() {
 
 # Comprobamos si los parámetros pasados se corresponden con la llamada a una de las funciones para ejecutarla
 # En caso de que el parámetro no sea una de las funciones definidas sólo se quieren importar, no ejecutar
-[[ "${MYFUNCS[*]}" =~ "${1} " ]] && \
+LISTADO_FUNCIONES=":${MYFUNCS[*]}:"
+LISTADO_FUNCIONES="${LISTADO_FUNCIONES// /:}"
+MIREGEX=":${1}:"
+[[ "${LISTADO_FUNCIONES}" =~ ${MIREGEX} ]] && \
 "$@" 2> /dev/null

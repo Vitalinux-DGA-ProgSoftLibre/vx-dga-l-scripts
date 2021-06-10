@@ -1,0 +1,97 @@
+#!/bin/bash
+# lastact: Ultima modificación [arturo@2021-5-25]
+# desc: Ventanas de yad reutilizables
+
+# Declaramos todas las funciones que se definen posteriormente para evitar ejecuciones indeseadas:
+declare -a MYFUNCS
+MYFUNCS=(
+    vx-yad_tail_pipe
+    vx-yad_close
+    vx-yad_close_exit
+)
+
+# Mostramos la lista de funciones disponibles en el caso de que se pase como parámetro "-h" o "--help":
+MIREGEX='^-h$|^--help$'
+[[ "${1}" =~ ${MIREGEX} ]] && echo "${MYFUNCS[@]}" | tr -s " " "\n" | sort | more
+
+function vx-yad_close(){
+    kill -s SIGUSR1 "$YAD_PID"
+}
+export -f vx-yad_close
+
+function vx-yad_close_exit(){
+    echo "Se cancela el proceso por parte del usuario antes de tiempo"
+    if [ -n "$YAD_LOG" ] && ps -p "$YAD_LOG" > /dev/null; then
+        echo "Matando $YAD_LOG y mataremos a $YAD_PID"
+        kill -s SIGUSR1 "$YAD_LOG"
+    fi
+    if [ -n "$YAD_PID" ] && ps -p "$YAD_PID" > /dev/null; then
+        echo "Matando $YAD_PID"
+        kill -s SIGUSR1 "$YAD_PID"
+    fi
+    # Salimos del programa
+    echo "Saliendo...."
+    exit 0
+}
+export -f vx-yad_close_exit
+
+function vx-yad_tail_pipe() {
+    TITULO="${1}"
+    TEXTO="${2}"
+    ICONO="${3:-"vitalinux"}"
+    IMAGEN="${4:-"vitalinux"}"
+    ANCHURA="${5:-"750"}"
+    ALTURA="${6:-"550"}"
+    BOTON1="${7:-"Ocultar"}"
+    BOTON2="${8:-"Cerrar"}"
+    fpipe=$(mktemp -u --tmpdir yadlog.XXXXXXXX)
+    export fpipe
+    mkfifo "${fpipe}"
+    exec 3<> "${fpipe}"
+    exec 2>&1
+    # Inyectamos todo en la pipe recien creada:
+    exec > >(tee -i "${fpipe}" )
+    # Borramos la pipe cuando salgamos
+    trap "rm -f ${fpipe}" EXIT
+    yad --title "${TITULO}" \
+    --text-info --tail \
+    --window-icon "${ICONO}" \
+    --image "${IMAGEN}" \
+    --text " ${TEXTO} " \
+    --center \
+    --width="${ANCHURA}" --height="${ALTURA}" \
+    --no-escape --no-focus --button="${BOTON1}:bash -c vx-yad_close" \
+    --button="${BOTON2}:bash -c vx-yad_close_exit" < "$fpipe" &
+    
+    YAD_LOG=$!
+    export YAD_LOG
+}
+
+function vx-yad_pipe() {
+    VENTANA_YAD="${1}"
+    BOTON1="${2:-"Ocultar"}"
+    BOTON2="${3:-"Cerrar"}"
+    fpipe=$(mktemp -u --tmpdir yadlog.XXXXXXXX)
+    export fpipe
+    mkfifo "${fpipe}"
+    exec 3<> "${fpipe}"
+    exec 2>&1
+    # Inyectamos todo en la pipe recien creada:
+    exec > >(tee -i "${fpipe}" )
+    # Borramos la pipe cuando salgamos
+    trap "rm -f ${fpipe}" EXIT
+    eval "${VENTANA_YAD}" \
+    --no-escape --no-focus --button="${BOTON1}:bash -c vx-yad_close" \
+    --button="${BOTON2}:bash -c vx-yad_close_exit" < "$fpipe" &
+    
+    YAD_LOG=$!
+    export YAD_LOG
+}
+
+# Comprobamos si los parámetros pasados se corresponden con la llamada a una de las funciones para ejecutarla
+# En caso de que el parámetro no sea una de las funciones definidas sólo se quieren importar, no ejecutar
+LISTADO_FUNCIONES=":${MYFUNCS[*]}:"
+LISTADO_FUNCIONES="${LISTADO_FUNCIONES// /:}"
+MIREGEX=":${1}:"
+[[ "${LISTADO_FUNCIONES}" =~ ${MIREGEX} ]] && \
+"$@" 2> /dev/null

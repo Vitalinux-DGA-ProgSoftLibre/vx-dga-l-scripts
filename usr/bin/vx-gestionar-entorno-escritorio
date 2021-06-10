@@ -1,0 +1,47 @@
+#!/bin/bash
+# lastact: [arturo@2021-5-14]
+# desc: yad que permite que el usuario seleccione entre las distintas opciones de gestión del Escritorio
+
+TITULO="Gestión del Entorno de Escritorio"
+IMAGEN="vx-desktop-environment"
+ICONO="vitalinux"
+TEXTO=" Selecciona que tipo de acción quieres llevar a cabo sobre el Entorno de Escritorio: "
+! RESPUESTA="$(yad --title "${TITULO}" \
+--center \
+--window-icon "${ICONO}" \
+--image "${IMAGEN}" \
+--height 250 --width 800 \
+--text "${TEXTO}" \
+--list --radiolist \
+--column "Opción":RD \
+--column "Valor":HD \
+--column "Acción":TEXT \
+--column "Descripción":TEXT \
+FALSE 0 "Reinciar" "Reinicia el Entorno de Escritorio preservando el aspecto configurado por el usuario" \
+FALSE 1 "Resetear" "Devuelve el Entorno de Escritorio a su estado inicial preservando los archivos y directorios del Escritorio" \
+FALSE 2 "Regenerar" "Devuelve el Entorno de Escritorio a su estado inicial eliminando archivos y directorios del Escritorio" \
+FALSE 3 "Apariencia" "Personaliza la apariencia del Escritorio: cursor, tema de iconos, tema de ventanas, etc." \
+FALSE 4 "Preferencias" "Personaliza el Wallpaper y lanzadores del Escritorio" \
+FALSE 5 "Panel Inferior" "Personaliza el panel inferior del Escritorio" \
+--button "Confirmar":0 --button "Cancelar":1)" && exit 1
+
+OPCION="$(echo "${RESPUESTA}" | cut -d"|" -f2)"
+ACCION="$(echo "${RESPUESTA}" | cut -d"|" -f3)"
+DESCRIPCION="$(echo "${RESPUESTA}" | cut -d"|" -f4)"
+
+# 0) Preparamos la auditoria del servicio:
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+LOG="vx-gestionar-entorno-escritorio.log"
+vx-log_xsession -o "${LOG}"
+# Reiniciamos todos los elementos que componen el entorno de Escritorio:
+vx-echo_log_titulo1 "GESTION-ESCRITORIO" "${ACCION}: ${DESCRIPCION}"
+
+case "${OPCION}" in
+    "0" ) vx-reiniciar-entorno-escritorio-cli ;;
+    "1" ) vx-resetear-entorno-escritorio-cli ;;
+    "2" ) vx-regenerar-entorno-escritorio-cli ;;
+    "3" ) lxappearance ;;
+    "4" ) pcmanfm --desktop-pref ;;
+    "5" ) lxpanelctl config ;;
+esac

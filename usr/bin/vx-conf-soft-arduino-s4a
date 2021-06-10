@@ -17,35 +17,37 @@ uso && exit 1
 [[ "${1}" == "--mute" ]] && MUTE="true" || MUTE="false"
 
 function configurar_sudo() {
-    LANZADOR="${1}"
-    if [ -f "${LANZADOR}" ]   ; then
-        crudini --set "${LANZADOR}" "Desktop Entry" "Exec" "${2}" && \
-        {
-            ! "${MUTE}" && \
-            echo "=> Se ha configurado para lanzador para lanzarse con permisos de sudo: ${LANZADOR}"
-        } || \
-        {
-            ! "${MUTE}" && \
-            echo "=> Problemas para configurar el lanzardor para lanzarse con permisos de sudo: ${LANZADOR}"
-        }
-        # Configuramos sudo para el comando anterior:
-        FICH="${3}"
-        if [ ! -f "${FICH}" ] ; then
+    LANZADORES="${1}"
+    for LANZADOR in ${LANZADORES//;/ } ; do
+        if [[ -f "${LANZADOR}" ]] && ! grep -Eq "^Exec *= *${2}" "${LANZADOR}" ; then
+            crudini --set "${LANZADOR}" "Desktop Entry" "Exec" "${2}" && \
+            {
+                ! "${MUTE}" && \
+                echo "=> Se ha configurado para lanzador para lanzarse con permisos de sudo: ${LANZADOR}"
+            } || \
+            {
+                ! "${MUTE}" && \
+                echo "=> Problemas para configurar el lanzardor para lanzarse con permisos de sudo: ${LANZADOR}"
+            }
+            # Configuramos sudo para el comando anterior:
+            FICH="${3}"
+            if [ ! -f "${FICH}" ] ; then
     cat > "${FICH}"<<EOF
 #ALL ALL = (root) NOPASSWD: /usr/bin/arduino, /usr/bin/s4a
 ALL ALL = (root) NOPASSWD: ${4}
 EOF
-            [ -f "${FICH}" ] && chmod 440 "${FICH}" && \
-            echo "=> Se ha creado el fichero de sudo: ${FICH}"
+                [ -f "${FICH}" ] && chmod 440 "${FICH}" && \
+                echo "=> Se ha creado el fichero de sudo: ${FICH}"
+            fi
         fi
-    fi
+    done
 }
 
-PARAMETROS=( "/usr/share/applications/arduino.desktop" \
+PARAMETROS=( "/usr/share/applications/arduino.desktop;$(vx-home-usuario-grafico)/Escritorio/arduino.desktop;/etc/skel/Escritorio/arduino.desktop" \
     "sudo arduino" \
     "/etc/sudoers.d/arduino" \
     "/usr/bin/arduino" \
-    "/usr/share/applications/s4a.desktop" \
+    "/usr/share/applications/s4a.desktop;$(vx-home-usuario-grafico)/Escritorio/s4a.desktop;/etc/skel/Escritorio/s4a.desktop" \
     "sudo s4a" \
     "/etc/sudoers.d/s4a" \
     "/usr/bin/s4a"
@@ -53,7 +55,7 @@ PARAMETROS=( "/usr/share/applications/arduino.desktop" \
 
 # Llamamos a la función pasandole los parametros {0..7} de 4 en 4 mediante seq:
 for VAR in $(seq 0 4 7) ; do
-    prueba "${PARAMETROS[$VAR]}" \
+    configurar_sudo "${PARAMETROS[$VAR]}" \
     "${PARAMETROS[((VAR + 1))]}" \
     "${PARAMETROS[((VAR + 2))]}" \
     "${PARAMETROS[((VAR + 3))]}"

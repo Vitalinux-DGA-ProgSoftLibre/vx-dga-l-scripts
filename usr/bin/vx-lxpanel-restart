@@ -1,0 +1,46 @@
+#!/bin/bash
+
+FILE_PANEL_GENERAL="/usr/share/lxpanel/profile/Lubuntu/panels/panel"
+# FILE_PANEL_LOCAL="$(vx-home-usuario-grafico)/.config/lxpanel/Lubuntu/panels/panel"
+# FILE_PANEL_LOCAL_DEF="$(vx-home-usuario-grafico)/.config/lxpanel/default/panels/panel"
+USER_GRAFICO="$(vx-usuario-grafico 2> /dev/null)"
+HOMEUSU="$(vx-home-usuario-grafico 2> /dev/null)"
+
+FICHFUNCS="/usr/bin/vx-funcs-bash"
+[ -f "${FICHFUNCS}" ] && . "${FICHFUNCS}"
+
+# 1) Preparamos la auditoria del servicio:
+LOG="vx-lxpanel-restart.log"
+vx-log_xsession -o "${LOG}"
+
+TEXTO="Reseterar lxpanel del Escritorio"
+vx-colorear_echo "magenta" "[$(vx-fecha)] ${TEXTO}" | sudo vx-auditar-syslog
+
+# 2) Comprobamos si hay que eliminar los archivos de configuración
+function lxpanel_rm_files() {
+    for DIR in ".config/lxpanel" ; do
+        [[ ! -d "/etc/skel/${DIR}" ]] && continue
+        if rsync --delete -ah --chown="${PROPIETARIO}" "/etc/skel/${DIR}/" "${HOMEUSU}/${DIR}" ; then
+            vx-colorear_echo "verde" "=> OK: copiado /etc/skel/${DIR}/ en ${HOMEUSU}/${DIR}"
+        else
+            rm -Rf "${HOMEUSU}/${DIR}"
+            vx-colorear_echo "rojo" "=> ERROR: Problema al copiar /etc/skel/${DIR} en ${HOMEUSU}/${DIR}"
+        fi
+    done
+}
+[ "${1}" == "-d" ] && lxpanel_rm_files
+
+
+# 3) Comprobamos que existe el fichero de descripción de lxpanel y lo reseteamos:
+function lxpanel_restart() {
+    lxpanelctl restart
+}
+
+for FILE_PANEL_LOCAL in "$(vx-home-usuario-grafico)/.config/lxpanel/Lubuntu/panels/panel" \
+"$(vx-home-usuario-grafico)/.config/lxpanel/default/panels/panel" ; do
+    [[ ! -f "${FILE_PANEL_LOCAL}" && -f "${FILE_PANEL_GENERAL}" ]] && \
+    rsync -ah --chown="${USER_GRAFICO}" "${FILE_PANEL_GENERAL}" "${FILE_PANEL_LOCAL}"
+done
+lxpanel_restart
+
+exit 0
