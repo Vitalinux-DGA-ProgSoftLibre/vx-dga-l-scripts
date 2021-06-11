@@ -23,6 +23,7 @@ vx-dga-l-scripts (4.1-33) unstable; urgency=low
   * usr/share/applications/vx-reiniciar-entorno-escritorio.desktop
   * usr/share/applications/vx-resetear-entorno-escritorio.desktop
   * usr/share/desktop-directories/
+  * Añadimos los iconos SVG de los desktop anteriores
 
  -- Arturo Martin <amartinromero@gmail.com>  Mon, 12 Apr 2021 00:18:06 +0200
 
