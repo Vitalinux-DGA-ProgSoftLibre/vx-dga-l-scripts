@@ -85,11 +85,12 @@ echo -e "</span></tt></b>" >> /tmp/info-tarjetas-red
 
 echo -e "Información del direccionamiento IP:" >> /tmp/info-tarjetas-red
 for TARJETA in $(nmcli -t -f device dev | grep -v "lo") ; do
+    MODO="$(ip -4 addr show "${TARJETA}" | grep inet | grep -q "dynamic" && echo "Dinámica" || echo "Estática")"
     IP=$(vx-trim $(nmcli dev show "${TARJETA}" | grep IP4.ADDRESS | cut -d":" -f2))
     MAC=$(vx-trim $(nmcli dev show "${TARJETA}" | grep GENERAL.HWADDR | awk -F": " '{ print $2 }'))
     if test "$IP" != "" -a "$MAC" != "" ; then
         INFODEV="  =>  Interfaz <b><tt><span foreground='blue'>$TARJETA</span></tt></b>: "
-        INFODEV="${INFODEV}<b><tt><span foreground='blue'>$IP</span></tt></b> [IP] - "
+        INFODEV="${INFODEV}<b><tt><span foreground='blue'>$IP</span></tt></b> [IP ${MODO}] - "
         INFODEV="${INFODEV}<b><tt><span foreground='blue'>$MAC</span></tt></b> [MAC]"
         echo "${INFODEV}" >> /tmp/info-tarjetas-red
     fi
@@ -144,7 +145,7 @@ if vx-detectar_gui && [[ -z "${1}" ]] ; then
     --image preferences-system-network \
     --width 700 --height 450 \
     --fixed \
-    --window-icon Vitalinux \
+    --window-icon "vitalinux" \
     --text \
     "$(cat /tmp/info-tarjetas-red) \n" \
     --button="Cerrar Ventana":0
