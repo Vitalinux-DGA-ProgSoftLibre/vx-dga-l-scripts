@@ -39,7 +39,10 @@ echo -e "Kernel: <b><tt><span foreground='blue'>${KERNEL}</span></tt></b>" >> /t
 #ARQUIHARDWARE="$(lscpu | grep 'CPUs' | cut -d':' -f2)"
 ARQUIHARDWARE="$(vx-trim "$(lscpu | awk 'NR==2' | cut -d':' -f2)")"
 echo -e "Arquitecturas de Vitalinux soportadas por el Hardware: <b><tt><span foreground='blue'>${ARQUIHARDWARE}</span></tt></b>" >> /tmp/info-tarjetas-red
-VEROPENGL="$(glxinfo | grep "OpenGL version" | awk -F":" '{ print $2 }')"
+# Averiguamos la versión de OpenGL (si hay entorno gráfico):
+vx-detectar_gui && \
+VEROPENGL="$(glxinfo | grep "OpenGL version" | awk -F":" '{ print $2 }')" || \
+VEROPENGL="Sin Entorno Gráfico"
 echo -e "Versión de OpenGL: <b><tt><span foreground='blue'>${VEROPENGL}</span></tt></b>" >> /tmp/info-tarjetas-red
 # Información sobre el tipo de BIOS del equipo: BIOS Legacy o UEFI
 [[ -d "/sys/firmware/efi" ]] && TIPOBIOS="BIOS UEFI" || TIPOBIOS="BIOS Legacy"
@@ -102,7 +105,7 @@ DNS="$(nmcli device show | grep ^IP4.DNS | tr -s " " " " | cut -d" " -f2 | tr -s
 #echo "  =>  DNSs: <b><tt><span foreground='blue'>${DNS}</span></tt></b>" >> /tmp/info-tarjetas-red
 IPPUBLICA=$(wget http://ipinfo.io/ip -qO - 2> /dev/null)
 #echo "  =>  IP Pública Router: <b><tt><span foreground='blue'>$IPPUBLICA</span></tt></b>" >> /tmp/info-tarjetas-red
-echo "  =>  Puerta de Enlace|DNSs|IP Pública Router: <b><tt><span foreground='blue'>${GATEWAY}|${DNS}|${$IPPUBLICA}</span></tt></b>" >> /tmp/info-tarjetas-red
+echo "  =>  Puerta de Enlace|DNSs|IP Pública Router: <b><tt><span foreground='blue'>${GATEWAY}|${DNS}|${IPPUBLICA}</span></tt></b>" >> /tmp/info-tarjetas-red
 
 echo "" >> /tmp/info-tarjetas-red
 

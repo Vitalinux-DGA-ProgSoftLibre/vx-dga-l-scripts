@@ -1,6 +1,7 @@
 vx-dga-l-scripts (5.0-54) unstable; urgency=low
 
   * Modificamos vx-informacion-red para añadir info sobre si la ip es DHCP o Static
+  * Modificamos vx-informacion-red para mostrar la versión de opengl sólo en entorno gráfico
 
  -- Arturo Martin <amartinromero@gmail.com>  Tue, 15 Jun 2021 00:18:06 +0200
 
