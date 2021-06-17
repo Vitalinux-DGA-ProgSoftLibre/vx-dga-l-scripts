@@ -10,7 +10,7 @@ Comment=Application that allows Desktop environment management
 Comment[en]=Application that allows Desktop environment management
 Comment[es]=Aplicación que permite Gestionar el Entorno de Escritorio
 
-Icon=vx-desktop-environment
+Icon=vx-desktop-environment-management
 
 Exec=vx-gestionar-entorno-escritorio
 Terminal=false

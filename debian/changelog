@@ -1,3 +1,10 @@
+vx-dga-l-scripts (5.0-55) unstable; urgency=low
+
+  * Añadimos el icon vx-desktop-environment-management.svg
+  * Modificamos vx-gestionar-entorno-escritorio.desktop para asociar como icono vx-desktop-environment-management.svg
+
+ -- Arturo Martin <amartinromero@gmail.com>  Thu, 17 Jun 2021 00:18:06 +0200
+
 vx-dga-l-scripts (5.0-54) unstable; urgency=low
 
   * Modificamos vx-informacion-red para añadir info sobre si la ip es DHCP o Static
