@@ -1,3 +1,11 @@
+vx-dga-l-scripts (5.0-56) unstable; urgency=low
+
+  * Modificamos control y añadimos la dependencia con poppler-utils para disponer de la utilidad pdftoppm
+  * Añadimos vx-pdf-to-png para añadir la funcionalidad de pasar de PDF a PNG mediante pdftoppm
+  * Modificamos vx-extraer-paginas-pdfs al hacer uso de pdfinfo para obtener el número de páginas del PDF
+
+ -- Arturo Martin <amartinromero@gmail.com>  Wed, 30 Jun 2021 00:18:06 +0200
+
 vx-dga-l-scripts (5.0-55) unstable; urgency=low
 
   * Añadimos el icon vx-desktop-environment-management.svg

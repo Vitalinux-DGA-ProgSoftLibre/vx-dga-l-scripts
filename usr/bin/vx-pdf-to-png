@@ -1,0 +1,81 @@
+#!/bin/bash
+# lastact: arturo@2021-6-29
+# Script gráfico encargado de convertir PDF to PNG:
+# pdftoppm {input.pdf} {output.file} [ -f first_page ] [ -l last_page] -png
+
+TITULO="Conversor PDF a PNG"
+IMAGEN="/usr/share/icons/vitalinux/actions-scripts/pdf.png"
+
+function seleccionar_fichero_pdf() {
+    TEXTO="\n<b>Selecciona</b> el <span foreground='blue'><b>Archivo PDF</b></span> que desees convertir en imágenes PNG:\n"
+    if RUTA="$(vx-funcs-bash vx-yad-file-select "${TITULO}" "${TEXTO}" "${IMAGEN}")" ; then
+        echo "${RUTA}"
+        return 0
+    else
+        echo "/dev/null"
+        return 1
+    fi
+}
+
+function pdf_to_png() {
+    # 0) En el caso de que el fichero indicado no sea de tipo PDF salimos de la aplicación:
+    MIMETYPE="$(vx-mime-type "${FICHERO}")"
+    REGEX="application/.*pdf"
+    MENSAJE="El archivo a convertir no es de tipo PDF. Vuelve a intentarlo."
+    CODIGO_SALIDA="1"
+    [[ ! "${MIMETYPE}" =~ ^$REGEX$ ]] && \
+    vx-funcs-bash vx-mensaje_y_salir "${TITULO}" "${MENSAJE}" "${CODIGO_SALIDA}" "${IMAGEN}"
+    
+    # 1) Una vez comprobado que el archivo es PDF preguntaremos si queremos convertir páginas individuales o todo el documento:
+    NUM_PAGS_PDF="$(pdfinfo "${FICHERO}" | grep ^Pages | tr -d " " | cut -d":" -f2)"
+    TEXTO="\n Indica si quieres convertir todas las páginas del PDF a PNG o un intérvalo en concreto: \n"
+    if ! RESPUESTA=$(yad --title "${TITULO}" --center \
+        --width=680 --height=250 \
+        --window-icon vitalinux \
+        --image "${IMAGEN}" \
+        --text="${TEXTO}" \
+        --form \
+        --field="Convertir Todas las páginas del PDF a PNG:CHK" "FALSE" \
+        --field="Pagina Incial a Convertir del PDF:NUM" 1!1..${NUM_PAGS_PDF}!1 \
+        --field="Pagina Final a Convertir del PDF:NUM" 1!1..${NUM_PAGS_PDF}!1 \
+        --separator="|" \
+        --button="Convertir Páginas":0 --button="Abortar":1) ; then
+        MENSAJE="Conversión abortada por el usuario"
+        CODIGO_SALIDA="2"
+        [[ ! "${MIMETYPE}" =~ ^$REGEX$ ]] && \
+        vx-funcs-bash vx-mensaje_y_salir "${TITULO}" "${MENSAJE}" "${CODIGO_SALIDA}" "${IMAGEN}"
+    fi
+    
+    # 2) Analizamos la respuesta anterior:
+    TODAS="$(echo "${RESPUESTA}" | cut -d"|" -f1)"
+    PAGINI="$(echo "${RESPUESTA}" | cut -d"|" -f2)"
+    PAGFIN="$(echo "${RESPUESTA}" | cut -d"|" -f3)"
+    
+    NOMBRE="$(vx-funcs-bash vx-obtener_nombre_archivo)"
+    NOMBRE_CON_EXT="$(vx-funcs-bash vx-obtener_nombre_archivo_con_extension)"
+    (
+        echo "#=> Vamos a empezar con la conversión del archivo: ${NOMBRE_CON_EXT} ..."
+        [[ "${TODAS}" != "TRUE" ]] && \
+        pdftoppm "${FICHERO}" "${NOMBRE}" -f "${PAGINI}" -l "${PAGFIN}" -png || \
+        pdftoppm "${FICHERO}" "${NOMBRE}" -png
+        echo "#=> Conversión finalizada. Encontrarás las imágenes PNG junto al fichero \"${NOMBRE_CON_EXT}\"."
+    ) | yad --title "${TITULO}" \
+    --window-icon vitalinux \
+    --image "${IMAGEN}" \
+    --width 600 \
+    --center \
+    --progress --pulsate
+}
+
+if [[ -z "${1}" ]] ; then
+    FICHERO="$(seleccionar_fichero_pdf)"
+    pdf_to_png
+else
+    until [ -z "${1}" ] ; do
+        FICHERO="${1}"
+        pft_to_png
+        shift
+    done
+fi
+
+exit 0
