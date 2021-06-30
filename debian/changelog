@@ -6,6 +6,7 @@ vx-dga-l-scripts (5.0-56) unstable; urgency=low
   * Cambiamos el nombre de vx-extraer-paginas-pdfs por vx-pdf-extraer-paginas
   * Cambiamos el nombre de vx-unir-pdfs por vx-pdfs-unir
   * Cambiamos el nombre de vx-extraer-imagenes-de-pdf a vx-pdf-extraer-imagenes
+  * Cambiamos el nombre de vx-comprimir-pdfs a vx-pdfs-comprimir
 
  -- Arturo Martin <amartinromero@gmail.com>  Wed, 30 Jun 2021 00:18:06 +0200
 
