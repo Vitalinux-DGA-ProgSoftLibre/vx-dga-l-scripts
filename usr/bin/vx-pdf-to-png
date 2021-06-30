@@ -28,7 +28,7 @@ function pdf_to_png() {
     
     # 1) Una vez comprobado que el archivo es PDF preguntaremos si queremos convertir páginas individuales o todo el documento:
     NUM_PAGS_PDF="$(pdfinfo "${FICHERO}" | grep ^Pages | tr -d " " | cut -d":" -f2)"
-    TEXTO="\n Indica si quieres convertir todas las páginas del PDF a PNG o un intérvalo en concreto: \n"
+    TEXTO="\n Indica si quieres convertir <span foreground='blue'><b>Todas</b></span> las páginas del PDF a PNG o un <span foreground='blue'><b>Intérvalo en concreto</b></span>: \n[Tu PDF tiene \"<b>${NUM_PAGS_PDF} páginas</b>\"]\n"
     if ! RESPUESTA=$(yad --title "${TITULO}" --center \
         --width=680 --height=250 \
         --window-icon vitalinux \
@@ -37,7 +37,7 @@ function pdf_to_png() {
         --form \
         --field="Convertir Todas las páginas del PDF a PNG:CHK" "FALSE" \
         --field="Pagina Incial a Convertir del PDF:NUM" 1!1..${NUM_PAGS_PDF}!1 \
-        --field="Pagina Final a Convertir del PDF:NUM" 1!1..${NUM_PAGS_PDF}!1 \
+        --field="Pagina Final a Convertir del PDF:NUM" ${NUM_PAGS_PDF}!1..${NUM_PAGS_PDF}!1 \
         --separator="|" \
         --button="Convertir Páginas":0 --button="Abortar":1) ; then
         MENSAJE="Conversión abortada por el usuario"
@@ -51,8 +51,8 @@ function pdf_to_png() {
     PAGINI="$(echo "${RESPUESTA}" | cut -d"|" -f2)"
     PAGFIN="$(echo "${RESPUESTA}" | cut -d"|" -f3)"
     
-    NOMBRE="$(vx-funcs-bash vx-obtener_nombre_archivo)"
-    NOMBRE_CON_EXT="$(vx-funcs-bash vx-obtener_nombre_archivo_con_extension)"
+    NOMBRE="$(vx-funcs-bash vx-obtener_nombre_archivo "${FICHERO}")"
+    NOMBRE_CON_EXT="$(vx-funcs-bash vx-obtener_nombre_archivo_con_extension "${FICHERO}")"
     (
         echo "#=> Vamos a empezar con la conversión del archivo: ${NOMBRE_CON_EXT} ..."
         [[ "${TODAS}" != "TRUE" ]] && \
@@ -73,7 +73,7 @@ if [[ -z "${1}" ]] ; then
 else
     until [ -z "${1}" ] ; do
         FICHERO="${1}"
-        pft_to_png
+        pdf_to_png
         shift
     done
 fi

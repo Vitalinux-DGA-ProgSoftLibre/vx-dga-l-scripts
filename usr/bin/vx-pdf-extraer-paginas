@@ -33,7 +33,7 @@ if ! INTERVALO=$(yad --title "Utilidad para Extraer páginas de un PDF" --center
 	--text="${TEXTO}" \
 	--form \
 	--field="Pagina Incial a Extraer del PDF:NUM" 1!1..${NUM_PAGS_PDF}!1 \
-	--field="Pagina Final a Extraer del PDF:NUM" 1!1..${NUM_PAGS_PDF}!1 \
+	--field="Pagina Final a Extraer del PDF:NUM" ${NUM_PAGS_PDF}!1..${NUM_PAGS_PDF}!1 \
 	--separator="|" \
 	--button="Extraer Páginas":0 --button="Abortar":1) ; then
 	mensaje-error "  La utilidad ha sido abortada por el Usuario ..."
