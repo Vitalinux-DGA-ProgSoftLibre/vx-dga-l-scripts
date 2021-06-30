@@ -1,29 +1,44 @@
 #!/bin/bash
 
+TITULO="Extraer Imágenes de PDFs"
+IMAGEN="/usr/share/icons/vitalinux/actions-scripts/pdf.png"
+
 function uso() {
     MENSAJE="Tienes que pasar como parametro un directorio donde buscar PDFs o archivos PDFs de las que extraer imagenes ..."
-	echo "=> ${MENSAJE}"
-	exit 1
+    echo "=> ${MENSAJE}"
+    exit 1
 }
 
 [ -z "${1}" ] && uso && exit 1
 
 CONTADOR=0
 until [ -z "${1}" ] ; do
-	if [ -d "${1}" ] ; then
-		echo "=> Inspeccionado el directorio ${1} ..."
-		for FICH in ./*.[pP][dD][fF] ; do
-			echo "=> Mirando el fichero ${FICH}"
-			TIPOMIME="$(file --mime-type -b "${FICH}")"
-			if [[ "${TIPOMIME}" == "application/pdf" ]] ; then
-				pdfimages -j "${FICH}" resultado-pdfimages-${CONTADOR}
-				((CONTADOR++))
-			fi
-		done
-	fi
-	if [[ "$(file --mime-type -b "${1}")" == "application/pdf" ]] ; then
-		pdfimages -j "${1}" resultado-pdfimages-${CONTADOR}
-		((CONTADOR++))
-	fi
-	shift
+    if [ -d "${1}" ] ; then
+        echo "=> Inspeccionado el directorio ${1} ..."
+        for FICH in ./*.[pP][dD][fF] ; do
+            echo "=> Mirando el fichero ${FICH}"
+            TIPOMIME="$(file --mime-type -b "${FICH}")"
+            if [[ "${TIPOMIME}" == "application/pdf" ]] ; then
+                pdfimages -j "${FICH}" resultado-pdfimages-${CONTADOR}
+                ((CONTADOR++))
+            fi
+        done
+    fi
+    if [[ "$(file --mime-type -b "${1}")" == "application/pdf" ]] ; then
+        NOMBRE="$(vx-funcs-bash vx-obtener_nombre_archivo "${1}")"
+        DIRBASE="$(dirname "${1}")"
+        NOMBRE_CON_EXT="$(vx-funcs-bash vx-obtener_nombre_archivo_con_extension "${1}")"
+        (
+            echo "#=> Vamos a empezar con archivo: ${NOMBRE_CON_EXT} ..."
+            pdfimages -png "${1}" "${DIRBASE}/${NOMBRE}-img"
+            echo "#=> Extracción finalizada. Encontrarás las imágenes PNG junto al fichero \"${NOMBRE_CON_EXT}\"."
+        ) | yad --title "${TITULO}" \
+        --window-icon vitalinux \
+        --image "${IMAGEN}" \
+        --width 600 \
+        --center \
+        --progress --pulsate
+        ((CONTADOR++))
+    fi
+    shift
 done

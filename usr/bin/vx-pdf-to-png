@@ -52,12 +52,13 @@ function pdf_to_png() {
     PAGFIN="$(echo "${RESPUESTA}" | cut -d"|" -f3)"
     
     NOMBRE="$(vx-funcs-bash vx-obtener_nombre_archivo "${FICHERO}")"
+    DIRBASE="$(dirname "${FICHERO}")"
     NOMBRE_CON_EXT="$(vx-funcs-bash vx-obtener_nombre_archivo_con_extension "${FICHERO}")"
     (
         echo "#=> Vamos a empezar con la conversión del archivo: ${NOMBRE_CON_EXT} ..."
         [[ "${TODAS}" != "TRUE" ]] && \
-        pdftoppm "${FICHERO}" "${NOMBRE}" -f "${PAGINI}" -l "${PAGFIN}" -png || \
-        pdftoppm "${FICHERO}" "${NOMBRE}" -png
+        pdftoppm "${FICHERO}" "${DIRBASE}/${NOMBRE}" -f "${PAGINI}" -l "${PAGFIN}" -png || \
+        pdftoppm "${FICHERO}" "${DIRBASE}/${NOMBRE}" -png
         echo "#=> Conversión finalizada. Encontrarás las imágenes PNG junto al fichero \"${NOMBRE_CON_EXT}\"."
     ) | yad --title "${TITULO}" \
     --window-icon vitalinux \
