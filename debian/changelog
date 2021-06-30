@@ -7,6 +7,7 @@ vx-dga-l-scripts (5.0-56) unstable; urgency=low
   * Cambiamos el nombre de vx-unir-pdfs por vx-pdfs-unir
   * Cambiamos el nombre de vx-extraer-imagenes-de-pdf a vx-pdf-extraer-imagenes
   * Cambiamos el nombre de vx-comprimir-pdfs a vx-pdfs-comprimir
+  * Corregimos los comandos para indicar los DIRBASE donde dejar los resultandos en vx-pdf-extraer-imagenes y vx-pdf-to-png
 
  -- Arturo Martin <amartinromero@gmail.com>  Wed, 30 Jun 2021 00:18:06 +0200
 
